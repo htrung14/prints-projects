@@ -6,7 +6,7 @@ import { useCart } from "@/lib/cart";
 /**
  * Cargo-style header: three plain text groups, edge to edge.
  *   LEFT   artist name
- *   CENTER project mark + Essay
+ *   CENTER project mark
  *   RIGHT  Info, Cart, Contact
  * All the same weight, same ink color, no borders, no badges.
  */
@@ -26,11 +26,10 @@ export default function Header() {
 
       <div className="hidden items-baseline gap-6 justify-self-center md:flex">
         <span className="text-[var(--ink-strong)]">Prints</span>
-        <Link href="/about">Essay</Link>
       </div>
 
       <div className="flex items-baseline gap-6 justify-self-end">
-        <Link href="/about" className="hidden md:inline">
+        <Link href="/information" className="hidden md:inline">
           Info
         </Link>
         <button type="button" onClick={openDrawer} className="text-[var(--ink-strong)]">
