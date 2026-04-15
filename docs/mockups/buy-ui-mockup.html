@@ -1,0 +1,1111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Photo Shop, Buy UI Mockup v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: rgba(0, 0, 0, 0.6);
+      --ink-strong: rgba(0, 0, 0, 0.85);
+      --ink-line: rgba(0, 0, 0, 0.15);
+      --ink-faint: rgba(0, 0, 0, 0.35);
+      --bg: #ffffff;
+      --bg-soft: #f4f4f0;
+      --accent: #b04a30;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #eaeaea;
+      color: var(--ink);
+      font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-weight: 900;
+      font-size: 14.5px;
+      line-height: 1.35;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.005em;
+    }
+
+    .stage {
+      background: var(--bg);
+      min-height: 100vh;
+      transition: max-width 200ms ease;
+      max-width: 100%;
+      margin: 0 auto;
+      box-shadow: 0 0 0 1px var(--ink-line);
+    }
+
+    body.mobile .stage {
+      max-width: 414px;
+      margin: 24px auto 80px;
+      min-height: 800px;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; cursor: pointer; }
+
+    /* SCENARIO SWITCHER */
+    .switcher {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 100;
+      background: var(--bg);
+      border: 1px solid var(--ink-line);
+      padding: 10px 12px;
+      display: flex;
+      gap: 6px;
+      flex-direction: column;
+      font-size: 11px;
+      max-width: 220px;
+    }
+    .switcher .label {
+      color: var(--ink-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 10px;
+      margin-bottom: 2px;
+    }
+    .switcher button {
+      background: transparent;
+      border: 1px solid transparent;
+      padding: 4px 6px;
+      text-align: left;
+      color: var(--ink);
+    }
+    .switcher button[aria-pressed="true"] {
+      border-color: var(--ink);
+    }
+    .switcher .group { display: flex; flex-direction: column; gap: 2px; }
+    .switcher hr { width: 100%; border: 0; border-top: 1px solid var(--ink-line); margin: 6px 0 4px; }
+
+    /* HEADER */
+    header.topbar {
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 50;
+      padding: 18px 32px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 24px;
+      border-bottom: 1px solid transparent;
+    }
+    header.topbar .left { justify-self: start; }
+    header.topbar .center {
+      justify-self: center;
+      display: flex;
+      gap: 24px;
+      align-items: baseline;
+    }
+    header.topbar .right {
+      justify-self: end;
+      display: flex;
+      gap: 22px;
+      align-items: center;
+    }
+    .arabic {
+      font-family: "Noto Naskh Arabic", "Arial", sans-serif;
+      font-weight: 700;
+    }
+
+    /* CART AFFORDANCE */
+    .cart-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid var(--ink);
+      color: var(--ink-strong);
+    }
+    .cart-link .count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 11px;
+      border-radius: 9px;
+    }
+    .cart-link.empty { border-color: var(--ink-line); color: var(--ink-faint); }
+    .cart-link.empty .count { background: var(--ink-line); color: var(--ink); }
+
+    /* DETAIL PANEL */
+    .panel { border-top: 1px solid var(--ink-line); }
+    .panel-bar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 14px 32px;
+      border-bottom: 1px solid var(--ink-line);
+    }
+    .panel-bar .right { justify-self: end; }
+    .panel-bar .center { justify-self: center; }
+
+    .panel-body {
+      display: grid;
+      grid-template-columns: 16% 30% 1fr;
+      gap: 24px;
+      padding: 28px 32px 120px;
+    }
+
+    .meta-block { font-size: 14px; line-height: 1.45; }
+    .meta-block em { font-style: italic; }
+    .meta-block .row { margin-bottom: 14px; }
+
+    .description { font-size: 14px; line-height: 1.5; }
+    .description p { margin: 0 0 16px; }
+
+    /* BUY COLUMN */
+    .buy {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-self: start;
+      position: sticky;
+      top: 84px;
+    }
+    .buy .preview {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: var(--bg-soft);
+      overflow: hidden;
+    }
+    .buy .preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .buy h2.product-title {
+      font-size: 22px;
+      margin: 0;
+      line-height: 1.2;
+      color: var(--ink-strong);
+    }
+    .buy h2.product-title em { font-style: italic; }
+
+    .buy .form { display: flex; flex-direction: column; gap: 0; }
+    .field {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--ink-line);
+      padding: 12px 0;
+      font-size: 13px;
+    }
+    .field:first-child { border-top: 1px solid var(--ink); }
+    .field label { color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; font-size: 11px; }
+    .field select,
+    .field input {
+      font: inherit;
+      color: inherit;
+      background: transparent;
+      border: 0;
+      appearance: none;
+      padding: 2px 0;
+      width: 100%;
+      cursor: pointer;
+    }
+    .field .value { display: flex; justify-content: space-between; align-items: center; }
+    .field .value::after { content: "▾"; color: var(--ink-faint); font-weight: 400; }
+    .field.no-caret .value::after { content: ""; }
+
+    /* PRICE + CTA, the moneymaker */
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 14px 0 4px;
+    }
+    .price-row .price { font-size: 22px; color: var(--ink-strong); }
+    .price-row .meta { font-size: 12px; color: var(--ink-faint); font-weight: 400; }
+
+    .cta {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 16px 18px;
+      background: var(--ink-strong);
+      color: #fff;
+      border: 0;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+    }
+    .cta.secondary { background: transparent; color: var(--ink-strong); border: 1px solid var(--ink-strong); }
+    .cta.disabled { background: transparent; color: var(--ink-faint); border: 1px solid var(--ink-line); cursor: not-allowed; }
+
+    .details-toggle {
+      background: transparent;
+      border: 0;
+      padding: 8px 0;
+      color: var(--ink-faint);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      text-align: left;
+    }
+    .details {
+      font-size: 12px;
+      color: var(--ink-faint);
+      font-weight: 400;
+      line-height: 1.5;
+      display: none;
+      padding-top: 4px;
+    }
+    .details.open { display: block; }
+    .details .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed var(--ink-line); }
+    .details .row:last-child { border-bottom: 0; }
+    .details p { margin: 8px 0 0; }
+
+    /* EDITION ELEMENTS */
+    .edition-block {
+      padding: 12px 0;
+      border-top: 1px solid var(--ink-line);
+      border-bottom: 1px solid var(--ink-line);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .edition-bar { height: 4px; background: var(--ink-line); position: relative; overflow: hidden; }
+    .edition-bar .filled { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink-strong); }
+    .edition-line { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-faint); font-weight: 400; }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border: 1px solid var(--ink);
+    }
+    .badge.warn { color: var(--accent); border-color: var(--accent); }
+
+    /* CART DRAWER */
+    .scrim {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.18);
+      z-index: 80;
+      display: none;
+    }
+    .scrim.open { display: block; }
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 480px;
+      max-width: 100vw;
+      background: var(--bg);
+      z-index: 90;
+      transform: translateX(100%);
+      transition: transform 220ms ease;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--ink-line);
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-bar {
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--ink-line);
+    }
+    .drawer-body { padding: 18px 24px; flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 18px; }
+    .drawer-foot { padding: 18px 24px; border-top: 1px solid var(--ink-line); display: flex; flex-direction: column; gap: 12px; }
+    .cart-item {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 14px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--ink-line);
+    }
+    .cart-item:last-child { border-bottom: 0; }
+    .cart-item img { width: 80px; height: 100px; object-fit: cover; display: block; }
+    .cart-item .ci-meta { font-size: 13px; line-height: 1.45; }
+    .cart-item .ci-meta .small { font-size: 12px; color: var(--ink-faint); font-weight: 400; }
+    .cart-item .ci-price { text-align: right; font-size: 13px; }
+    .cart-item .qty { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12px; }
+    .cart-item .qty button { width: 22px; height: 22px; border: 1px solid var(--ink-line); background: transparent; }
+    .qty .remove { font-weight: 400; color: var(--ink-faint); text-decoration: underline; margin-left: 12px; }
+
+    .totals { display: grid; grid-template-columns: auto 1fr auto; gap: 6px 12px; font-size: 13px; }
+    .totals .k { color: var(--ink-faint); font-weight: 400; }
+    .totals .total-row { font-size: 15px; padding-top: 8px; border-top: 1px solid var(--ink-line); margin-top: 6px; color: var(--ink-strong); }
+
+    /* MOBILE-ONLY: STICKY BUY BAR */
+    .mobile-buy-bar {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg);
+      border-top: 1px solid var(--ink);
+      padding: 12px 16px;
+      z-index: 70;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 -8px 24px rgba(0,0,0,0.06);
+    }
+    .mobile-buy-bar .price-stack { font-size: 18px; color: var(--ink-strong); line-height: 1.1; }
+    .mobile-buy-bar .price-stack small { display: block; font-size: 11px; color: var(--ink-faint); font-weight: 400; }
+    .mobile-buy-bar .cta { padding: 14px 20px; width: auto; }
+
+    /* SCENARIO TOGGLES */
+    [data-scenario] { display: none; }
+    body[data-current="standard"] [data-scenario="standard"] { display: grid; }
+    body[data-current="limited-partial"] [data-scenario="limited-partial"] { display: grid; }
+    body[data-current="sold-out"] [data-scenario="sold-out"] { display: grid; }
+    body[data-current="checkout"] [data-scenario="checkout"] { display: grid; }
+    body[data-current="thankyou"] [data-scenario="thankyou"] { display: grid; }
+    body[data-current="checkout"] .panel-bar,
+    body[data-current="thankyou"] .panel-bar { display: none; }
+
+    /* CHECKOUT */
+    .checkout {
+      grid-template-columns: 1.4fr 1fr;
+      gap: 0;
+      padding: 0;
+    }
+    .checkout-form {
+      padding: 32px 48px 80px;
+      border-right: 1px solid var(--ink-line);
+    }
+    .checkout-summary {
+      padding: 32px 40px;
+      background: var(--bg-soft);
+    }
+    .ck-section {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--ink-line);
+    }
+    .ck-section:last-child { border-bottom: 0; }
+    .ck-section h3 {
+      margin: 0 0 14px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-faint);
+      font-weight: 900;
+    }
+    .ck-section .step-num {
+      display: inline-flex;
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      margin-right: 8px;
+      color: var(--ink-strong);
+    }
+    .ck-row { display: grid; gap: 12px; margin-bottom: 12px; }
+    .ck-row.two { grid-template-columns: 1fr 1fr; }
+    .ck-row.three { grid-template-columns: 2fr 1fr 1fr; }
+    .ck-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--ink-line);
+      background: #fff;
+      font: inherit;
+      color: var(--ink-strong);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .ck-input:focus { outline: 0; border-color: var(--ink); }
+    .ck-label {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--ink-faint);
+      margin-bottom: 4px;
+      font-weight: 900;
+    }
+    .stripe-mount {
+      border: 1px dashed var(--ink-line);
+      background: #fff;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .stripe-mount .stripe-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--bg-soft);
+      font-size: 13px;
+      color: var(--ink-faint);
+      font-weight: 400;
+    }
+    .stripe-tag {
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      font-weight: 900;
+    }
+
+    .summary-line {
+      display: grid;
+      grid-template-columns: 60px 1fr auto;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--ink-line);
+      align-items: flex-start;
+      font-size: 13px;
+    }
+    .summary-line img { width: 60px; height: 75px; object-fit: cover; }
+    .summary-line .small { font-size: 11px; color: var(--ink-faint); font-weight: 400; line-height: 1.4; }
+    .summary-line .price { text-align: right; font-weight: 900; color: var(--ink-strong); }
+
+    .promo-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 16px; }
+    .promo-row button { background: transparent; border: 1px solid var(--ink); padding: 10px 14px; }
+
+    /* THANK YOU */
+    .thankyou {
+      grid-template-columns: 1fr;
+      padding: 80px 32px 80px;
+      max-width: 720px;
+      margin: 0 auto;
+      gap: 24px;
+    }
+    .thankyou .ty-eyebrow {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+      font-weight: 900;
+    }
+    .thankyou h1 {
+      font-size: 38px;
+      margin: 0;
+      line-height: 1.1;
+      color: var(--ink-strong);
+    }
+    .thankyou h1 em { font-style: italic; }
+    .thankyou .ty-meta { font-size: 14px; line-height: 1.5; }
+    .thankyou .ty-card {
+      border: 1px solid var(--ink-line);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .thankyou .ty-card h4 {
+      margin: 0 0 8px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-faint);
+    }
+    .thankyou .ty-card p { margin: 0; font-size: 13px; line-height: 1.5; }
+    .thankyou .ty-line {
+      display: grid;
+      grid-template-columns: 60px 1fr auto;
+      gap: 14px;
+      padding: 14px 0;
+      border-top: 1px solid var(--ink-line);
+      font-size: 13px;
+    }
+    .thankyou .ty-line:first-of-type { border-top: 1px solid var(--ink); }
+    .thankyou .ty-line img { width: 60px; height: 75px; object-fit: cover; }
+    .thankyou .ty-line .small { font-size: 11px; color: var(--ink-faint); font-weight: 400; }
+    .thankyou .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-top: 16px;
+    }
+    .thankyou .timeline .step {
+      padding: 12px;
+      border: 1px solid var(--ink-line);
+      border-right: 0;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .thankyou .timeline .step:last-child { border-right: 1px solid var(--ink-line); }
+    .thankyou .timeline .step.done { background: var(--ink-strong); color: #fff; border-color: var(--ink-strong); }
+    .thankyou .timeline .step .step-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }
+
+    /* MOBILE: stack columns, shrink padding, show sticky bar, photo at top */
+    @media (max-width: 900px) {
+      .panel-body { grid-template-columns: 1fr; padding: 0 0 120px; gap: 0; }
+      .buy { position: static; order: -1; gap: 14px; padding: 0 18px; }
+      .meta-block, .description { padding: 0 18px; }
+      .meta-block { padding-top: 18px; }
+      header.topbar { grid-template-columns: 1fr auto; padding: 14px 18px; }
+      header.topbar .center { display: none; }
+      .panel-bar { padding: 12px 18px; }
+      .meta-block { font-size: 13px; }
+      .description { font-size: 13px; }
+      .buy h2.product-title { font-size: 19px; }
+      .buy .preview { aspect-ratio: 4 / 3; margin: 0 -18px; width: auto; }
+      .mobile-buy-bar { display: grid; }
+      .cta.primary-desktop { display: none; }
+
+      /* CHECKOUT mobile: stack form on top of summary */
+      .panel-body.checkout { grid-template-columns: 1fr; padding: 0; gap: 0; }
+      .checkout-form { padding: 20px 18px 40px; border-right: 0; border-bottom: 1px solid var(--ink-line); }
+      .checkout-summary { padding: 20px 18px 40px; position: static; }
+      .ck-row.two, .ck-row.three { grid-template-columns: 1fr; }
+
+      /* THANKYOU mobile: tighter padding, stacked cards, 2-up timeline, smaller heading */
+      .panel-body.thankyou { padding: 32px 18px 60px; gap: 18px; max-width: 100%; }
+      .thankyou h1 { font-size: 26px; }
+      .thankyou .ty-card { grid-template-columns: 1fr; padding: 18px; gap: 14px; }
+      .thankyou .timeline { grid-template-columns: repeat(2, 1fr); }
+      .thankyou .timeline .step { border-right: 1px solid var(--ink-line); border-bottom: 0; }
+      .thankyou .timeline .step:nth-child(1),
+      .thankyou .timeline .step:nth-child(2) { border-bottom: 0; }
+      .thankyou .timeline .step:nth-child(3),
+      .thankyou .timeline .step:nth-child(4) { border-top: 0; }
+      .thankyou .ty-line { grid-template-columns: 48px 1fr auto; gap: 10px; }
+      .thankyou .ty-line img { width: 48px; height: 60px; }
+
+      /* Hide the buy-now sticky bar on checkout and thankyou */
+      body[data-current="checkout"] .mobile-buy-bar,
+      body[data-current="thankyou"] .mobile-buy-bar { display: none; }
+    }
+
+    /* When body.mobile is set, simulate the stage as if it's mobile width even on desktop */
+    body.mobile .stage { max-width: 414px; }
+    body.mobile .panel-body { grid-template-columns: 1fr; padding: 0 0 120px; gap: 0; }
+    body.mobile .buy { position: static; order: -1; gap: 14px; padding: 0 18px; }
+    body.mobile .meta-block, body.mobile .description { padding: 0 18px; }
+    body.mobile .meta-block { padding-top: 18px; font-size: 13px; }
+    body.mobile .description { font-size: 13px; }
+    body.mobile .buy h2.product-title { font-size: 19px; }
+    body.mobile .buy .preview { aspect-ratio: 4 / 3; margin: 0 -18px; width: auto; }
+    body.mobile header.topbar { grid-template-columns: 1fr auto; padding: 14px 18px; }
+    body.mobile header.topbar .center { display: none; }
+    body.mobile .panel-bar { padding: 12px 18px; }
+    body.mobile .mobile-buy-bar {
+      display: grid;
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      width: 100%;
+      max-width: 414px;
+    }
+    body.mobile .stage { padding-bottom: 80px; }
+    body.mobile .cta.primary-desktop { display: none; }
+
+    /* Body.mobile overrides for checkout and thankyou */
+    body.mobile .panel-body.checkout { grid-template-columns: 1fr; padding: 0; gap: 0; }
+    body.mobile .checkout-form { padding: 20px 18px 40px; border-right: 0; border-bottom: 1px solid var(--ink-line); }
+    body.mobile .checkout-summary { padding: 20px 18px 40px; position: static; }
+    body.mobile .ck-row.two, body.mobile .ck-row.three { grid-template-columns: 1fr; }
+
+    body.mobile .panel-body.thankyou { padding: 32px 18px 60px; gap: 18px; max-width: 100%; }
+    body.mobile .thankyou h1 { font-size: 26px; }
+    body.mobile .thankyou .ty-card { grid-template-columns: 1fr; padding: 18px; gap: 14px; }
+    body.mobile .thankyou .timeline { grid-template-columns: repeat(2, 1fr); }
+    body.mobile .thankyou .timeline .step { border-right: 1px solid var(--ink-line); }
+    body.mobile .thankyou .ty-line { grid-template-columns: 48px 1fr auto; gap: 10px; }
+    body.mobile .thankyou .ty-line img { width: 48px; height: 60px; }
+
+    body.mobile[data-current="checkout"] .mobile-buy-bar,
+    body.mobile[data-current="thankyou"] .mobile-buy-bar { display: none; }
+    body.mobile[data-current="checkout"] .stage,
+    body.mobile[data-current="thankyou"] .stage { padding-bottom: 0; }
+  </style>
+</head>
+<body data-current="standard">
+
+<div class="switcher" role="group" aria-label="Mockup scenario">
+  <span class="label">Scenario</span>
+  <div class="group">
+    <button data-scene="standard" aria-pressed="true">Standard, in stock</button>
+    <button data-scene="limited-partial" aria-pressed="false">Limited, 7 of 25</button>
+    <button data-scene="sold-out" aria-pressed="false">Limited, sold out</button>
+    <button data-scene="checkout" aria-pressed="false">Checkout page</button>
+    <button data-scene="thankyou" aria-pressed="false">Order confirmation</button>
+  </div>
+  <hr>
+  <span class="label">View</span>
+  <div class="group">
+    <button id="toggle-mobile" type="button">Toggle mobile</button>
+    <button id="open-cart" type="button">Open cart</button>
+  </div>
+</div>
+
+<div class="stage">
+
+  <header class="topbar">
+    <div class="left"><a href="#">Thalia Bassim</a></div>
+    <div class="center">
+      <span class="arabic" dir="rtl">التمسّك</span>
+      <span>At-Tamassok</span>
+      <a href="#">Essay</a>
+    </div>
+    <div class="right">
+      <a href="#">Info</a>
+      <a href="#" class="cart-link" id="open-cart-link">
+        Cart <span class="count">2</span>
+      </a>
+      <a href="#">Contact ↗</a>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="panel-bar">
+      <div class="left">Project Reference</div>
+      <div class="center">#007</div>
+      <div class="right"><a href="#">Close ✕</a></div>
+    </div>
+
+    <!-- ============ SCENARIO 1: STANDARD ============ -->
+    <div class="panel-body" data-scenario="standard">
+      <div class="meta-block">
+        <div class="row">Cypress Tree, <em>Beit Mery</em><br>Lebanon</div>
+        <div class="row">Archival pigment print<br>Open edition</div>
+        <div class="row">2024<br>TB-024.07</div>
+      </div>
+
+      <div class="description">
+        <p>Photographed at the eastern edge of Beit Mery during the late dry season, this image is part of an ongoing series documenting trees in transition. The wind that morning was unusually steady, allowing for a longer exposure than the light otherwise would have permitted.</p>
+        <p>Each print is produced by hand on Hahnemühle Photo Rag 308 gsm with a 1 inch border for handling.</p>
+      </div>
+
+      <div class="buy">
+        <div class="preview"><img src="https://picsum.photos/seed/cypress/800/450" alt="Cypress tree"></div>
+
+        <h2 class="product-title">Cypress Tree, <em>Beit Mery</em></h2>
+
+        <div class="form">
+          <div class="field">
+            <label for="size-1">Size</label>
+            <div class="value">
+              <select id="size-1">
+                <option>8 × 10 in &nbsp;&nbsp; $180</option>
+                <option selected>11 × 14 in &nbsp;&nbsp; $260</option>
+                <option>16 × 20 in &nbsp;&nbsp; $420</option>
+                <option>24 × 30 in &nbsp;&nbsp; $720</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="paper-1">Paper</label>
+            <div class="value">
+              <select id="paper-1">
+                <option selected>Hahnemühle Photo Rag</option>
+                <option>Canson Baryta</option>
+                <option>Hahnemühle Bamboo</option>
+              </select>
+            </div>
+          </div>
+          <div class="field no-caret">
+            <label for="qty-1">Qty</label>
+            <div class="value">
+              <select id="qty-1">
+                <option selected>1</option><option>2</option><option>3</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="price-row">
+          <span class="price">$260.00</span>
+          <span class="meta">+ shipping. Free US shipping on 2 prints or more.</span>
+        </div>
+
+        <button class="cta primary-desktop" type="button">Add to cart</button>
+
+        <button class="details-toggle" type="button" data-toggle="details-1">More details ▾</button>
+        <div class="details" id="details-1">
+          <div class="row"><span>Lead time</span><span>5 to 8 business days</span></div>
+          <div class="row"><span>Shipping</span><span>USPS Priority, calc at checkout</span></div>
+          <div class="row"><span>Returns</span><span>Damage and defect only</span></div>
+          <p>Made to order in Brooklyn. We replace prints damaged in transit or with production defects within 14 days of delivery.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCENARIO 2: LIMITED PARTIAL ============ -->
+    <div class="panel-body" data-scenario="limited-partial">
+      <div class="meta-block">
+        <div class="row">Threshold, <em>Saida</em><br>Lebanon</div>
+        <div class="row">Archival pigment print<br>Limited edition of 25</div>
+        <div class="row">2023<br>TB-023.11</div>
+      </div>
+
+      <div class="description">
+        <p>One of a series of seven photographs made in Saida between September 2022 and March 2023, exploring the persistent presence of the unfinished. Each frame was made on medium format film and scanned at high resolution.</p>
+        <p>This edition is limited to 25 prints, signed and numbered on the verso. Once the edition is complete it will not be reprinted at this size.</p>
+      </div>
+
+      <div class="buy">
+        <div class="preview"><img src="https://picsum.photos/seed/threshold/800/450" alt="Threshold"></div>
+
+        <h2 class="product-title">Threshold, <em>Saida</em></h2>
+
+        <div class="edition-block">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="badge">Edition 19 of 25</span>
+            <span style="font-size: 12px; color: var(--ink-faint); font-weight: 400;">7 remaining</span>
+          </div>
+          <div class="edition-bar"><div class="filled" style="width: 72%"></div></div>
+        </div>
+
+        <div class="form">
+          <div class="field">
+            <label for="size-2">Size</label>
+            <div class="value">
+              <select id="size-2">
+                <option selected>16 × 20 in &nbsp;&nbsp; $850</option>
+                <option>24 × 30 in &nbsp;&nbsp; $1,400</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="paper-2">Paper</label>
+            <div class="value">
+              <select id="paper-2">
+                <option selected>Hahnemühle Photo Rag</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="price-row">
+          <span class="price">$850.00</span>
+          <span class="meta">+ shipping</span>
+        </div>
+
+        <button class="cta primary-desktop" type="button">Buy now, edition 19 of 25 →</button>
+
+        <button class="details-toggle" type="button" data-toggle="details-2">More details ▾</button>
+        <div class="details" id="details-2">
+          <div class="row"><span>Lead time</span><span>10 to 14 business days</span></div>
+          <div class="row"><span>Edition</span><span>Signed and numbered, verso</span></div>
+          <div class="row"><span>Returns</span><span>Damage and defect only</span></div>
+          <p>Limited editions check out individually so two buyers don't claim the same number. Your edition number is reserved at checkout.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCENARIO 3: SOLD OUT ============ -->
+    <div class="panel-body" data-scenario="sold-out">
+      <div class="meta-block">
+        <div class="row">Orchid, <em>Hamra</em><br>Lebanon</div>
+        <div class="row">Archival pigment print<br>Limited edition of 15</div>
+        <div class="row">2022<br>TB-022.04</div>
+      </div>
+
+      <div class="description">
+        <p>The first photograph in the At-Tamassok series, made in a friend's apartment in Hamra in late spring. The orchid was already past its peak, leaning toward the window at an angle that became the structural anchor of the series.</p>
+        <p>This edition has sold out. A small number of artist's proofs may become available occasionally; join the list to be notified.</p>
+      </div>
+
+      <div class="buy">
+        <div class="preview"><img src="https://picsum.photos/seed/orchid/800/450" alt="Orchid"></div>
+
+        <h2 class="product-title">Orchid, <em>Hamra</em></h2>
+
+        <div class="edition-block">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="badge warn">Sold out</span>
+            <span style="font-size: 12px; color: var(--ink-faint); font-weight: 400;">15 of 15</span>
+          </div>
+          <div class="edition-bar"><div class="filled" style="width: 100%"></div></div>
+        </div>
+
+        <button class="cta disabled" type="button" disabled>Sold out</button>
+
+        <div class="field" style="border-top: 1px solid var(--ink); margin-top: 8px;">
+          <label for="email-3">Email</label>
+          <div class="value" style="grid-column: 2;">
+            <input type="email" placeholder="you@example.com" />
+          </div>
+        </div>
+        <button class="cta secondary" type="button">Notify me about artist's proofs</button>
+
+        <button class="details-toggle" type="button" data-toggle="details-3">More details ▾</button>
+        <div class="details" id="details-3">
+          <p>This edition is closed. We may release a small number of artist's proofs in the future. Joining the list does not guarantee availability or pricing. You can unsubscribe at any time.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCENARIO 4: CHECKOUT ============ -->
+    <div class="panel-body checkout" data-scenario="checkout">
+      <div class="checkout-form">
+        <div style="margin-bottom: 24px;">
+          <a href="#" style="font-size: 12px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em;">← Continue shopping</a>
+          <h1 style="font-size: 28px; margin: 12px 0 4px; color: var(--ink-strong);">Checkout</h1>
+          <p style="font-size: 13px; font-weight: 400; color: var(--ink-faint); margin: 0;">United States shipping only. We do not store your payment information.</p>
+        </div>
+
+        <div class="ck-section">
+          <h3><span class="step-num">1</span> Contact</h3>
+          <div class="ck-row">
+            <div>
+              <label class="ck-label" for="ck-email">Email</label>
+              <input class="ck-input" id="ck-email" type="email" placeholder="you@example.com" value="hai@example.com">
+            </div>
+          </div>
+          <label style="font-size: 12px; color: var(--ink-faint); font-weight: 400;">
+            <input type="checkbox" checked> Email me about new editions and prints (no spam)
+          </label>
+        </div>
+
+        <div class="ck-section">
+          <h3><span class="step-num">2</span> Shipping address</h3>
+          <div class="ck-row two">
+            <div><label class="ck-label">First name</label><input class="ck-input" value="Hai"></div>
+            <div><label class="ck-label">Last name</label><input class="ck-input" value="Vo"></div>
+          </div>
+          <div class="ck-row">
+            <div><label class="ck-label">Street address</label><input class="ck-input" value="123 Hudson St"></div>
+          </div>
+          <div class="ck-row">
+            <div><label class="ck-label">Apt, suite, etc. (optional)</label><input class="ck-input" placeholder=""></div>
+          </div>
+          <div class="ck-row three">
+            <div><label class="ck-label">City</label><input class="ck-input" value="Brooklyn"></div>
+            <div><label class="ck-label">State</label><input class="ck-input" value="NY"></div>
+            <div><label class="ck-label">ZIP</label><input class="ck-input" value="11201"></div>
+          </div>
+          <div class="ck-row">
+            <div><label class="ck-label">Phone (for delivery)</label><input class="ck-input" placeholder="(optional)"></div>
+          </div>
+        </div>
+
+        <div class="ck-section">
+          <h3><span class="step-num">3</span> Payment</h3>
+          <div class="stripe-mount">
+            <div class="stripe-tag">Secured by Stripe</div>
+            <div class="stripe-row">Card number &nbsp;&nbsp; <span style="margin-left: auto;">1234 1234 1234 1234</span></div>
+            <div class="ck-row two">
+              <div class="stripe-row">MM / YY</div>
+              <div class="stripe-row">CVC</div>
+            </div>
+            <div class="stripe-row">ZIP code</div>
+            <p style="font-size: 11px; color: var(--ink-faint); font-weight: 400; margin: 4px 0 0;">In production this is a Stripe Payment Element. Apple Pay and Link are also offered when supported.</p>
+          </div>
+        </div>
+
+        <button class="cta" type="button" style="margin-top: 24px;">Pay $560.00 →</button>
+
+        <p style="font-size: 11px; font-weight: 400; color: var(--ink-faint); margin: 14px 0 0; line-height: 1.5;">
+          By placing this order you agree to our <a href="#" style="text-decoration: underline;">terms of sale</a>. Each print is made to order in Brooklyn. We replace prints damaged in transit or with production defects within 14 days; otherwise all sales are final.
+        </p>
+      </div>
+
+      <aside class="checkout-summary">
+        <h3 style="margin: 0 0 16px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint);">Order summary</h3>
+
+        <div class="summary-line">
+          <img src="https://picsum.photos/seed/cypress/200/250" alt="">
+          <div>
+            Cypress Tree, <em>Beit Mery</em>
+            <div class="small">11 × 14 in &nbsp;·&nbsp; Hahnemühle Photo Rag &nbsp;·&nbsp; Qty 1</div>
+          </div>
+          <div class="price">$260.00</div>
+        </div>
+        <div class="summary-line">
+          <img src="https://picsum.photos/seed/almond/200/250" alt="">
+          <div>
+            Almond Branch, <em>Aley</em>
+            <div class="small">8 × 10 in &nbsp;·&nbsp; Canson Baryta &nbsp;·&nbsp; Qty 1</div>
+          </div>
+          <div class="price">$300.00</div>
+        </div>
+
+        <div class="promo-row">
+          <input class="ck-input" placeholder="Promo code">
+          <button type="button">Apply</button>
+        </div>
+
+        <div class="totals" style="margin-top: 24px;">
+          <span class="k">Subtotal</span><span></span><span>$560.00</span>
+          <span class="k">Shipping (USPS Priority, free on 2+)</span><span></span><span>$0.00</span>
+          <span class="k">Sales tax (NY 8.875%)</span><span></span><span>included</span>
+          <span class="total-row">Total</span><span class="total-row"></span><span class="total-row">$560.00</span>
+        </div>
+
+        <div style="margin-top: 24px; padding: 14px; border: 1px solid var(--ink-line); font-size: 12px; line-height: 1.5; font-weight: 400; color: var(--ink-faint);">
+          <strong style="color: var(--ink-strong); display: block; margin-bottom: 4px;">Lead time</strong>
+          Your order will ship in 5 to 8 business days. We will email a tracking link as soon as it leaves the studio.
+        </div>
+      </aside>
+    </div>
+
+    <!-- ============ SCENARIO 5: ORDER CONFIRMATION ============ -->
+    <div class="panel-body thankyou" data-scenario="thankyou">
+      <span class="ty-eyebrow">Order confirmed</span>
+      <h1>Thank you, <em>Hai</em>.</h1>
+      <p class="ty-meta" style="font-weight: 400;">
+        Your order <strong style="font-weight: 900;">TB-2026-0418</strong> has been received. We have emailed a confirmation to <strong style="font-weight: 900;">hai@example.com</strong>. The print is now in production at our studio in Brooklyn.
+      </p>
+
+      <div class="ty-card">
+        <div>
+          <h4>Shipping to</h4>
+          <p>Hai Vo<br>123 Hudson St<br>Brooklyn, NY 11201<br>United States</p>
+        </div>
+        <div>
+          <h4>Payment</h4>
+          <p>Visa ending in 4242<br>Charged $560.00<br>Receipt sent to your email</p>
+        </div>
+      </div>
+
+      <div>
+        <h4 style="margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint);">Production timeline</h4>
+        <div class="timeline">
+          <div class="step done"><div class="step-label">Step 1</div>Order received</div>
+          <div class="step"><div class="step-label">Step 2</div>Sent to print</div>
+          <div class="step"><div class="step-label">Step 3</div>Quality check</div>
+          <div class="step"><div class="step-label">Step 4</div>Shipped</div>
+        </div>
+      </div>
+
+      <div>
+        <h4 style="margin: 24px 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint);">Items</h4>
+        <div class="ty-line">
+          <img src="https://picsum.photos/seed/cypress/200/250" alt="">
+          <div>
+            Cypress Tree, <em>Beit Mery</em>
+            <div class="small">11 × 14 in &nbsp;·&nbsp; Hahnemühle Photo Rag &nbsp;·&nbsp; Qty 1</div>
+          </div>
+          <div style="text-align: right; color: var(--ink-strong);">$260.00</div>
+        </div>
+        <div class="ty-line">
+          <img src="https://picsum.photos/seed/almond/200/250" alt="">
+          <div>
+            Almond Branch, <em>Aley</em>
+            <div class="small">8 × 10 in &nbsp;·&nbsp; Canson Baryta &nbsp;·&nbsp; Qty 1</div>
+          </div>
+          <div style="text-align: right; color: var(--ink-strong);">$300.00</div>
+        </div>
+        <div class="totals" style="margin-top: 16px;">
+          <span class="k">Shipping (free, 2+ prints)</span><span></span><span>$0.00</span>
+          <span class="k">Tax</span><span></span><span>included</span>
+          <span class="total-row">Total paid</span><span class="total-row"></span><span class="total-row">$560.00</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <a href="#" class="cta secondary" style="text-decoration: none; flex: 1;">View order status</a>
+        <a href="#" class="cta" style="text-decoration: none; flex: 1;">Continue browsing</a>
+      </div>
+
+      <p style="font-size: 12px; color: var(--ink-faint); font-weight: 400; margin-top: 24px; line-height: 1.5;">
+        You can track your order at any time using the link in your confirmation email. Questions? Reply to that email or write to studio@thaliabassim.com.
+      </p>
+    </div>
+  </section>
+
+  <!-- MOBILE STICKY BUY BAR -->
+  <div class="mobile-buy-bar" id="mobile-bar">
+    <div class="price-stack">$260.00<small>+ shipping</small></div>
+    <button class="cta">Add to cart</button>
+  </div>
+
+</div>
+
+<!-- CART DRAWER -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-bar">
+    <div>Cart (2)</div>
+    <button id="close-cart" type="button" style="background: transparent; border: 0;">Close ✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="cart-item">
+      <img src="https://picsum.photos/seed/cypress/200/250" alt="">
+      <div class="ci-meta">
+        Cypress Tree, <em>Beit Mery</em>
+        <div class="small">11 × 14 &nbsp;·&nbsp; Hahnemühle Photo Rag</div>
+        <div class="qty">
+          <button type="button">−</button><span>1</span><button type="button">+</button>
+          <a href="#" class="remove">Remove</a>
+        </div>
+      </div>
+      <div class="ci-price">$260.00</div>
+    </div>
+    <div class="cart-item">
+      <img src="https://picsum.photos/seed/almond/200/250" alt="">
+      <div class="ci-meta">
+        Almond Branch, <em>Aley</em>
+        <div class="small">8 × 10 &nbsp;·&nbsp; Canson Baryta</div>
+        <div class="qty">
+          <button type="button">−</button><span>1</span><button type="button">+</button>
+          <a href="#" class="remove">Remove</a>
+        </div>
+      </div>
+      <div class="ci-price">$300.00</div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <div class="totals">
+      <span class="k">Subtotal</span><span></span><span>$560.00</span>
+      <span class="k">Shipping</span><span></span><span>calculated at checkout</span>
+      <span class="k">Lead time</span><span></span><span>longest in cart, 5 to 8 days</span>
+      <span class="total-row">Total</span><span class="total-row"></span><span class="total-row">$560.00 + ship</span>
+    </div>
+    <button class="cta" type="button">Check out</button>
+    <p style="font-size: 12px; color: var(--ink-faint); font-weight: 400; margin: 0;">Limited edition prints check out separately and don't appear here.</p>
+  </div>
+</aside>
+
+<script>
+  const body = document.body;
+  document.querySelectorAll('.switcher button[data-scene]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const scene = btn.getAttribute('data-scene');
+      body.setAttribute('data-current', scene);
+      document.querySelectorAll('.switcher button[data-scene]').forEach(b => {
+        b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      });
+    });
+  });
+
+  document.getElementById('toggle-mobile').addEventListener('click', () => {
+    body.classList.toggle('mobile');
+  });
+
+  const scrim = document.getElementById('scrim');
+  const drawer = document.getElementById('drawer');
+  const openCart = () => { scrim.classList.add('open'); drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); };
+  const closeCart = () => { scrim.classList.remove('open'); drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); };
+  document.getElementById('open-cart').addEventListener('click', openCart);
+  document.getElementById('open-cart-link').addEventListener('click', e => { e.preventDefault(); openCart(); });
+  document.getElementById('close-cart').addEventListener('click', closeCart);
+  scrim.addEventListener('click', closeCart);
+
+  document.querySelectorAll('.details-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-toggle');
+      const target = document.getElementById(id);
+      const isOpen = target.classList.toggle('open');
+      btn.textContent = isOpen ? 'Less details ▴' : 'More details ▾';
+    });
+  });
+</script>
+
+</body>
+</html>
