@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import FeedbackButton from "@/components/FeedbackButton";
 import CartDrawer from "@/components/CartDrawer";
 import { CartProvider } from "@/lib/cart";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
           <CartDrawer />
           <FeedbackButton />
         </CartProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
