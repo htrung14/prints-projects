@@ -3,13 +3,19 @@
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
 
+/**
+ * Cargo-style header: three plain text groups, edge to edge.
+ *   LEFT   artist name
+ *   CENTER project mark + Essay
+ *   RIGHT  Info, Cart, Contact
+ * All the same weight, same ink color, no borders, no badges.
+ */
 export default function Header() {
   const { itemCount, openDrawer } = useCart();
-  const empty = itemCount === 0;
 
   return (
     <header
-      className="sticky top-0 z-50 grid items-center gap-6 border-b border-[var(--ink-line)] bg-[var(--bg)] px-6 py-4 md:px-8"
+      className="sticky top-0 z-50 grid items-baseline gap-6 bg-[var(--bg)] px-6 py-5 md:px-10"
       style={{ gridTemplateColumns: "1fr auto 1fr" }}
     >
       <div className="justify-self-start">
@@ -19,30 +25,20 @@ export default function Header() {
       </div>
 
       <div className="hidden items-baseline gap-6 justify-self-center md:flex">
-        <Link href="/">Catalog</Link>
-        <Link href="/about">Info</Link>
+        <span className="text-[var(--ink-strong)]">Prints</span>
+        <Link href="/about">Essay</Link>
       </div>
 
-      <div className="flex items-center gap-4 justify-self-end md:gap-5">
-        <button
-          type="button"
-          onClick={openDrawer}
-          className={`inline-flex items-center gap-2 border px-2.5 py-1.5 ${
-            empty
-              ? "border-[var(--ink-line)] text-[var(--ink-faint)]"
-              : "border-[var(--ink)] text-[var(--ink-strong)]"
-          }`}
-          aria-label={`Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`}
-        >
-          <span>Cart</span>
-          <span
-            className={`inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1.5 text-[11px] ${
-              empty ? "bg-[var(--ink-line)] text-[var(--ink)]" : "bg-[var(--ink)] text-white"
-            }`}
-          >
-            {itemCount}
-          </span>
+      <div className="flex items-baseline gap-6 justify-self-end">
+        <Link href="/about" className="hidden md:inline">
+          Info
+        </Link>
+        <button type="button" onClick={openDrawer} className="text-[var(--ink-strong)]">
+          Cart{itemCount > 0 ? ` (${itemCount})` : ""}
         </button>
+        <Link href="mailto:" className="hidden md:inline">
+          Contact ↗
+        </Link>
       </div>
     </header>
   );

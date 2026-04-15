@@ -1,8 +1,8 @@
-import Link from "next/link";
 import BuyUI from "./BuyUI";
+import DetailCloseLink from "./DetailCloseLink";
 import type { Photo } from "@/lib/types";
 
-export default function DetailPanel({ photo }: { photo: Photo }) {
+export default function DetailPanel({ photo, modal = false }: { photo: Photo; modal?: boolean }) {
   return (
     <article className="border-t border-[var(--ink-line)]">
       <div
@@ -13,9 +13,7 @@ export default function DetailPanel({ photo }: { photo: Photo }) {
         <span className="justify-self-center text-[var(--ink-strong)]">
           {photo.referenceNumber}
         </span>
-        <Link href="/" className="justify-self-end">
-          Close ✕
-        </Link>
+        <DetailCloseLink modal={modal} />
       </div>
 
       <div
