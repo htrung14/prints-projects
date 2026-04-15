@@ -1,17 +1,17 @@
 [
   {
-    "slug": "morning-on-atlantic",
-    "referenceNumber": "BK-024.01",
-    "title": "Morning on",
-    "titleItalic": "Atlantic",
-    "subtitle": "Brooklyn, NY",
+    "slug": "pl-6604-01",
+    "referenceNumber": "PL-6604.01",
+    "title": "Untitled,",
+    "titleItalic": "01",
+    "subtitle": "From the roll 6604",
     "year": 2024,
     "description": [
-      "Atlantic Avenue at first light, looking east. The shot was made on a Tuesday in late winter when the cars were still paused at the signal and the storefronts had not yet opened.",
-      "Each print is produced by hand on archival pigment paper with a 1 inch border for handling."
+      "Frame 01 from a single roll of 35mm film, scanned by PhotoLife in Brooklyn, NY. The images in this series were made in a continuous window of afternoon light and have not been colour-corrected beyond the lab scan.",
+      "Each print is produced on archival pigment paper with a 1 inch border for handling. Signed and numbered on the verso."
     ],
-    "imageUrl": "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=1600&q=80",
-    "imageAlt": "Atlantic Avenue, Brooklyn, at dawn",
+    "imageUrl": "/images/catalog/pl-6604-01.jpg",
+    "imageAlt": "Film frame 01 from roll 6604",
     "basePriceCents": 14000,
     "sizes": [
       { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },
@@ -28,18 +28,18 @@
     "editionSold": 3
   },
   {
-    "slug": "greenpoint-4am",
-    "referenceNumber": "BK-024.02",
-    "title": "Greenpoint",
-    "titleItalic": "4am",
-    "subtitle": "Brooklyn, NY",
+    "slug": "pl-6604-02",
+    "referenceNumber": "PL-6604.02",
+    "title": "Untitled,",
+    "titleItalic": "02",
+    "subtitle": "From the roll 6604",
     "year": 2024,
     "description": [
-      "A long exposure across the Greenpoint waterfront made on a still night in March. The water was glass and the city across the river held very steady.",
+      "Frame 02 from the same roll. Made on medium-speed film stock, scanned at high resolution at the Brooklyn lab. Part of an ongoing personal archive.",
       "Printed on Hahnemühle Photo Rag 308 gsm. Signed and numbered on the verso."
     ],
-    "imageUrl": "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1600&q=80",
-    "imageAlt": "Greenpoint Brooklyn at four in the morning",
+    "imageUrl": "/images/catalog/pl-6604-02.jpg",
+    "imageAlt": "Film frame 02 from roll 6604",
     "basePriceCents": 16000,
     "sizes": [
       { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },
@@ -54,18 +54,17 @@
     "editionSold": 7
   },
   {
-    "slug": "prospect-in-fog",
-    "referenceNumber": "BK-024.03",
-    "title": "Prospect in",
-    "titleItalic": "Fog",
-    "subtitle": "Brooklyn, NY",
+    "slug": "pl-6604-03",
+    "referenceNumber": "PL-6604.03",
+    "title": "Untitled,",
+    "titleItalic": "03",
+    "subtitle": "From the roll 6604",
     "year": 2024,
     "description": [
-      "Long Meadow at Prospect Park on a morning when the fog never quite lifted. The image was made on medium format film and scanned at high resolution.",
-      "Each print is made to order. We replace prints damaged in transit or with production defects within 14 days of delivery."
+      "Frame 03 from the roll. Each print is made to order. We replace prints damaged in transit or with production defects within 14 days of delivery; otherwise all sales are final."
     ],
-    "imageUrl": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80",
-    "imageAlt": "Prospect Park covered in morning fog",
+    "imageUrl": "/images/catalog/pl-6604-03.jpg",
+    "imageAlt": "Film frame 03 from roll 6604",
     "basePriceCents": 15000,
     "sizes": [
       { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },
@@ -81,18 +80,17 @@
     "editionSold": 1
   },
   {
-    "slug": "bqe-overpass",
-    "referenceNumber": "BK-024.04",
-    "title": "BQE",
-    "titleItalic": "Overpass",
-    "subtitle": "Brooklyn, NY",
+    "slug": "pl-6604-04",
+    "referenceNumber": "PL-6604.04",
+    "title": "Untitled,",
+    "titleItalic": "04",
+    "subtitle": "From the roll 6604",
     "year": 2024,
     "description": [
-      "From beneath the Brooklyn-Queens Expressway, looking through the structural bays toward the harbor. Made on a clear afternoon in October.",
-      "Open edition. Made to order in Brooklyn."
+      "Frame 04 from the roll. Open edition across sizes; this is an early print run and additional editions may be issued if the plate holds."
     ],
-    "imageUrl": "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=1600&q=80",
-    "imageAlt": "Underside of the BQE overpass in Brooklyn",
+    "imageUrl": "/images/catalog/pl-6604-04.jpg",
+    "imageAlt": "Film frame 04 from roll 6604",
     "basePriceCents": 12000,
     "sizes": [
       { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },
@@ -107,18 +105,17 @@
     "editionSold": 0
   },
   {
-    "slug": "window-crown-heights",
-    "referenceNumber": "BK-024.05",
-    "title": "Window,",
-    "titleItalic": "Crown Heights",
-    "subtitle": "Brooklyn, NY",
-    "year": 2023,
+    "slug": "pl-6604-05",
+    "referenceNumber": "PL-6604.05",
+    "title": "Untitled,",
+    "titleItalic": "05",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
     "description": [
-      "An interior frame from a Crown Heights apartment, made on a Sunday afternoon in winter. The plant on the sill is a Monstera deliciosa.",
-      "Printed on Canson Baryta for the way it holds the highlights against the bright window."
+      "Frame 05. Printed on Canson Baryta for the way it holds the highlights against a bright background."
     ],
-    "imageUrl": "https://images.unsplash.com/photo-1416339442236-8ceb164046f8?auto=format&fit=crop&w=1600&q=80",
-    "imageAlt": "Window with plant in Crown Heights apartment",
+    "imageUrl": "/images/catalog/pl-6604-05.jpg",
+    "imageAlt": "Film frame 05 from roll 6604",
     "basePriceCents": 18000,
     "sizes": [
       { "id": "11x14", "label": "11 × 14 in", "multiplier": 1.45 },
@@ -129,18 +126,17 @@
     "editionSold": 10
   },
   {
-    "slug": "red-hook-low-tide",
-    "referenceNumber": "BK-023.11",
-    "title": "Red Hook at",
-    "titleItalic": "Low Tide",
-    "subtitle": "Brooklyn, NY",
-    "year": 2023,
+    "slug": "pl-6604-06",
+    "referenceNumber": "PL-6604.06",
+    "title": "Untitled,",
+    "titleItalic": "06",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
     "description": [
-      "The Red Hook waterfront at low tide, with the Statue of Liberty visible in the distance. Made on a cold morning in late February.",
-      "This edition is limited to 10 prints, signed and numbered on the verso. Once the edition is complete it will not be reprinted."
+      "Frame 06. This edition is limited to 10 prints, signed and numbered on the verso. Once the edition is complete it will not be reprinted."
     ],
-    "imageUrl": "https://images.unsplash.com/photo-1501446529957-6226bd447c46?auto=format&fit=crop&w=1600&q=80",
-    "imageAlt": "Red Hook waterfront at low tide",
+    "imageUrl": "/images/catalog/pl-6604-06.jpg",
+    "imageAlt": "Film frame 06 from roll 6604",
     "basePriceCents": 22000,
     "sizes": [
       { "id": "11x14", "label": "11 × 14 in", "multiplier": 1.45 },
@@ -155,18 +151,17 @@
     "editionSold": 5
   },
   {
-    "slug": "atlantic-yards-gantry",
-    "referenceNumber": "BK-023.12",
-    "title": "Atlantic Yards,",
-    "titleItalic": "Gantry",
-    "subtitle": "Brooklyn, NY",
-    "year": 2023,
+    "slug": "pl-6604-07",
+    "referenceNumber": "PL-6604.07",
+    "title": "Untitled,",
+    "titleItalic": "07",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
     "description": [
-      "A gantry crane at the Atlantic Yards rail cut. Photographed at the eastern edge of the lot during the first hour of full light.",
-      "Each print is made to order. Printed in Brooklyn on a 1 inch border for handling."
+      "Frame 07. Each print is made to order and printed in Brooklyn, NY with a 1 inch border for handling."
     ],
-    "imageUrl": "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1600&q=80",
-    "imageAlt": "Gantry crane at Atlantic Yards rail cut, Brooklyn",
+    "imageUrl": "/images/catalog/pl-6604-07.jpg",
+    "imageAlt": "Film frame 07 from roll 6604",
     "basePriceCents": 13000,
     "sizes": [
       { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },
@@ -182,18 +177,17 @@
     "editionSold": 2
   },
   {
-    "slug": "carroll-gardens-rain",
-    "referenceNumber": "BK-024.06",
-    "title": "Carroll Gardens,",
-    "titleItalic": "Rain",
-    "subtitle": "Brooklyn, NY",
+    "slug": "pl-6604-08",
+    "referenceNumber": "PL-6604.08",
+    "title": "Untitled,",
+    "titleItalic": "08",
+    "subtitle": "From the roll 6604",
     "year": 2024,
     "description": [
-      "Court Street in light rain on a weekday afternoon. The puddles on the sidewalk reflect the brownstones across the street.",
-      "Printed on Hahnemühle Photo Rag 308 gsm."
+      "Frame 08, the closing frame of the roll. Printed on Hahnemühle Photo Rag 308 gsm."
     ],
-    "imageUrl": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1600&q=80",
-    "imageAlt": "Court Street in Carroll Gardens during light rain",
+    "imageUrl": "/images/catalog/pl-6604-08.jpg",
+    "imageAlt": "Film frame 08 from roll 6604",
     "basePriceCents": 14500,
     "sizes": [
       { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Noto_Naskh_Arabic } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -13,6 +13,12 @@ const geistSans = Geist({
   weight: ["400", "700", "900"],
 });
 
+const notoNaskhArabic = Noto_Naskh_Arabic({
+  variable: "--font-arabic",
+  subsets: ["arabic"],
+  weight: ["700"],
+});
+
 export const metadata: Metadata = {
   title: "Prints — demo",
   description: "A Brooklyn, NY photographer's print shop. Demo build.",
@@ -20,12 +26,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children, modal }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${notoNaskhArabic.variable} h-full antialiased`}
+    >
+      <body className="min-h-full">
         <CartProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <div className="app-shell flex min-h-screen flex-col">
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
           <CartDrawer />
           <Toast />
           {modal}

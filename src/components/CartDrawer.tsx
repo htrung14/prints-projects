@@ -63,7 +63,7 @@ export default function CartDrawer() {
         }}
       />
       <aside
-        className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-[var(--ink-line)] bg-[var(--bg)] p-6"
+        className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-ink-line bg-bg p-6"
         aria-label="Cart"
         style={{
           transform: visible ? "translateX(0)" : "translateX(100%)",
@@ -71,15 +71,15 @@ export default function CartDrawer() {
           boxShadow: "-12px 0 32px -8px rgba(0, 0, 0, 0.14)",
         }}
       >
-        <div className="flex items-center justify-between border-b border-[var(--ink-line)] pb-3">
-          <span className="text-[var(--ink-strong)]">Cart</span>
+        <div className="flex items-center justify-between border-b border-ink-line pb-3">
+          <span className="text-ink-strong">Cart</span>
           <button onClick={closeDrawer}>Close ✕</button>
         </div>
 
         {lines.length === 0 ? (
-          <p className="mt-6 text-[var(--ink-faint)]">Your cart is empty.</p>
+          <p className="mt-6 text-ink-faint">Your cart is empty.</p>
         ) : (
-          <ul className="flex-1 divide-y divide-[var(--ink-line)] overflow-y-auto">
+          <ul className="flex-1 divide-y divide-ink-line overflow-y-auto">
             {lines.map((line, i) => {
               const photo = photos.find((p) => p.slug === line.photoSlug);
               if (!photo) return null;
@@ -94,7 +94,7 @@ export default function CartDrawer() {
                     className="h-20 w-20 object-cover"
                   />
                   <div className="flex flex-1 flex-col text-xs leading-snug">
-                    <span className="text-[var(--ink-strong)]">
+                    <span className="text-ink-strong">
                       {photo.title}
                       {photo.titleItalic ? (
                         <>
@@ -103,44 +103,43 @@ export default function CartDrawer() {
                         </>
                       ) : null}
                     </span>
-                    <span className="text-[var(--ink-faint)]">
+                    <span className="text-ink-faint">
                       {size?.label} · {paper?.name}
                     </span>
-                    <span className="text-[var(--ink-faint)]">Qty {line.quantity}</span>
+                    <span className="text-ink-faint">Qty {line.quantity}</span>
                     <button
                       onClick={() => remove(i)}
-                      className="mt-1 self-start text-[var(--ink-faint)] underline"
+                      className="mt-1 self-start text-ink-faint underline"
                     >
                       Remove
                     </button>
                   </div>
-                  <span className="text-[var(--ink-strong)]">
-                    {formatUsd(linePrice * line.quantity)}
-                  </span>
+                  <span className="text-ink-strong">{formatUsd(linePrice * line.quantity)}</span>
                 </li>
               );
             })}
           </ul>
         )}
 
-        <div className="mt-4 border-t border-[var(--ink-line)] pt-4">
+        <div className="mt-4 border-t border-ink-line pt-4">
           <div className="mb-3 flex items-center justify-between">
             <span>Subtotal</span>
-            <span className="text-[var(--ink-strong)]">{formatUsd(subtotalCents)}</span>
+            <span className="text-ink-strong">{formatUsd(subtotalCents)}</span>
           </div>
-          <p className="mb-3 text-[11px] text-[var(--ink-faint)]">
+          <p className="mb-3 text-[11px] text-ink-faint">
             Shipping calculated at checkout. Free US shipping on 2 prints or more.
           </p>
           <Link
             href="/checkout"
             onClick={closeDrawer}
-            className={`block border px-4 py-2 text-center transition-opacity ${
+            className={`block py-3 text-center transition-opacity ${
               lines.length === 0
-                ? "pointer-events-none border-[var(--ink-line)] text-[var(--ink-faint)]"
-                : "border-[var(--ink)] text-[var(--ink-strong)] hover:opacity-80"
+                ? "pointer-events-none border border-ink-line text-ink-faint"
+                : "bg-ink-strong text-bg hover:opacity-90"
             }`}
+            style={{ fontSize: "1rem", letterSpacing: "0.01em" }}
           >
-            Checkout
+            {lines.length === 0 ? "Checkout" : "Checkout →"}
           </Link>
         </div>
       </aside>

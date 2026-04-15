@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function InformationPage() {
   return (
-    <div className="border-t border-[var(--ink-line)] px-6 py-12 md:px-10">
+    <div className="border-t border-ink-line px-6 py-12 md:px-10">
       <div className="mx-auto max-w-3xl">
         <div className="mb-10 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-xs">
           <span className="label-caps">Contents</span>
@@ -34,7 +34,7 @@ export default function InformationPage() {
           </a>
         </div>
 
-        <Section id="about" heading="About">
+        <Section id="about" n={1} heading="About">
           <p>
             Brooklyn Prints is a small shop run by a photographer based in Brooklyn, NY. Every
             photograph in the catalog is an edition of 10 prints, pooled across all sizes and
@@ -51,7 +51,7 @@ export default function InformationPage() {
           </p>
         </Section>
 
-        <Section id="shipping" heading="Shipping &amp; Delivery">
+        <Section id="shipping" n={2} heading="Shipping &amp; Delivery">
           <p>
             <strong>Production lead time.</strong> Prints are made to order. Expected turnaround
             from order to dispatch:{" "}
@@ -89,7 +89,7 @@ export default function InformationPage() {
           </p>
         </Section>
 
-        <Section id="returns" heading="Refunds &amp; Returns">
+        <Section id="returns" n={3} heading="Refunds &amp; Returns">
           <p>
             Each print is made to order. We replace prints damaged in transit or with production
             defects within 14 days of delivery. Otherwise, all sales are final.
@@ -106,7 +106,7 @@ export default function InformationPage() {
           </p>
         </Section>
 
-        <Section id="terms" heading="Terms of Sale">
+        <Section id="terms" n={4} heading="Terms of Sale">
           <p>
             <strong>Definitions.</strong> &quot;Studio&quot; refers to{" "}
             <Tbd label="studio legal name" />. &quot;Customer&quot; refers to the person placing an
@@ -147,7 +147,7 @@ export default function InformationPage() {
           </p>
         </Section>
 
-        <Section id="privacy" heading="Privacy">
+        <Section id="privacy" n={5} heading="Privacy">
           <p>
             <strong>What we collect.</strong> When you place an order, we collect your name,
             shipping address, email address, and, at checkout, payment details handled by Stripe. We
@@ -173,7 +173,7 @@ export default function InformationPage() {
           </p>
         </Section>
 
-        <Section id="imprint" heading="Legal Notice">
+        <Section id="imprint" n={6} heading="Legal Notice">
           <p>
             Studio legal name: <Tbd label="studio legal name" />
             <br />
@@ -184,21 +184,21 @@ export default function InformationPage() {
             <br />
             Contact email: <Tbd label="support email" />
           </p>
-          <p className="text-[var(--ink-faint)]">
+          <p className="text-ink-faint">
             This notice is provided for compliance with legal identification requirements in
             applicable jurisdictions. It is not a guarantee of service or warranty beyond what is
             stated in the Terms of Sale above.
           </p>
         </Section>
 
-        <Section id="contact" heading="Contact">
+        <Section id="contact" n={7} heading="Contact">
           <p>
             For order support, shipping questions, or anything else, email{" "}
             <Tbd label="support email" />. We aim to reply within two business days.
           </p>
         </Section>
 
-        <p className="mt-12 border-t border-[var(--ink-line)] pt-6 text-[var(--ink-faint)]">
+        <p className="mt-12 border-t border-ink-line pt-6 text-ink-faint">
           Last updated <time dateTime="2026-04-15">April 15, 2026</time>. This page is a demo draft
           and has not yet been reviewed by counsel.
         </p>
@@ -209,31 +209,37 @@ export default function InformationPage() {
 
 function Section({
   id,
+  n,
   heading,
   children,
 }: {
   id: string;
+  n: number;
   heading: string;
   children: React.ReactNode;
 }) {
+  const num = String(n).padStart(2, "0");
   return (
     <section
       id={id}
-      className="scroll-mt-24 border-t border-[var(--ink-line)] py-8 first:border-t-0 first:pt-0"
+      className="scroll-mt-24 grid gap-6 border-t border-ink py-10 md:grid-cols-[90px_1fr] md:gap-10"
     >
-      <h2
-        className="mb-4 text-[var(--ink-strong)]"
-        style={{ fontSize: "22px", lineHeight: 1.2 }}
-        dangerouslySetInnerHTML={{ __html: heading }}
-      />
-      <div className="space-y-4 text-sm leading-relaxed">{children}</div>
+      <div className="label-caps pt-1 text-ink-faint">{num}</div>
+      <div>
+        <h2
+          className="mb-6 text-ink-strong"
+          style={{ fontSize: "28px", lineHeight: 1.1, letterSpacing: "-0.01em" }}
+          dangerouslySetInnerHTML={{ __html: heading }}
+        />
+        <div className="space-y-4 text-sm leading-relaxed">{children}</div>
+      </div>
     </section>
   );
 }
 
 function Tbd({ label }: { label?: string }) {
   return (
-    <span className="inline-block border border-[var(--ink-line)] bg-[var(--bg-soft)] px-1.5 py-0.5 text-[11px] text-[var(--ink-faint)]">
+    <span className="inline-block border border-ink-line bg-bg-soft px-1.5 py-0.5 text-[11px] text-ink-faint">
       TBD{label ? `: ${label}` : ""}
     </span>
   );

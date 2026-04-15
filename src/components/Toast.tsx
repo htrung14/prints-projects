@@ -40,7 +40,7 @@ export default function Toast() {
     <button
       type="button"
       onClick={openDrawer}
-      className="fixed left-1/2 z-[65] flex items-center gap-3 border border-[var(--ink)] bg-[var(--bg)] px-4 py-2 text-xs text-[var(--ink-strong)]"
+      className="fixed left-1/2 z-[65] flex items-center gap-3 border border-ink bg-bg px-4 py-2 text-xs text-ink-strong"
       style={{
         bottom: "24px",
         transform: `translateX(-50%) translateY(${visible ? "0" : "12px"})`,
@@ -51,7 +51,7 @@ export default function Toast() {
       aria-live="polite"
     >
       <span>Added to cart</span>
-      <span className="text-[var(--ink-faint)]">View →</span>
+      <span className="text-ink-faint">View →</span>
     </button>
   );
 }

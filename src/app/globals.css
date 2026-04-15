@@ -9,10 +9,10 @@
 :root {
   --bg: #ffffff;
   --bg-soft: #f4f4f0;
-  --ink: rgba(0, 0, 0, 0.6);
-  --ink-strong: rgba(0, 0, 0, 0.85);
-  --ink-line: rgba(0, 0, 0, 0.15);
-  --ink-faint: rgba(0, 0, 0, 0.35);
+  --ink: rgba(0, 0, 0, 0.78);
+  --ink-strong: rgba(0, 0, 0, 0.95);
+  --ink-line: rgba(0, 0, 0, 0.18);
+  --ink-faint: rgba(0, 0, 0, 0.5);
   --header-height: 60px;
 }
 
@@ -40,10 +40,25 @@ body {
     Roboto,
     sans-serif;
   font-weight: 900;
-  font-size: 14.5px;
-  line-height: 1.35;
+  font-size: 17px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.005em;
+}
+
+/* Bump Tailwind's small type classes up a notch so they read on larger
+   displays without making every file edit a font-size prop. */
+.text-xs {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+.text-sm {
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+}
+.text-base {
+  font-size: 17px !important;
+  line-height: 1.6 !important;
 }
 
 * {
@@ -84,6 +99,70 @@ em {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 900;
+}
+
+.arabic {
+  font-family: var(--font-arabic), "Noto Naskh Arabic", Arial, sans-serif;
+  font-weight: 700;
+}
+
+/* Marquee ticker. Two line copies slide together so the wrap is gapless. */
+.marquee {
+  overflow: hidden;
+  padding: 8px 0;
+  color: var(--ink);
+}
+.marquee-track {
+  display: flex;
+  width: fit-content;
+  gap: 0;
+  animation: marquee-scroll 44s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+.marquee-line {
+  flex: none;
+  white-space: nowrap;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+    transform: translateX(0);
+  }
+}
+
+/* Editorial display type: used for hero h1 on the home page. */
+.h-display-xl {
+  color: var(--ink-strong);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.h-display-xl em {
+  font-style: italic;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+/* Drop cap for editorial intro paragraphs. */
+.drop-cap::first-letter {
+  float: left;
+  font-size: 3.2em;
+  line-height: 0.9;
+  padding: 0.05em 0.12em 0 0;
+  color: var(--ink-strong);
 }
 
 /* Add-to-cart button press + hover transition. */
