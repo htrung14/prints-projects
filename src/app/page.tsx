@@ -26,15 +26,23 @@ export default function Home() {
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <Link
                   href="#catalog"
-                  className="inline-block bg-ink-strong px-5 py-3 text-bg hover:opacity-90"
-                  style={{ fontSize: "1rem", letterSpacing: "0.01em" }}
+                  className="inline-block px-5 py-3 hover:opacity-90"
+                  style={{
+                    fontSize: "1rem",
+                    letterSpacing: "0.01em",
+                    backgroundColor: "var(--ink-strong)",
+                    color: "var(--bg)",
+                  }}
                 >
                   View catalog →
                 </Link>
                 <Link
                   href="/essay"
-                  className="inline-block border border-ink px-5 py-3 text-ink-strong hover:opacity-70"
-                  style={{ fontSize: "1rem" }}
+                  className="inline-block border border-ink px-5 py-3 hover:opacity-70"
+                  style={{
+                    fontSize: "1rem",
+                    color: "var(--ink-strong)",
+                  }}
                 >
                   Read essay
                 </Link>
