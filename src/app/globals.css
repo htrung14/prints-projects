@@ -85,3 +85,32 @@ em {
   letter-spacing: 0.06em;
   font-weight: 900;
 }
+
+/* Add-to-cart button press + hover transition. */
+.add-to-cart-btn {
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out,
+    transform 120ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.add-to-cart-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Catalog card entrance: staggered fade + rise on first paint.
+   Delay is set inline per-card via --i. Skipped if the user prefers reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .stagger-in {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: stagger-rise 520ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    animation-delay: calc(var(--i, 0) * 55ms);
+  }
+}
+
+@keyframes stagger-rise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

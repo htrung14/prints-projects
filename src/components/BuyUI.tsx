@@ -113,10 +113,10 @@ export default function BuyUI({ photo }: { photo: Photo }) {
             quantity: qty,
           })
         }
-        className={`mt-1 border px-4 py-2 text-center ${
+        className={`add-to-cart-btn mt-1 border px-4 py-2 text-center ${
           soldOut
             ? "cursor-not-allowed border-[var(--ink-line)] text-[var(--ink-faint)]"
-            : "border-[var(--ink)] text-[var(--ink-strong)]"
+            : "border-[var(--ink)] text-[var(--ink-strong)] hover:bg-[var(--ink-strong)] hover:text-[var(--bg)]"
         }`}
       >
         {soldOut ? "Edition closed" : "Add to cart"}

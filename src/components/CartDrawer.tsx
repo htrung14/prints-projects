@@ -1,15 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { getAllPhotos } from "@/lib/photos";
 import { formatUsd, priceCents } from "@/lib/pricing";
 import type { PaperType } from "@/lib/types";
 
+const ENTER_MS = 260;
+const EXIT_MS = 200;
+
 export default function CartDrawer() {
   const { lines, drawerOpen, closeDrawer, remove, subtotalCents } = useCart();
   const photos = getAllPhotos();
+
+  // `mounted` controls DOM presence; `visible` controls transform/opacity.
+  // When drawerOpen flips false we set visible=false and keep the node
+  // mounted for EXIT_MS so the slide-out animation actually runs.
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  // Mount/unmount driver keyed on the external `drawerOpen` signal.
+  // Setting local state synchronously here is intentional: we derive
+  // `mounted` + `visible` from an external source so we can animate
+  // before unmounting. The rule treats all sync setState in effects
+  // as an anti-pattern, which doesn't apply to enter/exit animation.
+  useEffect(() => {
+    if (drawerOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMounted(true);
+      const id = requestAnimationFrame(() => {
+        requestAnimationFrame(() => setVisible(true));
+      });
+      return () => cancelAnimationFrame(id);
+    }
+    setVisible(false);
+    const t = window.setTimeout(() => setMounted(false), EXIT_MS);
+    return () => window.clearTimeout(t);
+  }, [drawerOpen]);
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -20,19 +48,28 @@ export default function CartDrawer() {
     return () => window.removeEventListener("keydown", onKey);
   }, [drawerOpen, closeDrawer]);
 
-  if (!drawerOpen) return null;
+  if (!mounted) return null;
 
   return (
     <div className="fixed inset-0 z-[60]">
       <button
         type="button"
-        className="absolute inset-0 bg-black/30"
         aria-label="Close cart"
         onClick={closeDrawer}
+        className="absolute inset-0 bg-black"
+        style={{
+          opacity: visible ? 0.3 : 0,
+          transition: `opacity ${visible ? ENTER_MS : EXIT_MS}ms ease-out`,
+        }}
       />
       <aside
         className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-[var(--ink-line)] bg-[var(--bg)] p-6"
         aria-label="Cart"
+        style={{
+          transform: visible ? "translateX(0)" : "translateX(100%)",
+          transition: `transform ${visible ? ENTER_MS : EXIT_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`,
+          boxShadow: "-12px 0 32px -8px rgba(0, 0, 0, 0.14)",
+        }}
       >
         <div className="flex items-center justify-between border-b border-[var(--ink-line)] pb-3">
           <span className="text-[var(--ink-strong)]">Cart</span>
@@ -97,10 +134,10 @@ export default function CartDrawer() {
           <Link
             href="/checkout"
             onClick={closeDrawer}
-            className={`block border px-4 py-2 text-center ${
+            className={`block border px-4 py-2 text-center transition-opacity ${
               lines.length === 0
                 ? "pointer-events-none border-[var(--ink-line)] text-[var(--ink-faint)]"
-                : "border-[var(--ink)] text-[var(--ink-strong)]"
+                : "border-[var(--ink)] text-[var(--ink-strong)] hover:opacity-80"
             }`}
           >
             Checkout

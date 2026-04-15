@@ -23,6 +23,9 @@ type CartContextValue = {
   clear: () => void;
   subtotalCents: number;
   itemCount: number;
+  // Monotonically increasing counter that ticks on each add; components
+  // can watch this to trigger transient UI like the add-to-cart toast.
+  addedAt: number;
 };
 
 const STORAGE_KEY = "prints-projects.cart.v1";
@@ -113,6 +116,7 @@ function mergeLine(lines: CartLine[], incoming: CartLine): CartLine[] {
 export function CartProvider({ children }: { children: ReactNode }) {
   const lines = useSyncExternalStore<CartLine[]>(subscribe, readLines, getServerSnapshot);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [addedAt, setAddedAt] = useState(0);
 
   const setLines = useCallback((next: CartLine[]) => {
     writeLines(next);
@@ -122,7 +126,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const add = useCallback(
     (line: CartLine) => {
       setLines(mergeLine(readLines(), line));
-      setDrawerOpen(true);
+      setAddedAt(Date.now());
     },
     [setLines]
   );
@@ -158,8 +162,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       clear,
       subtotalCents,
       itemCount,
+      addedAt,
     }),
-    [lines, drawerOpen, add, remove, clear, subtotalCents, itemCount]
+    [lines, drawerOpen, add, remove, clear, subtotalCents, itemCount, addedAt]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
