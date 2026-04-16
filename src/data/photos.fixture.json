@@ -8,76 +8,52 @@
     "year": 2024,
     "description": [
       "Frame 01 from a single roll of 35mm film, scanned by PhotoLife in Brooklyn, NY. The images in this series were made in a continuous window of afternoon light and have not been colour-corrected beyond the lab scan.",
-      "Each print is produced on archival pigment paper with a 1 inch border for handling. Signed and numbered on the verso."
+      "Each print is produced on archival pigment paper with a 1 inch border for handling."
     ],
     "imageUrl": "/images/catalog/pl-6604-01.jpg",
     "imageAlt": "Film frame 01 from roll 6604",
     "basePriceCents": 14000,
     "sizes": [
-      { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },
-      { "id": "11x14", "label": "11 × 14 in", "multiplier": 1.45 },
-      { "id": "16x20", "label": "16 × 20 in", "multiplier": 2.4 },
-      { "id": "24x30", "label": "24 × 30 in", "multiplier": 3.8 }
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      },
+      {
+        "id": "24x30",
+        "label": "24 × 30 in",
+        "multiplier": 3.8
+      }
     ],
     "papers": [
-      { "id": "photo-rag", "name": "Hahnemühle Photo Rag", "surchargeCents": 0 },
-      { "id": "baryta", "name": "Canson Baryta", "surchargeCents": 2000 },
-      { "id": "bamboo", "name": "Hahnemühle Bamboo", "surchargeCents": 4000 }
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 4000
+      }
     ],
     "editionTotal": 10,
     "editionSold": 3
-  },
-  {
-    "slug": "pl-6604-02",
-    "referenceNumber": "PL-6604.02",
-    "title": "Untitled,",
-    "titleItalic": "02",
-    "subtitle": "From the roll 6604",
-    "year": 2024,
-    "description": [
-      "Frame 02 from the same roll. Made on medium-speed film stock, scanned at high resolution at the Brooklyn lab. Part of an ongoing personal archive.",
-      "Printed on Hahnemühle Photo Rag 308 gsm. Signed and numbered on the verso."
-    ],
-    "imageUrl": "/images/catalog/pl-6604-02.jpg",
-    "imageAlt": "Film frame 02 from roll 6604",
-    "basePriceCents": 16000,
-    "sizes": [
-      { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },
-      { "id": "11x14", "label": "11 × 14 in", "multiplier": 1.45 },
-      { "id": "16x20", "label": "16 × 20 in", "multiplier": 2.4 }
-    ],
-    "papers": [
-      { "id": "photo-rag", "name": "Hahnemühle Photo Rag", "surchargeCents": 0 },
-      { "id": "baryta", "name": "Canson Baryta", "surchargeCents": 2000 }
-    ],
-    "editionTotal": 10,
-    "editionSold": 7
-  },
-  {
-    "slug": "pl-6604-03",
-    "referenceNumber": "PL-6604.03",
-    "title": "Untitled,",
-    "titleItalic": "03",
-    "subtitle": "From the roll 6604",
-    "year": 2024,
-    "description": [
-      "Frame 03 from the roll. Each print is made to order. We replace prints damaged in transit or with production defects within 14 days of delivery; otherwise all sales are final."
-    ],
-    "imageUrl": "/images/catalog/pl-6604-03.jpg",
-    "imageAlt": "Film frame 03 from roll 6604",
-    "basePriceCents": 15000,
-    "sizes": [
-      { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },
-      { "id": "11x14", "label": "11 × 14 in", "multiplier": 1.45 },
-      { "id": "16x20", "label": "16 × 20 in", "multiplier": 2.4 },
-      { "id": "24x30", "label": "24 × 30 in", "multiplier": 3.8 }
-    ],
-    "papers": [
-      { "id": "photo-rag", "name": "Hahnemühle Photo Rag", "surchargeCents": 0 },
-      { "id": "baryta", "name": "Canson Baryta", "surchargeCents": 2000 }
-    ],
-    "editionTotal": 10,
-    "editionSold": 1
   },
   {
     "slug": "pl-6604-04",
@@ -93,62 +69,36 @@
     "imageAlt": "Film frame 04 from roll 6604",
     "basePriceCents": 12000,
     "sizes": [
-      { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },
-      { "id": "11x14", "label": "11 × 14 in", "multiplier": 1.45 },
-      { "id": "16x20", "label": "16 × 20 in", "multiplier": 2.4 }
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
     ],
     "papers": [
-      { "id": "photo-rag", "name": "Hahnemühle Photo Rag", "surchargeCents": 0 },
-      { "id": "bamboo", "name": "Hahnemühle Bamboo", "surchargeCents": 4000 }
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 4000
+      }
     ],
     "editionTotal": 10,
     "editionSold": 0
-  },
-  {
-    "slug": "pl-6604-05",
-    "referenceNumber": "PL-6604.05",
-    "title": "Untitled,",
-    "titleItalic": "05",
-    "subtitle": "From the roll 6604",
-    "year": 2024,
-    "description": [
-      "Frame 05. Printed on Canson Baryta for the way it holds the highlights against a bright background."
-    ],
-    "imageUrl": "/images/catalog/pl-6604-05.jpg",
-    "imageAlt": "Film frame 05 from roll 6604",
-    "basePriceCents": 18000,
-    "sizes": [
-      { "id": "11x14", "label": "11 × 14 in", "multiplier": 1.45 },
-      { "id": "16x20", "label": "16 × 20 in", "multiplier": 2.4 }
-    ],
-    "papers": [{ "id": "baryta", "name": "Canson Baryta", "surchargeCents": 0 }],
-    "editionTotal": 10,
-    "editionSold": 10
-  },
-  {
-    "slug": "pl-6604-06",
-    "referenceNumber": "PL-6604.06",
-    "title": "Untitled,",
-    "titleItalic": "06",
-    "subtitle": "From the roll 6604",
-    "year": 2024,
-    "description": [
-      "Frame 06. This edition is limited to 10 prints, signed and numbered on the verso. Once the edition is complete it will not be reprinted."
-    ],
-    "imageUrl": "/images/catalog/pl-6604-06.jpg",
-    "imageAlt": "Film frame 06 from roll 6604",
-    "basePriceCents": 22000,
-    "sizes": [
-      { "id": "11x14", "label": "11 × 14 in", "multiplier": 1.45 },
-      { "id": "16x20", "label": "16 × 20 in", "multiplier": 2.4 },
-      { "id": "24x30", "label": "24 × 30 in", "multiplier": 3.8 }
-    ],
-    "papers": [
-      { "id": "photo-rag", "name": "Hahnemühle Photo Rag", "surchargeCents": 0 },
-      { "id": "baryta", "name": "Canson Baryta", "surchargeCents": 2000 }
-    ],
-    "editionTotal": 10,
-    "editionSold": 5
   },
   {
     "slug": "pl-6604-07",
@@ -164,17 +114,392 @@
     "imageAlt": "Film frame 07 from roll 6604",
     "basePriceCents": 13000,
     "sizes": [
-      { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },
-      { "id": "11x14", "label": "11 × 14 in", "multiplier": 1.45 },
-      { "id": "16x20", "label": "16 × 20 in", "multiplier": 2.4 }
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
     ],
     "papers": [
-      { "id": "photo-rag", "name": "Hahnemühle Photo Rag", "surchargeCents": 0 },
-      { "id": "baryta", "name": "Canson Baryta", "surchargeCents": 2000 },
-      { "id": "bamboo", "name": "Hahnemühle Bamboo", "surchargeCents": 4000 }
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 4000
+      }
     ],
     "editionTotal": 10,
     "editionSold": 2
+  },
+  {
+    "slug": "pl-6604-10",
+    "referenceNumber": "PL-6604.10",
+    "title": "Untitled,",
+    "titleItalic": "10",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 10 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-10.jpg",
+    "imageAlt": "Film frame 10 from roll 6604",
+    "basePriceCents": 15000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 6
+  },
+  {
+    "slug": "pl-6604-13",
+    "referenceNumber": "PL-6604.13",
+    "title": "Untitled,",
+    "titleItalic": "13",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 13 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-13.jpg",
+    "imageAlt": "Film frame 13 from roll 6604",
+    "basePriceCents": 15500,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 7
+  },
+  {
+    "slug": "pl-6604-16",
+    "referenceNumber": "PL-6604.16",
+    "title": "Untitled,",
+    "titleItalic": "16",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 16 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-16.jpg",
+    "imageAlt": "Film frame 16 from roll 6604",
+    "basePriceCents": 15000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 0
+  },
+  {
+    "slug": "pl-6604-19",
+    "referenceNumber": "PL-6604.19",
+    "title": "Untitled,",
+    "titleItalic": "19",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 19 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-19.jpg",
+    "imageAlt": "Film frame 19 from roll 6604",
+    "basePriceCents": 15000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 1
+  },
+  {
+    "slug": "pl-6604-22",
+    "referenceNumber": "PL-6604.22",
+    "title": "Untitled,",
+    "titleItalic": "22",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 22 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-22.jpg",
+    "imageAlt": "Film frame 22 from roll 6604",
+    "basePriceCents": 15000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 2
+  },
+  {
+    "slug": "pl-6604-25",
+    "referenceNumber": "PL-6604.25",
+    "title": "Untitled,",
+    "titleItalic": "25",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 25 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-25.jpg",
+    "imageAlt": "Film frame 25 from roll 6604",
+    "basePriceCents": 14000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 3
+  },
+  {
+    "slug": "pl-6604-02",
+    "referenceNumber": "PL-6604.02",
+    "title": "Untitled,",
+    "titleItalic": "02",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 02 from the same roll. Made on medium-speed film stock, scanned at high resolution at the Brooklyn lab. Part of an ongoing personal archive.",
+      "Printed on Hahnemühle Photo Rag 308 gsm."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-02.jpg",
+    "imageAlt": "Film frame 02 from roll 6604",
+    "basePriceCents": 16000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 7
+  },
+  {
+    "slug": "pl-6604-05",
+    "referenceNumber": "PL-6604.05",
+    "title": "Untitled,",
+    "titleItalic": "05",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 05. Printed on Canson Baryta for the way it holds the highlights against a bright background."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-05.jpg",
+    "imageAlt": "Film frame 05 from roll 6604",
+    "basePriceCents": 18000,
+    "sizes": [
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 10
   },
   {
     "slug": "pl-6604-08",
@@ -190,15 +515,625 @@
     "imageAlt": "Film frame 08 from roll 6604",
     "basePriceCents": 14500,
     "sizes": [
-      { "id": "8x10", "label": "8 × 10 in", "multiplier": 1 },
-      { "id": "11x14", "label": "11 × 14 in", "multiplier": 1.45 },
-      { "id": "16x20", "label": "16 × 20 in", "multiplier": 2.4 }
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
     ],
     "papers": [
-      { "id": "photo-rag", "name": "Hahnemühle Photo Rag", "surchargeCents": 0 },
-      { "id": "baryta", "name": "Canson Baryta", "surchargeCents": 2000 }
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
     ],
     "editionTotal": 10,
     "editionSold": 4
+  },
+  {
+    "slug": "pl-6604-11",
+    "referenceNumber": "PL-6604.11",
+    "title": "Untitled,",
+    "titleItalic": "11",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 11 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-11.jpg",
+    "imageAlt": "Film frame 11 from roll 6604",
+    "basePriceCents": 14000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 1
+  },
+  {
+    "slug": "pl-6604-14",
+    "referenceNumber": "PL-6604.14",
+    "title": "Untitled,",
+    "titleItalic": "14",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 14 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-14.jpg",
+    "imageAlt": "Film frame 14 from roll 6604",
+    "basePriceCents": 14000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 2
+  },
+  {
+    "slug": "pl-6604-17",
+    "referenceNumber": "PL-6604.17",
+    "title": "Untitled,",
+    "titleItalic": "17",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 17 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-17.jpg",
+    "imageAlt": "Film frame 17 from roll 6604",
+    "basePriceCents": 15500,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 3
+  },
+  {
+    "slug": "pl-6604-20",
+    "referenceNumber": "PL-6604.20",
+    "title": "Untitled,",
+    "titleItalic": "20",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 20 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-20.jpg",
+    "imageAlt": "Film frame 20 from roll 6604",
+    "basePriceCents": 14500,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 4
+  },
+  {
+    "slug": "pl-6604-23",
+    "referenceNumber": "PL-6604.23",
+    "title": "Untitled,",
+    "titleItalic": "23",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 23 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-23.jpg",
+    "imageAlt": "Film frame 23 from roll 6604",
+    "basePriceCents": 14500,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 5
+  },
+  {
+    "slug": "pl-6604-03",
+    "referenceNumber": "PL-6604.03",
+    "title": "Untitled,",
+    "titleItalic": "03",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 03 from the roll. Each print is made to order. We replace prints damaged in transit or with production defects within 14 days of delivery; otherwise all sales are final."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-03.jpg",
+    "imageAlt": "Film frame 03 from roll 6604",
+    "basePriceCents": 15000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      },
+      {
+        "id": "24x30",
+        "label": "24 × 30 in",
+        "multiplier": 3.8
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 1
+  },
+  {
+    "slug": "pl-6604-06",
+    "referenceNumber": "PL-6604.06",
+    "title": "Untitled,",
+    "titleItalic": "06",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 06. This edition is limited to 10 prints. Once the edition is complete it will not be reprinted."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-06.jpg",
+    "imageAlt": "Film frame 06 from roll 6604",
+    "basePriceCents": 22000,
+    "sizes": [
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      },
+      {
+        "id": "24x30",
+        "label": "24 × 30 in",
+        "multiplier": 3.8
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 5
+  },
+  {
+    "slug": "pl-6604-09",
+    "referenceNumber": "PL-6604.09",
+    "title": "Untitled,",
+    "titleItalic": "09",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 09 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-09.jpg",
+    "imageAlt": "Film frame 09 from roll 6604",
+    "basePriceCents": 14500,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 3
+  },
+  {
+    "slug": "pl-6604-12",
+    "referenceNumber": "PL-6604.12",
+    "title": "Untitled,",
+    "titleItalic": "12",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 12 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-12.jpg",
+    "imageAlt": "Film frame 12 from roll 6604",
+    "basePriceCents": 16000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 4
+  },
+  {
+    "slug": "pl-6604-15",
+    "referenceNumber": "PL-6604.15",
+    "title": "Untitled,",
+    "titleItalic": "15",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 15 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-15.jpg",
+    "imageAlt": "Film frame 15 from roll 6604",
+    "basePriceCents": 14500,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 5
+  },
+  {
+    "slug": "pl-6604-18",
+    "referenceNumber": "PL-6604.18",
+    "title": "Untitled,",
+    "titleItalic": "18",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 18 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-18.jpg",
+    "imageAlt": "Film frame 18 from roll 6604",
+    "basePriceCents": 14000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 6
+  },
+  {
+    "slug": "pl-6604-21",
+    "referenceNumber": "PL-6604.21",
+    "title": "Untitled,",
+    "titleItalic": "21",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 21 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-21.jpg",
+    "imageAlt": "Film frame 21 from roll 6604",
+    "basePriceCents": 16000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 7
+  },
+  {
+    "slug": "pl-6604-24",
+    "referenceNumber": "PL-6604.24",
+    "title": "Untitled,",
+    "titleItalic": "24",
+    "subtitle": "From the roll 6604",
+    "year": 2024,
+    "description": [
+      "Frame 24 from the same roll, scanned by PhotoLife in Brooklyn, NY. Printed on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/pl-6604-24.jpg",
+    "imageAlt": "Film frame 24 from roll 6604",
+    "basePriceCents": 15500,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      },
+      {
+        "id": "11x14",
+        "label": "11 × 14 in",
+        "multiplier": 1.45
+      },
+      {
+        "id": "16x20",
+        "label": "16 × 20 in",
+        "multiplier": 2.4
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 2000
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 0
   }
 ]

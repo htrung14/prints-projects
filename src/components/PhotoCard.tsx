@@ -24,7 +24,7 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
           </span>
         ) : null}
       </div>
-      <div className="mt-3 flex items-baseline justify-between gap-3 text-sm">
+      <div className="mt-3 flex items-baseline justify-between gap-3 text-xs">
         <span className="text-ink-strong group-hover:underline">
           {photo.title}
           {photo.titleItalic ? (
@@ -42,7 +42,7 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
         </span>
       </div>
       <div className="mt-1 text-xs text-ink-faint">
-        {photo.referenceNumber} · {photo.year} · Edition of {photo.editionTotal}
+        {photo.year} · Edition of {photo.editionTotal}
       </div>
     </Link>
   );

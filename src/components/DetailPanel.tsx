@@ -5,82 +5,44 @@ import type { Photo } from "@/lib/types";
 export default function DetailPanel({ photo, modal = false }: { photo: Photo; modal?: boolean }) {
   return (
     <article>
-      {/* On the full page, show the panel header with the Close link.
-          In modal mode, the PhotoModal provides a sticky close bar, so
-          skip this redundant header bar. */}
       {!modal ? (
-        <div
-          className="grid items-center gap-6 border-b border-ink-line px-6 py-3 md:px-8"
-          style={{ gridTemplateColumns: "1fr auto 1fr" }}
-        >
-          <span className="justify-self-start text-ink-faint">Project Reference</span>
-          <span className="justify-self-center text-ink-strong">{photo.referenceNumber}</span>
+        <div className="flex items-center justify-end gap-6 border-b border-ink-line px-6 py-3 md:px-8">
           <DetailCloseLink modal={modal} />
         </div>
       ) : null}
 
-      <div className="grid gap-8 px-6 py-8 pb-16 md:px-10 lg:gap-12">
-        {/* Mobile: single-column stack starting with BuyUI (photo + buy form). */}
+      <div className="px-6 py-8 pb-16 md:px-10">
+        {/* Mobile: single-column stack. Photo + BuyUI, then description. */}
         <div className="lg:hidden">
           <BuyUI photo={photo} />
-        </div>
-
-        {/* Desktop: 3-column editorial grid (16% meta / 30% description / buy column). */}
-        <div className="hidden lg:grid lg:grid-cols-[16%_30%_1fr] lg:gap-12">
-          {/* META — small, label-style, left rail */}
-          <aside className="flex flex-col gap-5 text-xs leading-snug">
-            <div>
-              <div className="label-caps mb-1.5 text-ink-faint">Title</div>
-              <div className="text-ink-strong">
-                {photo.title}
-                {photo.titleItalic ? (
-                  <>
-                    {" "}
-                    <em>{photo.titleItalic}</em>
-                  </>
-                ) : null}
-              </div>
-              {photo.subtitle ? <div className="text-ink-faint">{photo.subtitle}</div> : null}
-            </div>
-            <div>
-              <div className="label-caps mb-1.5 text-ink-faint">Medium</div>
-              <div>
-                Archival pigment print
-                <br />
-                Edition of {photo.editionTotal}
-              </div>
-            </div>
-            <div>
-              <div className="label-caps mb-1.5 text-ink-faint">Year</div>
-              <div>{photo.year}</div>
-            </div>
-            <div>
-              <div className="label-caps mb-1.5 text-ink-faint">Reference</div>
-              <div>{photo.referenceNumber}</div>
-            </div>
-          </aside>
-
-          {/* DESCRIPTION — middle column, reading column */}
-          <div className="space-y-4 text-sm leading-relaxed">
+          <div className="mt-10 space-y-4 text-sm leading-relaxed">
             {photo.description.map((para, i) => (
               <p key={i}>{para}</p>
             ))}
           </div>
-
-          {/* BUY — sticky right column */}
-          <div
-            className="self-start lg:sticky"
-            style={{ top: "calc(var(--header-height) + 72px)" }}
-          >
-            <BuyUI photo={photo} />
-          </div>
         </div>
 
-        {/* Mobile: description stacks below BuyUI. */}
-        <div className="space-y-4 text-sm leading-relaxed lg:hidden">
-          {photo.description.map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
+        {/* Desktop P3: 2-col — photo left (60%), buy+description right (40%).
+            Buy is sticky ONLY within its own block. Description is a sibling
+            that flows normally below it. Keeping sticky scoped prevents the
+            description from pinning or dragging when the page scrolls. */}
+        <div className="hidden lg:grid lg:grid-cols-[3fr_2fr] lg:gap-16">
+          <div className="bg-bg-soft p-6">
+            <img
+              src={photo.imageUrl}
+              alt={photo.imageAlt}
+              className="w-full object-contain"
+              style={{ maxHeight: "85vh" }}
+            />
+          </div>
+          <div>
+            <BuyUI photo={photo} showPhoto={false} />
+            <div className="mt-6 space-y-4 text-sm leading-relaxed">
+              {photo.description.map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </article>

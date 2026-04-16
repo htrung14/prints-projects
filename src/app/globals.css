@@ -13,7 +13,13 @@
   --ink-strong: rgba(0, 0, 0, 0.95);
   --ink-line: rgba(0, 0, 0, 0.18);
   --ink-faint: rgba(0, 0, 0, 0.5);
+  --accent: #1529db;
+  --heading-weight: 900;
+  --body-weight: 900;
+  --heading-scale: 1;
+  --section-py-scale: 1;
   --header-height: 60px;
+  --footer-gap: 80px;
 }
 
 @theme inline {
@@ -178,6 +184,41 @@ em {
 }
 .add-to-cart-btn:active:not(:disabled) {
   transform: scale(0.97);
+}
+
+/* Rectangle CTA (variant B): small, filled in --accent.
+   Secondary variant = outlined, same dimensions. Hover just dims opacity.
+   Colors driven by --accent so the dev picker can re-theme live. */
+.btn-ghost {
+  display: inline-block;
+  padding: 10px 22px;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  background-color: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  transition:
+    opacity 140ms ease-out,
+    transform 120ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.btn-ghost.is-secondary {
+  background-color: transparent;
+  color: var(--accent);
+}
+.btn-ghost:hover {
+  opacity: 0.85;
+}
+.btn-ghost.is-secondary:hover {
+  opacity: 0.7;
+}
+.btn-ghost:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.btn-ghost:disabled {
+  border-color: var(--ink-line);
+  color: var(--ink-faint);
+  background-color: transparent;
+  cursor: not-allowed;
 }
 
 /* Catalog card entrance: staggered fade + rise on first paint.

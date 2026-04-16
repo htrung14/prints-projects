@@ -36,9 +36,6 @@ export default function Header() {
       </div>
 
       <div className="flex items-baseline gap-6 justify-self-end">
-        <Link href="/information" className="hidden md:inline">
-          Info
-        </Link>
         <button type="button" onClick={openDrawer} className="text-ink-strong">
           Cart{itemCount > 0 ? ` (${itemCount})` : ""}
         </button>

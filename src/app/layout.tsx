@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import Toast from "@/components/Toast";
+import { Analytics } from "@vercel/analytics/react";
 import { CartProvider } from "@/lib/cart";
 
 const geistSans = Geist({
@@ -41,6 +42,7 @@ export default function RootLayout({ children, modal }: LayoutProps<"/">) {
           <Toast />
           {modal}
         </CartProvider>
+        <Analytics />
       </body>
     </html>
   );

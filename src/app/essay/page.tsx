@@ -59,7 +59,7 @@ export default function EssayPage() {
           provident.
         </p>
 
-        <p className="mt-12 border-t border-ink-line pt-6 text-ink-faint">
+        <p className="mt-12 text-ink-faint">
           Placeholder copy. Real essay text to be provided by the studio.
         </p>
       </div>

@@ -14,24 +14,8 @@ export default function CheckoutPage() {
           prints to a cart, and leave feedback using the button at the bottom right of any page.
         </p>
         <div className="flex flex-wrap gap-3 pt-2">
-          <Link
-            href="/"
-            className="inline-block px-5 py-3 hover:opacity-90"
-            style={{
-              fontSize: "1rem",
-              letterSpacing: "0.01em",
-              backgroundColor: "var(--ink-strong)",
-              color: "var(--bg)",
-            }}
-          >
-            Back to catalog →
-          </Link>
-          <Link
-            href="/information"
-            className="inline-block border border-ink px-5 py-3 hover:opacity-70"
-            style={{ fontSize: "1rem", color: "var(--ink-strong)" }}
-          >
-            Information
+          <Link href="/" className="btn-ghost">
+            Back to editions →
           </Link>
         </div>
       </div>

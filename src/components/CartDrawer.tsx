@@ -132,19 +132,9 @@ export default function CartDrawer() {
           <Link
             href="/checkout"
             onClick={closeDrawer}
-            className={`block py-3 text-center transition-opacity ${
-              lines.length === 0 ? "pointer-events-none border border-ink-line" : "hover:opacity-90"
+            className={`btn-ghost block w-full text-center ${
+              lines.length === 0 ? "pointer-events-none opacity-50" : ""
             }`}
-            style={
-              lines.length === 0
-                ? { fontSize: "1rem", letterSpacing: "0.01em", color: "var(--ink-faint)" }
-                : {
-                    fontSize: "1rem",
-                    letterSpacing: "0.01em",
-                    backgroundColor: "var(--ink-strong)",
-                    color: "var(--bg)",
-                  }
-            }
           >
             {lines.length === 0 ? "Checkout" : "Checkout →"}
           </Link>
