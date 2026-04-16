@@ -6,6 +6,18 @@ System design and decisions live in [`docs/system-design.md`](docs/system-design
 Visual reference: [468414.cargo.site](https://468414.cargo.site/) (Thalia Bassim, At-Tamassok template).
 Buy UI mockup (vanilla HTML/JS, source of truth for pricing math): [`docs/mockups/buy-ui-mockup.html`](docs/mockups/buy-ui-mockup.html).
 
+## Current state
+
+**Last updated: 2026-04-16**
+
+Phase 0 static shell is design-locked. Accent color `#1529DB`, footer F2 (80px gap), product detail P3 layout, 25 interleaved photos, Vercel Analytics wired. Pastel feedback batch A+B complete, `/terms` route live, ghost-button CTAs locked.
+
+Backend architecture is locked. Schema, order flow, print-shop hand-off (token-gated fulfillment), admin roles, and shipping-zone model all captured in the plan file: `/Users/haivotrung/.claude/plans/adaptive-hopping-snowglobe.md`. MemPalace drawer: `mempalace search "prints-projects master state"`.
+
+Printer-facing mocks (`/dispatch-mock`, `/dispatch-batch-mock`, `/coa-mock`), archival spec block in BuyUI, and remaining Brooklyn/"signed" copy strip live on the `stakeholder-preview` branch pending review. Not yet merged to `main`.
+
+See [`docs/system-design.md` Section 15](docs/system-design.md) for the 2026-04-15/16 update summary.
+
 ## Stack
 
 - Next.js 16 (App Router)
@@ -85,3 +97,9 @@ The demo ships with multiple ways for a stakeholder to leave comments on the liv
 ## Next phases
 
 See [`docs/system-design.md` Section 11](docs/system-design.md) for the full build phase plan. Phase 0 is the work in this README.
+
+## Stakeholder review
+
+Active decision poll on Notion: <https://www.notion.so/344d02ec20c080e79873eafdb2459a23>
+
+Preview deployment lives on the `stakeholder-preview` branch of this repo (do not merge without sign-off). Main deploys to `prints-projects.vercel.app`.
