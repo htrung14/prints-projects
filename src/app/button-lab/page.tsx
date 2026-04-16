@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import PreviewBanner from "@/components/PreviewBanner";
 import { getAllPhotos } from "@/lib/photos";
 
 const MUTED_BLUE = "#2a4d8f";
@@ -351,12 +351,11 @@ const VARIANTS: VariantDef[] = [
 ];
 
 export default function ButtonLab() {
-  if (process.env.NODE_ENV === "production") notFound();
-
   const photos = getAllPhotos().slice(0, 3);
 
   return (
     <div>
+      <PreviewBanner />
       <style>{`
         .ghost-fill:hover { background-color: ${MUTED_BLUE} !important; color: #fff !important; }
       `}</style>

@@ -22,7 +22,7 @@ const notoNaskhArabic = Noto_Naskh_Arabic({
 
 export const metadata: Metadata = {
   title: "Prints — demo",
-  description: "A Brooklyn, NY photographer's print shop. Demo build.",
+  description: "A photographer's print shop. Demo build.",
 };
 
 export default function RootLayout({ children, modal }: LayoutProps<"/">) {

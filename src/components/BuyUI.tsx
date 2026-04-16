@@ -147,6 +147,30 @@ export default function BuyUI({ photo, showPhoto = true }: { photo: Photo; showP
           ) : null}
         </div>
 
+        {/* Archival specs — trust-signal block, matches Magnum / Todd Hido
+            pattern. Terse, dry, paired with the purchase CTA. */}
+        <dl
+          className="grid gap-x-6 gap-y-1 border-t border-ink-line pt-4 text-xs"
+          style={{ gridTemplateColumns: "auto 1fr" }}
+        >
+          <dt className="label-caps text-ink-faint">Paper</dt>
+          <dd className="text-ink-strong" style={{ fontSize: "0.75rem" }}>
+            Hahnemühle Photo Rag Baryta · 308 gsm · gloss
+          </dd>
+          <dt className="label-caps text-ink-faint">Ink</dt>
+          <dd className="text-ink-strong" style={{ fontSize: "0.75rem" }}>
+            Archival pigment, acid-free, lignin-free
+          </dd>
+          <dt className="label-caps text-ink-faint">Lifespan</dt>
+          <dd className="text-ink-strong" style={{ fontSize: "0.75rem" }}>
+            100+ years lightfast · 200+ years dark storage
+          </dd>
+          <dt className="label-caps text-ink-faint">Authenticity</dt>
+          <dd className="text-ink-strong" style={{ fontSize: "0.75rem" }}>
+            Numbered verso · certificate of authenticity included
+          </dd>
+        </dl>
+
         <button
           type="button"
           disabled={soldOut}
@@ -181,8 +205,8 @@ export default function BuyUI({ photo, showPhoto = true }: { photo: Photo; showP
           <dd className="text-right text-ink-strong">Damage and defect only</dd>
         </dl>
         <p className="mt-5 text-ink-faint" style={{ fontSize: "0.875rem" }}>
-          Made to order in Brooklyn, NY. We replace prints damaged in transit or with production
-          defects within 14 days of delivery.
+          Made to order. We replace prints damaged in transit or with production defects within 14
+          days of delivery.
         </p>
       </details>
     </section>

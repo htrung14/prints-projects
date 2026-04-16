@@ -1,12 +1,12 @@
-import { notFound } from "next/navigation";
+import PreviewBanner from "@/components/PreviewBanner";
 import { getAllPhotos } from "@/lib/photos";
 
 export default function ProductLab() {
-  if (process.env.NODE_ENV === "production") notFound();
   const photo = getAllPhotos()[0];
 
   return (
     <div>
+      <PreviewBanner />
       <div className="border-b border-ink-line bg-bg-soft px-6 py-6 md:px-10">
         <div className="label-caps mb-2">Dev only · Product page lab</div>
         <h1 className="text-ink-strong" style={{ fontSize: "1.5rem", lineHeight: 1.2 }}>

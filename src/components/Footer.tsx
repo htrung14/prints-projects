@@ -25,7 +25,6 @@ export default function Footer() {
         <Link href="/terms#returns">Returns</Link>
         <Link href="/terms#terms">Terms</Link>
         <Link href="/terms#privacy">Privacy</Link>
-        <span style={{ opacity: 0.6 }}>Brooklyn, NY</span>
       </div>
     </footer>
   );

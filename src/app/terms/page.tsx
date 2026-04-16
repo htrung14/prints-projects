@@ -42,16 +42,15 @@ export default function TermsPage() {
             cart contains two or more prints of any sizes.
           </p>
           <p>
-            <strong>International shipping.</strong> Worldwide dispatch from Brooklyn, NY via USPS
-            International or DHL. Customs declarations use HS code 4911.91 (printed pictures,
-            designs, photographs). International customers are responsible for any VAT, GST, or
-            import duties collected by the destination country on delivery; these fees are not
-            collected at checkout.
+            <strong>International shipping.</strong> Worldwide dispatch via USPS International or
+            DHL. Customs declarations use HS code 4911.91 (printed pictures, designs, photographs).
+            International customers are responsible for any VAT, GST, or import duties collected by
+            the destination country on delivery; these fees are not collected at checkout.
           </p>
           <p>
-            <strong>Local pickup (Brooklyn, NY only).</strong> Customers in Brooklyn may select
-            local pickup at checkout. The pickup address and window are provided in the order
-            confirmation email and on the order status page after payment.
+            <strong>Local pickup.</strong> Local pickup may be available at checkout. The pickup
+            address and window are provided in the order confirmation email and on the order status
+            page after payment.
           </p>
           <p>
             <strong>Free shipping thresholds and flat rates.</strong>{" "}
