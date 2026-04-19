@@ -27,13 +27,13 @@ export default function BuyUI({ photo }: { photo: Photo }) {
 
   const ctaRef = useRef<HTMLButtonElement>(null);
   const [showSticky, setShowSticky] = useState(false);
-  // In-place add acknowledgement — flips true for ~1.6s after click so both
+  // In-place add acknowledgement - flips true for ~1.6s after click so both
   // the main CTA and the mobile sticky bar briefly render as "Added ✓".
   // The bottom Toast still fires via cart.addedAt; this is the direct-contact
   // confirmation for users whose eyes are on the button, not the viewport.
   const [justAdded, setJustAdded] = useState(false);
 
-  // Resolve the locked size — the fixture may not have 16x20 for every
+  // Resolve the locked size - the fixture may not have 16x20 for every
   // photo, so fall back to the first declared size rather than erroring.
   const lockedSize = photo.sizes.find((s) => s.id === FIXED_SIZE_ID) ?? photo.sizes[0];
   const sizeId = lockedSize.id;
@@ -45,7 +45,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
   const toggleDisc = (key: DiscKey) => setOpen((o) => ({ ...o, [key]: !o[key] }));
   const closeDisc = (key: DiscKey) => setOpen((o) => ({ ...o, [key]: false }));
 
-  // Sticky bar — show when the main CTA is out of viewport AND the related
+  // Sticky bar - show when the main CTA is out of viewport AND the related
   // section is NOT yet in viewport. Same dual IntersectionObserver as prototype.
   useEffect(() => {
     const cta = ctaRef.current;
@@ -149,7 +149,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         </span>
       </h1>
 
-      {/* Static size meta — placeholder, one size per print (TBD) */}
+      {/* Static size meta - placeholder, one size per print (TBD) */}
       <p
         className="font-mono"
         style={{
@@ -163,18 +163,15 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         Size · {FIXED_SIZE_LABEL}
       </p>
 
-      <p
-        style={{
-          fontSize: 17,
-          color: "var(--ink)",
-          letterSpacing: "0.02em",
-          marginBottom: 40,
-        }}
-      >
-        {formatUsd(currentPrice)} USD
-      </p>
+      {/* Desktop: the headline price lives on the Add-to-Cart CTA below, so
+          we don't repeat it here. On the narrow mobile sticky bar the title
+          is echoed with its own price so the button can stay compact. */}
+      <div style={{ marginBottom: 32 }} aria-hidden />
 
-      {/* Paper disclosure — price meta on each option mirrors the size-list pattern */}
+      {/* Paper disclosure - each option shows the surcharge delta ("+ $20")
+          rather than the full resolved line price. The base paper shows
+          "Included" so the zero-surcharge state reads as intentional, not as
+          missing data. Selected state uses a row highlight instead of a dot. */}
       <Disclosure
         label="Paper"
         value={currentPaper?.name ?? "Select"}
@@ -182,7 +179,10 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         onToggle={() => toggleDisc("paper")}
       >
         {photo.papers.map((p) => {
-          const perPaperPrice = priceCents(photo, sizeId, p.id);
+          // Surcharge in cents - 0 for the base paper. Display a sign so the
+          // delta is legible at a glance ("+ $20") without doing math.
+          const surcharge = p.surchargeCents;
+          const deltaLabel = surcharge === 0 ? "Included" : `+ ${formatUsd(surcharge)}`;
           return (
             <button
               key={p.id}
@@ -195,13 +195,13 @@ export default function BuyUI({ photo }: { photo: Photo }) {
               }}
             >
               {p.name}
-              <span className="opt-meta">{formatUsd(perPaperPrice)}</span>
+              <span className="opt-meta">{deltaLabel}</span>
             </button>
           );
         })}
       </Disclosure>
 
-      {/* CTA — the shipping/edition copy lives in the Shipping & returns
+      {/* CTA - the shipping/edition copy lives in the Shipping & returns
           disclosure below, so we don't duplicate it as a caps-mono preamble
           above the button. */}
       <div className="mt-7 mb-3.5">
@@ -244,8 +244,9 @@ export default function BuyUI({ photo }: { photo: Photo }) {
       >
         <div style={{ fontSize: 16, lineHeight: 1.65, color: "var(--ink)", maxWidth: "58ch" }}>
           <p>
-            Ships flat in an archival tube within 7 working days via insured courier, worldwide. No
-            returns — a replacement can be arranged if the package arrives damaged or unsealed.
+            Ships flat in an archival tube within 7 working days via insured courier, worldwide. A
+            replacement can be arranged if the package arrives damaged or with the seal broken -
+            just email a photo of the outer tube and the print within 48 hours of delivery.
           </p>
         </div>
       </Disclosure>
@@ -260,7 +261,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         </div>
       </Disclosure>
 
-      {/* Mobile sticky bar — hides when cart drawer is open so it doesn't
+      {/* Mobile sticky bar - hides when cart drawer is open so it doesn't
           sit on top of the drawer's primary CTA. */}
       <div
         className="fixed inset-x-0 bottom-0 z-[80] grid grid-cols-[1fr_auto] items-center gap-[18px] border-t border-ink-line bg-bg lg:hidden"

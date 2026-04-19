@@ -96,8 +96,11 @@ export default function CartDrawer() {
                     alt={photo.imageAlt}
                     className="h-20 w-20 object-cover"
                   />
-                  <div className="flex flex-1 flex-col text-xs leading-snug">
-                    <span className="font-serif italic text-ink-strong">
+                  <div className="flex flex-1 flex-col gap-[3px] leading-snug">
+                    <span
+                      className="font-serif italic text-ink-strong"
+                      style={{ fontSize: 15, fontWeight: 500 }}
+                    >
                       {photo.title}
                       {photo.titleItalic ? (
                         <>
@@ -106,20 +109,30 @@ export default function CartDrawer() {
                         </>
                       ) : null}
                     </span>
-                    <span className="text-[11px] font-light tracking-[0.02em] text-ink-faint">
+                    <span
+                      className="tracking-[0.01em] text-ink"
+                      style={{ fontSize: 12, fontWeight: 400 }}
+                    >
                       {size?.label} · {paper?.name}
                     </span>
-                    <span className="text-[11px] font-light tracking-[0.02em] text-ink-faint">
+                    <span
+                      className="tracking-[0.01em] text-ink-faint"
+                      style={{ fontSize: 12, fontWeight: 400 }}
+                    >
                       Qty {line.quantity}
                     </span>
                     <button
                       onClick={() => remove(i)}
-                      className="mt-1 self-start text-ink-faint underline"
+                      className="mt-1 self-start text-ink underline"
+                      style={{ fontSize: 12, fontWeight: 400 }}
                     >
                       Remove
                     </button>
                   </div>
-                  <span className="font-mono text-ink-strong">
+                  <span
+                    className="font-mono text-ink"
+                    style={{ fontSize: 13, fontWeight: 500, fontVariantNumeric: "tabular-nums" }}
+                  >
                     {formatUsd(linePrice * line.quantity)}
                   </span>
                 </li>
@@ -130,15 +143,29 @@ export default function CartDrawer() {
 
         <div className="mt-4 border-t border-ink-line pt-4">
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-[12px] font-light tracking-[0.04em]">Subtotal</span>
+            <span
+              className="tracking-[0.04em]"
+              style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}
+            >
+              Subtotal
+            </span>
             <span
               className="font-mono"
-              style={{ fontSize: 17, color: "var(--ink)", letterSpacing: "0.02em" }}
+              style={{
+                fontSize: 17,
+                fontWeight: 500,
+                color: "var(--ink)",
+                letterSpacing: "0.02em",
+                fontVariantNumeric: "tabular-nums",
+              }}
             >
               {formatUsd(subtotalCents)}
             </span>
           </div>
-          <p className="mb-3 text-[11px] font-light text-ink-faint">
+          <p
+            className="mb-3 text-ink-faint"
+            style={{ fontSize: 12, fontWeight: 400, lineHeight: 1.5 }}
+          >
             Shipping calculated at checkout. Free US shipping on 2 prints or more.
           </p>
           <Link

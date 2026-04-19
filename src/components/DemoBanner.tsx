@@ -1,6 +1,6 @@
 /**
  * Thin notice strip at the very top of the page. Signals to stakeholders
- * reviewing the preview that this is a demo — no real payments, no real orders.
+ * reviewing the preview that this is a demo - no real payments, no real orders.
  *
  * Remove this component (and its mount in `src/app/layout.tsx`) before the
  * site accepts real payments.

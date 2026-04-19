@@ -114,8 +114,7 @@ export default function RelatedPrints({ current, all }: { current: Photo; all: P
           padding-bottom: 8px;
           scroll-snap-type: x mandatory;
           scrollbar-width: none;
-          /* Let cells align to the container's visual left edge cleanly —
-             no inner padding on cells, so the first item doesn't render as
+          /* Let cells align to the container's visual left edge cleanly - no inner padding on cells, so the first item doesn't render as
              a thin sliver on scroll-reset. */
         }
         .related-rail::-webkit-scrollbar { display: none; }

@@ -46,7 +46,12 @@ export default function LandingHero({ lead }: { lead: Photo }) {
       });
 
       const cA = p < 0.38 ? 1 : p > 0.78 ? 0 : 1 - (p - 0.38) / 0.4;
-      const cY = p > 0.38 ? ((p - 0.38) / 0.4) * -9 : 0;
+      // Desktop visual lift: shift the whole composition up a touch so the
+      // image + surrounding labels feel centered in the viewport rather than
+      // sitting low. lbl-bc (View Prints) compensates with a matching +3vh
+      // translate so it stays pinned near the bottom of the fold.
+      const baseLift = -3;
+      const cY = baseLift + (p > 0.38 ? ((p - 0.38) / 0.4) * -9 : 0);
       comp.style.opacity = String(cA);
       comp.style.transform = `translateY(${cY}vh)`;
 
@@ -117,7 +122,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
               <img
                 src={lead.imageUrl}
                 alt={lead.imageAlt}
-                className="hero-frame-img block object-cover"
+                className="hero-frame-img img-protected block object-cover"
               />
             </div>
           </div>
@@ -155,15 +160,31 @@ export default function LandingHero({ lead }: { lead: Photo }) {
             </Link>
           </div>
 
-          {/* BC: VIEW PRINTS */}
+          {/* BC: VIEW PRINTS - smooth-scroll to the prints grid rather than
+              jumping. Handler intercepts the native anchor jump, computes the
+              target offset, and animates with prefers-reduced-motion respect. */}
           <div
             ref={setLblRef(3)}
             className="lbl-bc absolute text-center"
-            style={{ bottom: 0, left: "50%", transform: "translateX(-50%)" }}
+            style={{ bottom: 0, left: "50%", transform: "translate(-50%, 3vh)" }}
           >
             <Link
               href="#prints"
-              className="inline-block transition-opacity hover:opacity-50"
+              onClick={(e) => {
+                const target = document.getElementById("prints");
+                if (!target) return;
+                e.preventDefault();
+                const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+                const top = target.getBoundingClientRect().top + window.scrollY - 16;
+                window.scrollTo({
+                  top,
+                  behavior: reduceMotion ? "auto" : "smooth",
+                });
+                // Update the URL hash without a second jump so back-forward
+                // still lands on the prints section.
+                history.replaceState(null, "", "#prints");
+              }}
+              className="view-prints-link inline-block"
               style={{
                 fontSize: 13,
                 fontWeight: 500,
@@ -180,6 +201,29 @@ export default function LandingHero({ lead }: { lead: Photo }) {
 
       {/* Mobile override: static stack, left-aligned to Arabic header */}
       <style jsx>{`
+        /* Press animation - tactile scale-down on :active, paired with a soft
+           translate on the ↓ arrow so the button feels like a nudge toward the
+           print grid below. transition covers hover (opacity) and press
+           (transform) on the same element. */
+        .view-prints-link {
+          transition:
+            opacity 200ms ease,
+            transform 140ms cubic-bezier(0.22, 0.61, 0.36, 1);
+          will-change: transform;
+        }
+        .view-prints-link:hover {
+          opacity: 0.5;
+        }
+        .view-prints-link:active {
+          transform: scale(0.94) translateY(1px);
+          opacity: 0.85;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .view-prints-link,
+          .view-prints-link:active {
+            transform: none;
+          }
+        }
         .hero-frame-img {
           width: min(400px, 45vh);
           height: calc(min(400px, 45vh) * 1.25);

@@ -33,7 +33,7 @@ export default function FooterLab() {
         </nav>
       </div>
 
-      <Shell id="f1" title="F1 · Current (minimal — Contact column + copyright)" photos={photos}>
+      <Shell id="f1" title="F1 · Current (minimal - Contact column + copyright)" photos={photos}>
         <FooterF1 />
       </Shell>
 
@@ -170,7 +170,7 @@ function Shell({
 }
 
 /* ------------------------------------------------------------------ */
-/* F1 — Current minimal                                                */
+/* F1 - Current minimal                                                */
 /* ------------------------------------------------------------------ */
 function FooterF1() {
   return (
@@ -205,7 +205,7 @@ function FooterF1() {
 }
 
 /* ------------------------------------------------------------------ */
-/* F2 — Single horizontal row                                          */
+/* F2 - Single horizontal row                                          */
 /* ------------------------------------------------------------------ */
 function FooterF2() {
   return (
@@ -229,7 +229,7 @@ function FooterF2() {
 }
 
 /* ------------------------------------------------------------------ */
-/* F3 — Loose-Joints split panel                                       */
+/* F3 - Loose-Joints split panel                                       */
 /* ------------------------------------------------------------------ */
 function FooterF3() {
   return (
@@ -244,7 +244,7 @@ function FooterF3() {
       }}
     >
       <div className="grid gap-10 md:grid-cols-2">
-        {/* LEFT — identity + address */}
+        {/* LEFT - identity + address */}
         <div className="space-y-5">
           <div>
             <div className="text-ink-strong" style={{ fontSize: "18px", letterSpacing: "-0.01em" }}>
@@ -253,14 +253,14 @@ function FooterF3() {
             <div style={{ opacity: 0.7 }}>Photographer, Brooklyn, NY</div>
           </div>
           <div className="border-t pt-5" style={{ borderColor: "var(--accent)", opacity: 0.9 }}>
-            <div style={{ opacity: 0.6 }}>Studio · Brooklyn, NY</div>
+            <div style={{ opacity: 0.6 }}>Brooklyn, NY</div>
             <div>By appointment</div>
           </div>
         </div>
-        {/* RIGHT — contact rows */}
+        {/* RIGHT - contact rows */}
         <div className="space-y-2">
           {[
-            ["General", "studio@example.com"],
+            ["General", "hello@example.com"],
             ["Press", "press@example.com"],
             ["Sales", "sales@example.com"],
           ].map(([label, value]) => (
@@ -300,7 +300,7 @@ function FooterF3() {
 }
 
 /* ------------------------------------------------------------------ */
-/* F4 — Cargo one-liner                                                */
+/* F4 - Cargo one-liner                                                */
 /* ------------------------------------------------------------------ */
 function FooterF4() {
   return (
@@ -324,7 +324,7 @@ function FooterF4() {
 }
 
 /* ------------------------------------------------------------------ */
-/* F5 — Big name type                                                  */
+/* F5 - Big name type                                                  */
 /* ------------------------------------------------------------------ */
 function FooterF5() {
   return (
@@ -366,7 +366,7 @@ function FooterF5() {
 }
 
 /* ------------------------------------------------------------------ */
-/* F6 — 3-column editorial                                             */
+/* F6 - 3-column editorial                                             */
 /* ------------------------------------------------------------------ */
 function FooterF6() {
   return (
@@ -429,7 +429,7 @@ function FooterF6() {
 }
 
 /* ------------------------------------------------------------------ */
-/* F7 — Boxed soft panel                                               */
+/* F7 - Boxed soft panel                                               */
 /* ------------------------------------------------------------------ */
 function FooterF7() {
   return (

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  Design tokens — editorial refinement.
+  Design tokens - editorial refinement.
   Three voices: Favorit (commerce), EB Garamond (art), Geist Mono (data).
   Warm palette inspired by Lemaire's #fdfbf9/#100a0d.
 */
@@ -16,7 +16,7 @@
   --ink-faint: rgba(12, 11, 10, 0.52);
   --ink-line: rgba(12, 11, 10, 0.12);
 
-  /* Prototype tier aliases — use these in new components. */
+  /* Prototype tier aliases - use these in new components. */
   --i8: rgba(12, 11, 10, 0.92);
   --i5: rgba(12, 11, 10, 0.7);
   --i3: rgba(12, 11, 10, 0.52);
@@ -102,6 +102,34 @@
   font-display: swap;
 }
 
+/* Latin-Extended fallback. The Favorit woff2 files are subset to basic Latin
+   only, so glyphs like `ü` (U+00FC) in "Hahnemühle" drop to the system font
+   with mismatched metrics and make a visible jump mid-word. Declaring these
+   code points under the "Favorit" family with a size-adjusted local fallback
+   keeps the baseline, weight and x-height stable across the glyph break.
+   Helvetica Neue is the closest-matched system face on macOS; Arial is the
+   Windows/Linux fallback. size-adjust is tuned to Favorit's x-height. */
+@font-face {
+  font-family: "Favorit";
+  src: local("Helvetica Neue"), local("HelveticaNeue"), local("Arial"), local("sans-serif");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 96%;
+  unicode-range: U+0100-017F, U+0180-024F, U+1E00-1EFF, U+2070-209F, U+20A0-20CF, U+00A0-00FF;
+}
+@font-face {
+  font-family: "Favorit";
+  src:
+    local("Helvetica Neue Italic"), local("HelveticaNeue-Italic"), local("Arial Italic"),
+    local("sans-serif");
+  font-weight: 300 700;
+  font-style: italic;
+  font-display: swap;
+  size-adjust: 96%;
+  unicode-range: U+0100-017F, U+0180-024F, U+1E00-1EFF, U+2070-209F, U+20A0-20CF, U+00A0-00FF;
+}
+
 html,
 body {
   margin: 0;
@@ -109,7 +137,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: "Favorit", var(--font-sans);
-  /* 400 rather than 300 — the light cut was reading too thin against the
+  /* 400 rather than 300 - the light cut was reading too thin against the
      warm-paper background, especially at 14px body size. Book (400) keeps
      the editorial texture without looking washed out. */
   font-weight: 400;
@@ -318,12 +346,42 @@ em {
   font-family: var(--font-serif);
 }
 
+/* ─── Preview-only image protection ──────────────────────────
+   Soft lock on product imagery: block drag-to-desktop, long-press save, and
+   right-click save-image. Anyone technical can still DOM-inspect the file,
+   but the friction stops casual screenshot-and-go. Pairs with the 2000px q70
+   preview bitmaps in /public/images/catalog - the file you *can* pull is too
+   small for a decent print anyway.
+
+   Note: user-select:none kills copy-as-image on some browsers; the
+   oncontextmenu block is applied via onContextMenu in the JSX so this class
+   just owns the CSS-reachable defences. */
+.img-protected {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  /* Pointer-events:none would block interaction - instead we block only
+     the default image download affordances via drag + callout above. */
+}
+
 /* ─── Double-rule mat (gallery frame) ────────────────────────── */
+/* max-width:100% + box-sizing:border-box keeps the frame from pushing past
+   its parent column on desktop when the image's natural width exceeds the
+   available space. Pair with min-width:0 on the grid column so the column
+   doesn't auto-expand to the image's intrinsic width. */
 .mat-o {
   border: 1px solid var(--rule);
   padding: 20px; /* overridden on mobile to 14px */
   background: var(--bg);
   width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
   display: inline-block;
 }
 .mat-i {
@@ -331,6 +389,11 @@ em {
   overflow: hidden;
   line-height: 0;
   display: block;
+  max-width: 100%;
+}
+.mat-i > img {
+  max-width: 100%;
+  height: auto;
 }
 @media (max-width: 700px) {
   .mat-o {
@@ -452,16 +515,21 @@ em {
 }
 .disc-opt[aria-pressed="true"] {
   color: var(--ink);
+  /* Selected row - warm translucent ink wash handles the "selected" state
+     on its own; no dot marker. Row gets a pulled-in horizontal padding so
+     the highlight reads as a band that spans the full disclosure width. */
+  background: rgba(12, 11, 10, 0.055);
+  padding-left: 12px;
+  padding-right: 12px;
+  margin: 0 -12px;
+  width: calc(100% + 24px);
 }
-.disc-opt[aria-pressed="true"]::before {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  background: var(--ink);
-  border-radius: 50%;
-  margin-right: 10px;
-  transform: translateY(-2px);
+.disc-opt[aria-pressed="true"] .opt-meta {
+  color: var(--ink);
+  font-weight: 500;
+}
+.disc-opt[aria-pressed="true"]:hover {
+  padding-left: 12px;
 }
 .disc-opt[disabled] {
   color: var(--i3);
@@ -536,8 +604,7 @@ em {
 }
 
 /* ─── Essay page ──────────────────────────────────────────────
-   Scoped utilities for /essay. Typography-first, no new colours —
-   everything resolves to existing --ink / --i8 / --i5 / --i3 / --rule.
+   Scoped utilities for /essay. Typography-first, no new colours - everything resolves to existing --ink / --i8 / --i5 / --i3 / --rule.
 */
 .essay-root {
   color: var(--ink);
@@ -618,7 +685,7 @@ em {
   padding: clamp(56px, 10vw, 120px) 24px clamp(80px, 10vw, 144px);
 }
 
-/* Optical measure — body text sits at a readable line-length. */
+/* Optical measure - body text sits at a readable line-length. */
 .essay-measure {
   max-width: clamp(58ch, 70vw, 65ch);
   margin: 0 auto;
@@ -691,7 +758,7 @@ em {
   opacity: 0.55;
 }
 
-/* Pull quote — serif italic, larger, offset by a left rule. */
+/* Pull quote - serif italic, larger, offset by a left rule. */
 .essay-pull {
   max-width: clamp(48ch, 60vw, 58ch);
   margin: clamp(56px, 8vw, 96px) auto;
@@ -710,7 +777,7 @@ em {
   text-wrap: balance;
 }
 
-/* Signature block — italic name + meta */
+/* Signature block - italic name + meta */
 .essay-sig {
   max-width: clamp(58ch, 70vw, 65ch);
   margin: clamp(72px, 10vw, 112px) auto 0;
@@ -750,7 +817,7 @@ em {
   opacity: 0.55;
 }
 
-/* Mobile — tighten padding while keeping hierarchy intact. */
+/* Mobile - tighten padding while keeping hierarchy intact. */
 @media (max-width: 640px) {
   .essay-mast {
     padding: 56px 20px 40px;

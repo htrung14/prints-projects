@@ -152,7 +152,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (target.paperId === paperId) return;
       const swapped: CartLine = { ...target, paperId };
       // Check if an existing line at a different index already has this
-      // exact variant — if so, merge quantities; otherwise replace in place.
+      // exact variant - if so, merge quantities; otherwise replace in place.
       const collision = current.findIndex(
         (l, i) =>
           i !== index &&

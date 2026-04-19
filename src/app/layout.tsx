@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { EB_Garamond, Geist_Mono, Noto_Naskh_Arabic } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import DemoBanner from "@/components/DemoBanner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import Toast from "@/components/Toast";
+import ImageProtect from "@/components/ImageProtect";
 import { Analytics } from "@vercel/analytics/react";
 import { CartProvider } from "@/lib/cart";
 
@@ -43,7 +43,7 @@ const notoNaskhArabic = Noto_Naskh_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "At-Tamassok — Thalia Bassim",
+  title: "At-Tamassok - Thalia Bassim",
   description: "Twenty-five archival pigment prints. Limited editions.",
 };
 
@@ -55,14 +55,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-full">
         <CartProvider>
+          {/* DemoBanner now lives only on the checkout page so the rest of
+              the site (landing, product detail, essay) can be reviewed as it
+              will be seen in production, without the preview nag. */}
           <div className="app-shell flex min-h-screen flex-col">
-            <DemoBanner />
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
           <CartDrawer />
           <Toast />
+          <ImageProtect />
         </CartProvider>
         <Analytics />
       </body>

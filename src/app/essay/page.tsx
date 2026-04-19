@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "At-Tamassok — Essay — Thalia Bassim",
+  title: "At-Tamassok - Essay - Thalia Bassim",
   description:
     "A written accompaniment to At-Tamassok, twenty-five photographs from a single 35mm roll.",
 };
@@ -17,7 +17,7 @@ export default function EssayPage() {
             className="label-caps essay-kicker"
             style={{ color: "var(--i5)", letterSpacing: "0.12em" }}
           >
-            Essay · PL-6604
+            Essay · At-Tamassok
           </span>
 
           <h1 className="essay-title" style={{ margin: 0 }}>
@@ -36,11 +36,11 @@ export default function EssayPage() {
             </div>
             <div>
               <dt>Filed</dt>
-              <dd>Brooklyn · late afternoon, 2025</dd>
+              <dd>Late afternoon · 2025</dd>
             </div>
             <div>
               <dt>Frames</dt>
-              <dd>25 of 36 · single roll · 35mm</dd>
+              <dd>From the At-Tamassok series · 35mm</dd>
             </div>
           </dl>
         </div>
@@ -51,25 +51,25 @@ export default function EssayPage() {
         <section className="essay-measure">
           <p className="drop-cap essay-lede">
             I began with a single roll of film and the feeling that the afternoon would not wait for
-            me. It was the kind of light that announces its own going — low, amber, falling across
+            me. It was the kind of light that announces its own going - low, amber, falling across
             the kitchen tile in the way light does only for an hour, maybe less. I loaded the camera
             on the countertop, forgot to check the frame counter, and went looking for whatever was
             already in the room.
           </p>
 
           <p>
-            The roll was labelled PL-6604 when it came back from PhotoLife in Brooklyn. The number
-            is theirs, not mine — a lab sticker, the kind that outlives the negative and starts to
-            feel, eventually, like a small gift of authorship you didn&rsquo;t ask for. Of the
-            thirty-six exposures the roll allows, twenty-five are here. The rest were a door, a
-            shadow I mistook for a hand, and a frame where my thumb had wandered into the lens. I
+            The roll came back from the lab with a sticker on the canister - a number that was
+            theirs, not mine, the kind that outlives the negative and starts to feel, eventually,
+            like a small gift of authorship you didn&rsquo;t ask for. Of the thirty-six exposures
+            the roll allows, the series that follows is what remains. The rest were a door, a shadow
+            I mistook for a hand, and a frame where my thumb had wandered into the lens. I
             don&rsquo;t miss them.
           </p>
 
           <p>
             What the Arabic word <span lang="ar">التمسّك</span> does, more than translate, is
             insist. It is the noun form of a verb that means, at once, to hold on and to refuse to
-            let go — a holding that has already begun to suspect it will be asked to stop. English
+            let go - a holding that has already begun to suspect it will be asked to stop. English
             gives me
             <em> clinging</em>, which is too anxious, or <em>adherence</em>, which is too legal. The
             truth is somewhere between the two, and closer to the hand than either.
@@ -88,7 +88,7 @@ export default function EssayPage() {
           </h2>
 
           <p>
-            A roll of 35mm film has a shape — not metaphorically, a literal shape. Thirty-six
+            A roll of 35mm film has a shape - not metaphorically, a literal shape. Thirty-six
             frames, usually a little more if the loader is generous, a little less if it
             isn&rsquo;t. You cannot add to it partway through. You cannot revise a frame after the
             shutter has closed. Whatever arrives on the negative arrived in the room, at the moment,
@@ -99,7 +99,7 @@ export default function EssayPage() {
             Digital teaches the opposite lesson. It teaches that an image is a draft, that the
             shutter is a suggestion, that what you saw can be corrected into what you wish you had
             seen. I have nothing against that practice; I use it often. But there is a different
-            kind of attention that comes from knowing the count is finite — that this frame costs
+            kind of attention that comes from knowing the count is finite - that this frame costs
             one thirty-sixth of an afternoon, and that if the light moves before I&rsquo;m ready I
             will not get it back.
           </p>
@@ -130,7 +130,7 @@ export default function EssayPage() {
           <p>
             The pictures were made across what I&rsquo;d guess was ninety minutes, though I did not
             time them. I know this because the shadows travel across the kitchen floor in a legible
-            way from the first frame to the last — a slow diagonal, then a sudden thinning, then the
+            way from the first frame to the last - a slow diagonal, then a sudden thinning, then the
             moment when the sun clears the building across the street and the room goes flat. You
             can watch the series in order and feel the hour passing. That was not a plan. It is
             simply what the afternoon did while I was in it.
@@ -145,8 +145,8 @@ export default function EssayPage() {
           </p>
 
           <p>
-            What I will say is that the series is the hour, not the objects in it. The clinging —
-            التمسّك — is the hour&rsquo;s, not mine. I was the one with the camera, but the hour was
+            What I will say is that the series is the hour, not the objects in it. The clinging -
+            التمسّك - is the hour&rsquo;s, not mine. I was the one with the camera, but the hour was
             the one doing the refusing to end.
           </p>
         </section>
@@ -163,11 +163,11 @@ export default function EssayPage() {
           </h2>
 
           <p>
-            PhotoLife scanned the roll on a Noritsu, as they do every roll that passes through their
-            small storefront on Flushing Avenue. The scans came back warm — a little pink in the
-            highlights, a gentle green in the shadows of two or three frames where the light had
-            started to go. I have not corrected any of that. What you are seeing on the prints is
-            the lab&rsquo;s scan, cropped for the frame edge and otherwise left alone.
+            The lab scanned the roll on a Noritsu, as they do every roll that passes through their
+            shop. The scans came back warm - a little pink in the highlights, a gentle green in the
+            shadows of two or three frames where the light had started to go. I have not corrected
+            any of that. What you are seeing on the prints is the lab&rsquo;s scan, cropped for the
+            frame edge and otherwise left alone.
           </p>
 
           <p>
@@ -196,7 +196,7 @@ export default function EssayPage() {
             When I made the decision to release the series as prints rather than as a book or a
             screen-based edit, I was thinking about surface. A print on paper has weight; it refuses
             to scroll. You live with it in a room, at a specific wall, under whatever light that
-            wall happens to get in the afternoon. The print enters a duration of its own — yours,
+            wall happens to get in the afternoon. The print enters a duration of its own - yours,
             now, not mine.
           </p>
 
@@ -209,7 +209,7 @@ export default function EssayPage() {
           </p>
 
           <p>
-            If there is a thesis here — and I&rsquo;m reluctant to give the work one — it is that
+            If there is a thesis here - and I&rsquo;m reluctant to give the work one - it is that
             holding on is not the same as preserving. Preservation is a freezing. Holding on is a
             practice that happens in time. The prints are my way of extending the hour long enough
             to look at it, and then letting it go again when you take one home.
@@ -219,7 +219,7 @@ export default function EssayPage() {
         {/* Signature block */}
         <footer className="essay-sig">
           <p className="essay-sig-name font-serif italic">Thalia Bassim</p>
-          <p className="essay-sig-meta">Brooklyn, 2025</p>
+          <p className="essay-sig-meta">Late afternoon, 2025</p>
         </footer>
 
         {/* Quiet CTA back to prints */}

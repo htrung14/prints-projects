@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions — Thalia Bassim",
+  title: "Terms & Conditions - Thalia Bassim",
   description: "Shipping, returns, terms of sale, privacy, and legal information.",
 };
 
@@ -42,16 +42,10 @@ export default function TermsPage() {
             cart contains two or more prints of any sizes.
           </p>
           <p>
-            <strong>International shipping.</strong> Worldwide dispatch from Brooklyn, NY via USPS
-            International or DHL. Customs declarations use HS code 4911.91 (printed pictures,
-            designs, photographs). International customers are responsible for any VAT, GST, or
-            import duties collected by the destination country on delivery; these fees are not
-            collected at checkout.
-          </p>
-          <p>
-            <strong>Local pickup (Brooklyn, NY only).</strong> Customers in Brooklyn may select
-            local pickup at checkout. The pickup address and window are provided in the order
-            confirmation email and on the order status page after payment.
+            <strong>International shipping.</strong> Worldwide dispatch via USPS International or
+            DHL. Customs declarations use HS code 4911.91 (printed pictures, designs, photographs).
+            International customers are responsible for any VAT, GST, or import duties collected by
+            the destination country on delivery; these fees are not collected at checkout.
           </p>
           <p>
             <strong>Free shipping thresholds and flat rates.</strong>{" "}
@@ -139,9 +133,9 @@ export default function TermsPage() {
 
         <Section id="imprint" n={5} heading="Legal Notice">
           <p>
-            Studio legal name: <Tbd label="studio legal name" />
+            Legal name: <Tbd label="legal name" />
             <br />
-            Registered address: <Tbd label="registered studio address" />
+            Registered address: <Tbd label="registered address" />
             <br />
             Contact email: <Tbd label="support email" />
           </p>

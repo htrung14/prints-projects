@@ -198,7 +198,7 @@ function Description({ photo }: { photo: Photo }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* P1 — Stacked single column                                          */
+/* P1 - Stacked single column                                          */
 /* ------------------------------------------------------------------ */
 function P1({ photo }: { photo: Photo }) {
   return (
@@ -227,7 +227,7 @@ function P1({ photo }: { photo: Photo }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* P2 — Photo dominant, buy floats                                     */
+/* P2 - Photo dominant, buy floats                                     */
 /* ------------------------------------------------------------------ */
 function P2({ photo }: { photo: Photo }) {
   return (
@@ -251,7 +251,7 @@ function P2({ photo }: { photo: Photo }) {
         </div>
       </div>
 
-      {/* Floating buy card — bottom right, sticky within section */}
+      {/* Floating buy card - bottom right, sticky within section */}
       <div
         className="sticky bottom-6 ml-auto mt-10 w-full max-w-sm border border-ink bg-bg p-5 shadow-lg"
         style={{ boxShadow: "0 12px 32px -12px rgba(0,0,0,0.18)" }}
@@ -277,7 +277,7 @@ function P2({ photo }: { photo: Photo }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* P3 — Gallery-left, info-right                                       */
+/* P3 - Gallery-left, info-right                                       */
 /* ------------------------------------------------------------------ */
 function P3({ photo }: { photo: Photo }) {
   return (
@@ -308,7 +308,7 @@ function P3({ photo }: { photo: Photo }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* P4 — Film-strip top, buy inline                                     */
+/* P4 - Film-strip top, buy inline                                     */
 /* ------------------------------------------------------------------ */
 function P4({ photo }: { photo: Photo }) {
   return (
@@ -347,12 +347,12 @@ function P4({ photo }: { photo: Photo }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* P5 — Two-pane sticky photo, scrolling info                          */
+/* P5 - Two-pane sticky photo, scrolling info                          */
 /* ------------------------------------------------------------------ */
 function P5({ photo }: { photo: Photo }) {
   return (
     <div className="grid md:grid-cols-2">
-      {/* Photo pane — sticky to viewport */}
+      {/* Photo pane - sticky to viewport */}
       <div
         className="md:sticky md:self-start"
         style={{
@@ -385,7 +385,7 @@ function P5({ photo }: { photo: Photo }) {
           <p className="label-caps">More detail</p>
           <p>
             Prints are made to order on archival pigment paper with a 1 inch border for handling.
-            Edition of ten pooled across all sizes and papers — once ten prints have sold in any
+            Edition of ten pooled across all sizes and papers - once ten prints have sold in any
             combination, the edition is closed.
           </p>
           <p>

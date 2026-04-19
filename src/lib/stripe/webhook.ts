@@ -1,0 +1,316 @@
+/**
+ * Stripe webhook event dispatcher.
+ *
+ * Server-only. Called from `POST /api/webhooks/stripe/route.ts` after
+ * signature verification. This module contains *all* the post-payment logic
+ * (persist order, assign editions, dispatch emails, audit). Keeping it out
+ * of the route file makes it unit-testable and keeps the route thin.
+ *
+ * Reliability rules (design doc §7):
+ *   - Return 200 fast. Stripe retries up to 3 days on non-2xx.
+ *   - Idempotency by the unique `stripe_checkout_session_id` constraint on
+ *     `orders`. A duplicate event is a no-op (logged + 200).
+ *   - Email/audit failures are swallowed (logged) - NEVER fail the webhook.
+ *   - Re-resolve prices from the photo catalog. Don't trust Stripe's echoed
+ *     `unit_amount` - defence in depth.
+ */
+
+import "server-only";
+import type Stripe from "stripe";
+import type { Address, CartLine, Order, OrderItem } from "@/lib/types";
+import { resolveCartLines } from "./checkout";
+import { insertOrderWithItems } from "@/lib/supabase/queries/orders";
+import { audit } from "@/lib/supabase/queries/audit";
+import {
+  sendOrderConfirmation,
+  sendPrintJobEmail,
+  schedulePostPurchaseSequence,
+} from "@/lib/email/send";
+import { buildDispatchUrl } from "@/lib/dispatch/url";
+
+// ---------------------------------------------------------------------------
+// Metadata shape
+// ---------------------------------------------------------------------------
+
+/**
+ * Parse the cart that was stashed in session metadata at checkout creation.
+ * Throws on malformed payloads so we don't silently succeed with a partial
+ * order. (A failed parse surfaces via the webhook's 500 → Stripe retries.)
+ */
+function parseCartLinesFromMetadata(metadata: Stripe.Metadata | null | undefined): CartLine[] {
+  const raw = metadata?.cart_lines_json;
+  if (typeof raw !== "string" || raw.length === 0) {
+    throw new Error("webhook: session.metadata.cart_lines_json missing or empty");
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(`webhook: cart_lines_json is not valid JSON: ${(err as Error).message}`);
+  }
+
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error("webhook: cart_lines_json did not decode to a non-empty array");
+  }
+
+  return parsed.map((line, idx) => {
+    if (typeof line !== "object" || line === null) {
+      throw new Error(`webhook: cart_lines_json[${idx}] is not an object`);
+    }
+    const rec = line as Record<string, unknown>;
+    const slug = rec.photoSlug;
+    const sizeId = rec.sizeId;
+    const paperId = rec.paperId;
+    const quantity = rec.quantity;
+    if (
+      typeof slug !== "string" ||
+      typeof sizeId !== "string" ||
+      typeof paperId !== "string" ||
+      typeof quantity !== "number" ||
+      !Number.isInteger(quantity) ||
+      quantity <= 0
+    ) {
+      throw new Error(`webhook: cart_lines_json[${idx}] shape mismatch`);
+    }
+    return {
+      photoSlug: slug,
+      sizeId,
+      // The CartLine type widens paperId to PaperType; runtime we trust the
+      // slug lookup in resolveCartLines to reject unknown papers.
+      paperId: paperId as CartLine["paperId"],
+      quantity,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Address extraction
+// ---------------------------------------------------------------------------
+
+/**
+ * Pull the canonical shipping address off the completed session.
+ *
+ * Stripe populates `collected_information.shipping_details` on session
+ * completion. Falls back to `customer_details.address` (billing) if the
+ * shipping collection ever lands empty (shouldn't with `required`).
+ */
+function extractShippingAddress(session: Stripe.Checkout.Session): Address {
+  const ship = session.collected_information?.shipping_details;
+  const cust = session.customer_details;
+
+  const name = ship?.name ?? cust?.name ?? cust?.individual_name ?? "Unknown";
+  const addr = ship?.address ?? cust?.address ?? null;
+
+  if (!addr) {
+    throw new Error("webhook: session has no shipping or billing address");
+  }
+  if (typeof addr.line1 !== "string" || addr.line1.length === 0) {
+    throw new Error("webhook: shipping address missing line1");
+  }
+  if (typeof addr.city !== "string" || addr.city.length === 0) {
+    throw new Error("webhook: shipping address missing city");
+  }
+  if (typeof addr.postal_code !== "string" || addr.postal_code.length === 0) {
+    throw new Error("webhook: shipping address missing postal_code");
+  }
+  if (typeof addr.country !== "string" || addr.country.length === 0) {
+    throw new Error("webhook: shipping address missing country");
+  }
+
+  return {
+    name,
+    line1: addr.line1,
+    line2: addr.line2 ?? null,
+    city: addr.city,
+    state: addr.state ?? null,
+    postalCode: addr.postal_code,
+    country: addr.country,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Payment intent extraction
+// ---------------------------------------------------------------------------
+
+function extractPaymentIntentId(session: Stripe.Checkout.Session): string | null {
+  const pi = session.payment_intent;
+  if (!pi) return null;
+  if (typeof pi === "string") return pi;
+  return pi.id ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Core: handle `checkout.session.completed`
+// ---------------------------------------------------------------------------
+
+/**
+ * Persist the order, notify Rob + the customer, schedule the post-purchase
+ * drip sequence, and audit-log. Idempotent on
+ * `stripe_checkout_session_id`.
+ *
+ * All email/audit failures are logged and swallowed. The only hard-failure
+ * branches are:
+ *   - Malformed session metadata (webhook lacks the cart - can't rebuild)
+ *   - Missing shipping address (Stripe misconfiguration)
+ *   - Unknown photo/size/paper (catalog drift between checkout and fulfil)
+ *   - Supabase RPC raising (e.g. edition sold out). Track A's RPC raises
+ *     with a prefixed code; upstream logs and returns 500 → Stripe retries.
+ */
+export async function handleCheckoutSessionCompleted(
+  session: Stripe.Checkout.Session
+): Promise<{ order: Order; items: OrderItem[] } | { idempotent: true }> {
+  // ---- 1. Rebuild cart + re-price defensively ----
+  const cartLines = parseCartLinesFromMetadata(session.metadata);
+  const resolved = await resolveCartLines(cartLines);
+
+  // ---- 2. Gather session-level fields ----
+  const address = extractShippingAddress(session);
+  const email =
+    session.customer_details?.email ?? session.customer_email ?? "unknown@example.invalid";
+  const name =
+    session.customer_details?.name ?? session.customer_details?.individual_name ?? address.name;
+
+  const subtotalCents = resolved.reduce((n, r) => n + r.unitPriceCents * r.line.quantity, 0);
+  const taxCents = session.total_details?.amount_tax ?? 0;
+  const shippingCents = session.total_details?.amount_shipping ?? 0;
+  const totalCents = session.amount_total ?? subtotalCents + taxCents + shippingCents;
+  const currency = session.currency ?? "usd";
+
+  // ---- 3. Insert order + items (atomic edition assignment) ----
+  let inserted: { order: Order; items: OrderItem[] };
+  try {
+    inserted = await insertOrderWithItems({
+      stripeSessionId: session.id,
+      stripePaymentIntentId: extractPaymentIntentId(session),
+      customerEmail: email,
+      customerName: name,
+      shippingAddress: address,
+      subtotalCents,
+      taxCents,
+      shippingCents,
+      totalCents,
+      currency,
+      items: resolved.map((r) => ({
+        // Track A's InsertOrderArgs requires photoId + denormalized snapshot
+        // fields so order_items rows survive catalog edits.
+        photoId: r.photo.id ?? "",
+        photoSlug: r.photo.slug,
+        photoTitle: r.photo.title,
+        sizeId: r.line.sizeId,
+        sizeLabel: r.sizeLabel,
+        paperId: r.line.paperId,
+        paperName: r.paperName,
+        quantity: r.line.quantity,
+        unitPriceCents: r.unitPriceCents,
+      })),
+    });
+  } catch (err) {
+    const msg = (err as Error).message ?? String(err);
+
+    // Idempotency: the unique constraint on stripe_checkout_session_id will
+    // surface as a Postgres "duplicate key" error. Stripe retries (e.g. if
+    // our 200 was lost) should return 200 cleanly.
+    if (/duplicate key|unique constraint|already exists/i.test(msg)) {
+      console.info(
+        `webhook: duplicate checkout.session.completed for ${session.id} - idempotent no-op`
+      );
+      return { idempotent: true };
+    }
+
+    // Anything else (edition exhausted, bad payload, RPC error) bubbles up
+    // so the route returns 500 and Stripe retries.
+    throw err;
+  }
+
+  const { order, items } = inserted;
+
+  // ---- 4. Build the dispatch URL once; Track C's template embeds it. ----
+  //
+  // We compute it here so the URL lifetime starts at paid time, and so we
+  // don't re-sign on every retry. The email sender accepts `order` and
+  // `items` per the Track C interface; the dispatch URL is derivable from
+  // `order.id`, which Track C will re-derive. We also attach it to the
+  // audit trail so ops can recover the exact URL later.
+  let dispatchUrl: string | null = null;
+  try {
+    dispatchUrl = buildDispatchUrl(order.id, { kind: "single" });
+  } catch (err) {
+    // buildDispatchUrl may throw if DISPATCH_SIGNING_SECRET is unset. Don't
+    // block the webhook on it - Rob can reissue from admin later.
+    console.error(`webhook(${order.id}): buildDispatchUrl failed: ${(err as Error).message}`);
+  }
+
+  // ---- 5. Emails + scheduled sequence ----
+  //
+  // "If sending email fails, log, but return 200 to Stripe." Each call is
+  // isolated in its own try/catch so one failure doesn't skip the rest.
+  await runSafely("sendOrderConfirmation", () => sendOrderConfirmation(order, items), order.id);
+  // Only send the print-job email if the dispatch URL was built successfully - // Track C's signature requires a non-null URL. If we don't have one, log
+  // and skip; admin can resend once DISPATCH_SIGNING_SECRET is configured.
+  if (dispatchUrl) {
+    const url = dispatchUrl;
+    await runSafely("sendPrintJobEmail", () => sendPrintJobEmail(order, items, url), order.id);
+  } else {
+    console.error(`webhook(${order.id}): skipping print-job email; dispatch URL unavailable`);
+  }
+  await runSafely(
+    "schedulePostPurchaseSequence",
+    () => schedulePostPurchaseSequence(order),
+    order.id
+  );
+
+  // ---- 6. Audit log ----
+  await runSafely(
+    "audit(paid)",
+    () =>
+      audit({
+        orderId: order.id,
+        actor: "stripe_webhook",
+        action: "paid",
+        meta: {
+          stripeCheckoutSessionId: session.id,
+          stripePaymentIntentId: order.stripePaymentIntentId,
+          totalCents,
+          taxCents,
+          shippingCents,
+          currency,
+          dispatchUrl,
+        },
+      }),
+    order.id
+  );
+
+  return { order, items };
+}
+
+/**
+ * Run a side-effect that must not fail the webhook. Logs + swallows.
+ */
+async function runSafely(label: string, fn: () => Promise<void>, orderId: string): Promise<void> {
+  try {
+    await fn();
+  } catch (err) {
+    console.error(`webhook(${orderId}): ${label} failed: ${(err as Error).message ?? String(err)}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Top-level dispatcher - route calls this after signature verification.
+// ---------------------------------------------------------------------------
+
+export async function dispatchWebhookEvent(event: Stripe.Event): Promise<void> {
+  switch (event.type) {
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      await handleCheckoutSessionCompleted(session);
+      return;
+    }
+    // Intentionally a no-op for everything else. Returning 200 for unknown
+    // types is the Stripe-recommended pattern (docs: "Return a 200 response
+    // to acknowledge receipt of the event").
+    default:
+      console.info(`webhook: ignoring event type ${event.type}`);
+      return;
+  }
+}

@@ -20,6 +20,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Site-extracted design references live here — third-party snippets we
+    // study for inspiration, not files we ship or maintain. No point linting
+    // their generated tailwind configs.
+    "design-extract-output/**",
   ]),
 ]);
 

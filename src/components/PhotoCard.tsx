@@ -17,7 +17,7 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
         <img
           src={photo.imageUrl}
           alt={photo.imageAlt}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-[640ms] group-hover:scale-[1.015]"
+          className="img-protected absolute inset-0 h-full w-full object-cover transition-transform duration-[640ms] group-hover:scale-[1.015]"
           style={{ transitionTimingFunction: "cubic-bezier(.2,.6,.2,1)" }}
           loading="lazy"
         />
@@ -37,17 +37,15 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
         {photo.title}
         {photo.titleItalic ? <> {photo.titleItalic}</> : null}
       </span>
+      {/* Edition count removed from card - every print is an edition of 10,
+          so repeating it across the grid is noise. The edition meta lives on
+          the product detail page (Shipping & returns disclosure) and in the
+          footer strap. */}
       <span
         className="block font-mono"
-        style={{ fontSize: 15, fontWeight: 400, color: "var(--ink)", marginBottom: 4 }}
+        style={{ fontSize: 15, fontWeight: 400, color: "var(--ink)" }}
       >
         From {formatUsd(photo.basePriceCents)}
-      </span>
-      <span
-        className="block font-mono"
-        style={{ fontSize: 14, fontWeight: 400, color: "var(--i8)" }}
-      >
-        Edition of {photo.editionTotal}
       </span>
     </Link>
   );
