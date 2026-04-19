@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import DetailPanel from "@/components/DetailPanel";
+import RelatedPrints from "@/components/RelatedPrints";
 import { getAllPhotos, getPhotoBySlug } from "@/lib/photos";
 
 export function generateStaticParams() {
@@ -10,5 +11,11 @@ export default async function PhotoPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const photo = getPhotoBySlug(slug);
   if (!photo) notFound();
-  return <DetailPanel photo={photo} />;
+  const all = getAllPhotos();
+  return (
+    <>
+      <DetailPanel photo={photo} />
+      <RelatedPrints current={photo} all={all} />
+    </>
+  );
 }
