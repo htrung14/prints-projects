@@ -9,7 +9,7 @@ import type { PaperType, Photo } from "@/lib/types";
 type DiscKey = "paper" | "size" | "description" | "shipping" | "care";
 
 export default function BuyUI({ photo }: { photo: Photo }) {
-  const { add, itemCount } = useCart();
+  const { add } = useCart();
   const [sizeId, setSizeId] = useState<string | null>(null);
   const [paperId, setPaperId] = useState<PaperType>(photo.papers[0].id);
   const [qty] = useState(1);
@@ -207,14 +207,6 @@ export default function BuyUI({ photo }: { photo: Photo }) {
           Ships within 7 days · Worldwide
           {soldOut ? " · Sold out" : ` · ${remaining} remaining`}
         </p>
-        {itemCount === 0 && sizeId && !soldOut ? (
-          <p
-            className="font-serif italic"
-            style={{ fontSize: 13, color: "var(--i5)", marginBottom: 14 }}
-          >
-            Add a second print for free US shipping.
-          </p>
-        ) : null}
         <button
           ref={ctaRef}
           type="button"
@@ -307,8 +299,6 @@ export default function BuyUI({ photo }: { photo: Photo }) {
           {sizeId ? "Add to cart" : "Select size"}
         </button>
       </div>
-
-      {itemCount > 0 ? null : null /* kept for future "free shipping" nudge */}
     </section>
   );
 }
