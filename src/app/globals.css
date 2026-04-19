@@ -508,3 +508,26 @@ em {
   font-size: 13px;
   text-transform: none;
 }
+
+/* Post-click add acknowledgement. The label flips to "Added to cart ✓" for
+   ~1.6s; we collapse the price column so the layout doesn't shift, and warm
+   the background just slightly so the state feels alive without shouting. */
+.btn-ink[data-added="true"] {
+  grid-template-columns: 1fr;
+  background: #1a1815;
+  animation: btn-ink-pulse 420ms ease-out;
+}
+.btn-ink[data-added="true"] .btn-ink-price {
+  display: none;
+}
+@keyframes btn-ink-pulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.015);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

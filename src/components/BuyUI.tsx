@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
-import { editionRemaining, formatUsd, isSoldOut, priceCents } from "@/lib/pricing";
+import { formatUsd, isSoldOut, priceCents } from "@/lib/pricing";
 import type { PaperType, Photo } from "@/lib/types";
 
 type DiscKey = "paper" | "description" | "shipping" | "care";
@@ -27,13 +27,17 @@ export default function BuyUI({ photo }: { photo: Photo }) {
 
   const ctaRef = useRef<HTMLButtonElement>(null);
   const [showSticky, setShowSticky] = useState(false);
+  // In-place add acknowledgement — flips true for ~1.6s after click so both
+  // the main CTA and the mobile sticky bar briefly render as "Added ✓".
+  // The bottom Toast still fires via cart.addedAt; this is the direct-contact
+  // confirmation for users whose eyes are on the button, not the viewport.
+  const [justAdded, setJustAdded] = useState(false);
 
   // Resolve the locked size — the fixture may not have 16x20 for every
   // photo, so fall back to the first declared size rather than erroring.
   const lockedSize = photo.sizes.find((s) => s.id === FIXED_SIZE_ID) ?? photo.sizes[0];
   const sizeId = lockedSize.id;
 
-  const remaining = editionRemaining(photo);
   const soldOut = isSoldOut(photo);
   const currentPrice = priceCents(photo, sizeId, paperId);
   const currentPaper = photo.papers.find((p) => p.id === paperId);
@@ -81,7 +85,16 @@ export default function BuyUI({ photo }: { photo: Photo }) {
   const handleAdd = () => {
     if (soldOut) return;
     add({ photoSlug: photo.slug, sizeId, paperId, quantity: qty });
+    setJustAdded(true);
   };
+
+  // Clear the "Added ✓" state after a short delay so the CTA returns to its
+  // normal label. Keyed on justAdded so repeated clicks restart the timer.
+  useEffect(() => {
+    if (!justAdded) return;
+    const t = window.setTimeout(() => setJustAdded(false), 1600);
+    return () => window.clearTimeout(t);
+  }, [justAdded]);
 
   return (
     <section className="flex flex-col self-start">
@@ -188,29 +201,21 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         })}
       </Disclosure>
 
-      {/* Delivery copy + CTA */}
+      {/* CTA — the shipping/edition copy lives in the Shipping & returns
+          disclosure below, so we don't duplicate it as a caps-mono preamble
+          above the button. */}
       <div className="mt-7 mb-3.5">
-        <p
-          className="font-mono mb-2"
-          style={{
-            fontSize: 12,
-            color: "var(--i5)",
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-          }}
-        >
-          Ships within 7 days · Worldwide
-          {soldOut ? " · Sold out" : ` · ${remaining} remaining`}
-        </p>
         <button
           ref={ctaRef}
           type="button"
           className="btn-ink"
+          data-added={justAdded ? "true" : "false"}
           disabled={soldOut}
           onClick={handleAdd}
+          aria-live="polite"
         >
-          <span>{soldOut ? "Edition closed" : "Add to cart"}</span>
-          <span className="btn-ink-price">{formatUsd(currentPrice)}</span>
+          <span>{soldOut ? "Edition closed" : justAdded ? "Added to cart ✓" : "Add to cart"}</span>
+          <span className="btn-ink-price">{justAdded ? "" : formatUsd(currentPrice)}</span>
         </button>
       </div>
 
@@ -287,10 +292,12 @@ export default function BuyUI({ photo }: { photo: Photo }) {
           type="button"
           className="btn-ink"
           style={{ width: "auto", padding: "16px 22px", gridTemplateColumns: "auto" }}
+          data-added={justAdded ? "true" : "false"}
           disabled={soldOut}
           onClick={handleAdd}
+          aria-live="polite"
         >
-          {soldOut ? "Sold out" : "Add to cart"}
+          {soldOut ? "Sold out" : justAdded ? "Added ✓" : "Add to cart"}
         </button>
       </div>
     </section>

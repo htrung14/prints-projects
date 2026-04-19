@@ -179,13 +179,21 @@ function CheckoutLine({
   const paper = photo.papers.find((p) => p.id === line.paperId);
   const lineUnit = priceCents(photo, line.sizeId, line.paperId);
 
-  // Paper upsell — offer the next more-expensive paper on this photo, if any.
+  // Paper change chips — show both directions when available:
+  //   upgrade   → next more-expensive paper (adds cost)
+  //   downgrade → next cheaper paper (subtracts cost; lets user undo an
+  //               earlier upsell click without hunting through disclosures)
   const currentPaperCents = paper?.surchargeCents ?? 0;
   const upgrade: PaperOption | null =
     photo.papers
       .filter((p) => p.surchargeCents > currentPaperCents)
       .sort((a, b) => a.surchargeCents - b.surchargeCents)[0] ?? null;
+  const downgrade: PaperOption | null =
+    photo.papers
+      .filter((p) => p.surchargeCents < currentPaperCents)
+      .sort((a, b) => b.surchargeCents - a.surchargeCents)[0] ?? null;
   const upgradeDeltaPerUnit = upgrade ? upgrade.surchargeCents - currentPaperCents : 0;
+  const downgradeDeltaPerUnit = downgrade ? currentPaperCents - downgrade.surchargeCents : 0;
 
   return (
     <li className="flex flex-col gap-3 py-5">
@@ -237,6 +245,20 @@ function CheckoutLine({
           >
             Upgrade to {upgrade.name}
             <span className="upsell-delta">+{formatUsd(upgradeDeltaPerUnit * line.quantity)}</span>
+          </button>
+        ) : null}
+        {downgrade ? (
+          <button
+            type="button"
+            onClick={() => onUpgrade(downgrade.id)}
+            disabled={disabled}
+            className="upsell-chip upsell-chip--revert"
+            title={`Switch this print to ${downgrade.name}`}
+          >
+            Revert to {downgrade.name}
+            <span className="upsell-delta">
+              −{formatUsd(downgradeDeltaPerUnit * line.quantity)}
+            </span>
           </button>
         ) : null}
       </div>
