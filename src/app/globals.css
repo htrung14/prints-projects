@@ -418,8 +418,8 @@ em {
   border: 0;
   background: transparent;
   width: 100%;
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  justify-content: space-between;
   align-items: baseline;
   gap: 18px;
   padding: 14px 0;

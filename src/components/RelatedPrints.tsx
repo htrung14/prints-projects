@@ -112,7 +112,7 @@ export default function RelatedPrints({ current, all }: { current: Photo; all: P
               className="block font-mono"
               style={{ fontSize: 13, color: "var(--i5)", letterSpacing: "0.02em" }}
             >
-              From {formatUsd(p.basePriceCents)} · Edition of {p.editionTotal}
+              From {formatUsd(p.basePriceCents)}
             </span>
           </Link>
         ))}

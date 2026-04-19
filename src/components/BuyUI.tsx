@@ -6,16 +6,20 @@ import { useCart } from "@/lib/cart";
 import { editionRemaining, formatUsd, isSoldOut, priceCents } from "@/lib/pricing";
 import type { PaperType, Photo } from "@/lib/types";
 
-type DiscKey = "paper" | "size" | "description" | "shipping" | "care";
+type DiscKey = "paper" | "description" | "shipping" | "care";
+
+// Placeholder: each print is a single size. Stakeholder to confirm.
+// Falls back to the first fixture size if the expected id is absent so
+// cart/Stripe flow keeps working while the size is finalized.
+const FIXED_SIZE_ID = "16x20";
+const FIXED_SIZE_LABEL = "16 × 20 in";
 
 export default function BuyUI({ photo }: { photo: Photo }) {
   const { add } = useCart();
-  const [sizeId, setSizeId] = useState<string | null>(null);
   const [paperId, setPaperId] = useState<PaperType>(photo.papers[0].id);
   const [qty] = useState(1);
   const [open, setOpen] = useState<Record<DiscKey, boolean>>({
     paper: false,
-    size: false,
     description: false,
     shipping: false,
     care: false,
@@ -24,11 +28,14 @@ export default function BuyUI({ photo }: { photo: Photo }) {
   const ctaRef = useRef<HTMLButtonElement>(null);
   const [showSticky, setShowSticky] = useState(false);
 
+  // Resolve the locked size — the fixture may not have 16x20 for every
+  // photo, so fall back to the first declared size rather than erroring.
+  const lockedSize = photo.sizes.find((s) => s.id === FIXED_SIZE_ID) ?? photo.sizes[0];
+  const sizeId = lockedSize.id;
+
   const remaining = editionRemaining(photo);
   const soldOut = isSoldOut(photo);
-  const fromPrice = priceCents(photo, photo.sizes[0].id, paperId);
-  const currentPrice = sizeId ? priceCents(photo, sizeId, paperId) : fromPrice;
-  const currentSize = sizeId ? photo.sizes.find((s) => s.id === sizeId) : null;
+  const currentPrice = priceCents(photo, sizeId, paperId);
   const currentPaper = photo.papers.find((p) => p.id === paperId);
 
   const toggleDisc = (key: DiscKey) => setOpen((o) => ({ ...o, [key]: !o[key] }));
@@ -72,7 +79,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
   }, []);
 
   const handleAdd = () => {
-    if (!sizeId || soldOut) return;
+    if (soldOut) return;
     add({ photoSlug: photo.slug, sizeId, paperId, quantity: qty });
   };
 
@@ -129,6 +136,20 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         </span>
       </h1>
 
+      {/* Static size meta — placeholder, one size per print (TBD) */}
+      <p
+        className="font-mono"
+        style={{
+          fontSize: 12,
+          color: "var(--i5)",
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          marginBottom: 12,
+        }}
+      >
+        Size · {FIXED_SIZE_LABEL}
+      </p>
+
       <p
         style={{
           fontSize: 17,
@@ -137,57 +158,31 @@ export default function BuyUI({ photo }: { photo: Photo }) {
           marginBottom: 40,
         }}
       >
-        {sizeId ? formatUsd(currentPrice) : `From ${formatUsd(fromPrice)}`} USD
+        {formatUsd(currentPrice)} USD
       </p>
 
-      {/* Paper disclosure */}
+      {/* Paper disclosure — price meta on each option mirrors the size-list pattern */}
       <Disclosure
         label="Paper"
         value={currentPaper?.name ?? "Select"}
         open={open.paper}
         onToggle={() => toggleDisc("paper")}
       >
-        {photo.papers.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            className="disc-opt"
-            aria-pressed={paperId === p.id}
-            onClick={() => {
-              setPaperId(p.id);
-              closeDisc("paper");
-            }}
-          >
-            {p.name}
-            <span className="opt-meta">
-              {p.surchargeCents ? `+${formatUsd(p.surchargeCents)}` : "Matte cotton"}
-            </span>
-          </button>
-        ))}
-      </Disclosure>
-
-      {/* Size disclosure */}
-      <Disclosure
-        label="Size"
-        value={currentSize?.label ?? "Select a size"}
-        open={open.size}
-        onToggle={() => toggleDisc("size")}
-      >
-        {photo.sizes.map((s) => {
-          const p = priceCents(photo, s.id, paperId);
+        {photo.papers.map((p) => {
+          const perPaperPrice = priceCents(photo, sizeId, p.id);
           return (
             <button
-              key={s.id}
+              key={p.id}
               type="button"
               className="disc-opt"
-              aria-pressed={sizeId === s.id}
+              aria-pressed={paperId === p.id}
               onClick={() => {
-                setSizeId(s.id);
-                closeDisc("size");
+                setPaperId(p.id);
+                closeDisc("paper");
               }}
             >
-              {s.label}
-              <span className="opt-meta">{formatUsd(p)}</span>
+              {p.name}
+              <span className="opt-meta">{formatUsd(perPaperPrice)}</span>
             </button>
           );
         })}
@@ -211,13 +206,11 @@ export default function BuyUI({ photo }: { photo: Photo }) {
           ref={ctaRef}
           type="button"
           className="btn-ink"
-          disabled={!sizeId || soldOut}
+          disabled={soldOut}
           onClick={handleAdd}
         >
-          <span>{soldOut ? "Edition closed" : sizeId ? "Add to cart" : "Select a size"}</span>
-          <span className="btn-ink-price">
-            {sizeId ? formatUsd(currentPrice) : `From ${formatUsd(fromPrice)}`}
-          </span>
+          <span>{soldOut ? "Edition closed" : "Add to cart"}</span>
+          <span className="btn-ink-price">{formatUsd(currentPrice)}</span>
         </button>
       </div>
 
@@ -286,17 +279,17 @@ export default function BuyUI({ photo }: { photo: Photo }) {
             {photo.titleItalic ? ` ${photo.titleItalic}` : ""}
           </span>
           <span className="block font-mono" style={{ fontSize: 13, color: "var(--ink)" }}>
-            {sizeId ? formatUsd(currentPrice) : `From ${formatUsd(fromPrice)}`}
+            {formatUsd(currentPrice)}
           </span>
         </div>
         <button
           type="button"
           className="btn-ink"
           style={{ width: "auto", padding: "16px 22px", gridTemplateColumns: "auto" }}
-          disabled={!sizeId || soldOut}
+          disabled={soldOut}
           onClick={handleAdd}
         >
-          {sizeId ? "Add to cart" : "Select size"}
+          {soldOut ? "Sold out" : "Add to cart"}
         </button>
       </div>
     </section>
