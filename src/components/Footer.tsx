@@ -3,29 +3,36 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer
-      className="px-6 md:px-10"
+      className="flex flex-col gap-[18px] border-t border-ink-line px-5 py-9 md:px-11 md:pb-10"
       style={{
-        fontSize: "var(--footer-size, 12px)",
-        fontWeight: "var(--footer-weight, 400)" as unknown as number,
-        lineHeight: 1.6,
-        color: "var(--accent)",
-        paddingTop: "var(--footer-py, 32px)",
-        paddingBottom: "var(--footer-py, 32px)",
-        borderTop: "var(--footer-border, 0px) solid var(--ink-line)",
+        fontSize: 13,
+        fontWeight: 400,
+        letterSpacing: "0.05em",
+        textTransform: "uppercase",
+        color: "var(--i5)",
       }}
     >
-      <div className="flex flex-wrap items-baseline" style={{ gap: "var(--footer-gap, 80px)" }}>
-        <span style={{ opacity: 0.7 }}>© {new Date().getFullYear()} Thalia Bassim</span>
-        <Link href="mailto:">Contact</Link>
-        <Link href="https://instagram.com" rel="noreferrer noopener" target="_blank">
+      <span style={{ letterSpacing: "0.03em", textTransform: "none" }}>
+        © {new Date().getFullYear()} Thalia Bassim
+      </span>
+      <div className="flex flex-wrap items-baseline" style={{ gap: "32px 36px" }}>
+        <Link href="mailto:thalia@bassim.studio" className="transition-colors hover:text-ink">
+          Contact
+        </Link>
+        <Link
+          href="https://instagram.com"
+          rel="noreferrer noopener"
+          target="_blank"
+          className="transition-colors hover:text-ink"
+        >
           Instagram ↗
         </Link>
-        <Link href="/essay">Essay</Link>
-        <Link href="/terms#shipping">Shipping</Link>
-        <Link href="/terms#returns">Returns</Link>
-        <Link href="/terms#terms">Terms</Link>
-        <Link href="/terms#privacy">Privacy</Link>
-        <span style={{ opacity: 0.6 }}>Brooklyn, NY</span>
+        <Link href="/terms#shipping" className="transition-colors hover:text-ink">
+          Shipping
+        </Link>
+        <Link href="/terms" className="transition-colors hover:text-ink">
+          Terms
+        </Link>
       </div>
     </footer>
   );
