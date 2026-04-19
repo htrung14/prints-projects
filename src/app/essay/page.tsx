@@ -9,16 +9,40 @@ export default function EssayPage() {
   return (
     <div className="border-t border-ink-line px-6 py-16 md:px-10">
       <div className="mx-auto max-w-2xl">
-        <div className="label-caps mb-4 text-ink-faint">Essay</div>
-        <h1
-          className="mb-10 text-ink-strong"
-          style={{ fontSize: "clamp(2rem, 4vw, 3rem)", lineHeight: 1.1, letterSpacing: "-0.01em" }}
-        >
-          <span className="arabic" dir="rtl" lang="ar">
-            التمسّك
-          </span>{" "}
-          <em>At-Tamassok</em>
-        </h1>
+        <div className="mb-10">
+          <span
+            className="label-caps mb-4 block"
+            style={{ color: "var(--i5)", letterSpacing: "0.08em" }}
+          >
+            Essay
+          </span>
+          <h1 className="flex flex-col" style={{ margin: 0 }}>
+            <span
+              className="font-serif"
+              lang="ar"
+              style={{
+                fontWeight: 500,
+                fontSize: "clamp(36px, 5vw, 48px)",
+                color: "var(--ink)",
+                lineHeight: 1.05,
+                letterSpacing: "0.01em",
+                marginBottom: 10,
+              }}
+            >
+              التمسّك
+            </span>
+            <span
+              className="font-serif italic"
+              style={{
+                fontSize: "clamp(20px, 2.2vw, 24px)",
+                fontWeight: 500,
+                color: "var(--i8)",
+              }}
+            >
+              At-Tamassok
+            </span>
+          </h1>
+        </div>
 
         <p className="drop-cap text-sm leading-relaxed">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt

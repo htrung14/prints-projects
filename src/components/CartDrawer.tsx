@@ -68,12 +68,15 @@ export default function CartDrawer() {
         style={{
           transform: visible ? "translateX(0)" : "translateX(100%)",
           transition: `transform ${visible ? ENTER_MS : EXIT_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`,
-          boxShadow: "-12px 0 32px -8px rgba(0, 0, 0, 0.14)",
         }}
       >
         <div className="flex items-center justify-between border-b border-ink-line pb-3">
-          <span className="text-ink-strong">Cart</span>
-          <button onClick={closeDrawer}>Close ✕</button>
+          <span className="text-[13px] tracking-[0.06em] font-normal text-ink-strong uppercase">
+            Cart
+          </span>
+          <button onClick={closeDrawer} className="text-[12px] text-ink-faint tracking-[0.04em]">
+            Close ✕
+          </button>
         </div>
 
         {lines.length === 0 ? (
@@ -94,7 +97,7 @@ export default function CartDrawer() {
                     className="h-20 w-20 object-cover"
                   />
                   <div className="flex flex-1 flex-col text-xs leading-snug">
-                    <span className="text-ink-strong">
+                    <span className="font-serif italic text-ink-strong">
                       {photo.title}
                       {photo.titleItalic ? (
                         <>
@@ -103,10 +106,12 @@ export default function CartDrawer() {
                         </>
                       ) : null}
                     </span>
-                    <span className="text-ink-faint">
+                    <span className="text-[11px] font-light tracking-[0.02em] text-ink-faint">
                       {size?.label} · {paper?.name}
                     </span>
-                    <span className="text-ink-faint">Qty {line.quantity}</span>
+                    <span className="text-[11px] font-light tracking-[0.02em] text-ink-faint">
+                      Qty {line.quantity}
+                    </span>
                     <button
                       onClick={() => remove(i)}
                       className="mt-1 self-start text-ink-faint underline"
@@ -114,7 +119,9 @@ export default function CartDrawer() {
                       Remove
                     </button>
                   </div>
-                  <span className="text-ink-strong">{formatUsd(linePrice * line.quantity)}</span>
+                  <span className="font-mono text-ink-strong">
+                    {formatUsd(linePrice * line.quantity)}
+                  </span>
                 </li>
               );
             })}
@@ -123,20 +130,25 @@ export default function CartDrawer() {
 
         <div className="mt-4 border-t border-ink-line pt-4">
           <div className="mb-3 flex items-center justify-between">
-            <span>Subtotal</span>
-            <span className="text-ink-strong">{formatUsd(subtotalCents)}</span>
+            <span className="text-[12px] font-light tracking-[0.04em]">Subtotal</span>
+            <span
+              className="font-mono"
+              style={{ fontSize: 17, color: "var(--ink)", letterSpacing: "0.02em" }}
+            >
+              {formatUsd(subtotalCents)}
+            </span>
           </div>
-          <p className="mb-3 text-[11px] text-ink-faint">
+          <p className="mb-3 text-[11px] font-light text-ink-faint">
             Shipping calculated at checkout. Free US shipping on 2 prints or more.
           </p>
           <Link
             href="/checkout"
             onClick={closeDrawer}
-            className={`btn-ghost block w-full text-center ${
-              lines.length === 0 ? "pointer-events-none opacity-50" : ""
-            }`}
+            className={`btn-ink ${lines.length === 0 ? "pointer-events-none opacity-50" : ""}`}
+            aria-disabled={lines.length === 0}
           >
-            {lines.length === 0 ? "Checkout" : "Checkout →"}
+            <span>Checkout</span>
+            <span className="btn-ink-price">{formatUsd(subtotalCents)}</span>
           </Link>
         </div>
       </aside>
