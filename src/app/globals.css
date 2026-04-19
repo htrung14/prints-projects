@@ -109,7 +109,10 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: "Favorit", var(--font-sans);
-  font-weight: 300;
+  /* 400 rather than 300 — the light cut was reading too thin against the
+     warm-paper background, especially at 14px body size. Book (400) keeps
+     the editorial texture without looking washed out. */
+  font-weight: 400;
   font-size: 14px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -157,7 +160,7 @@ em {
   font-family: var(--font-serif);
   color: var(--ink-strong);
   font-size: 22px;
-  font-weight: 400;
+  font-weight: 500;
   font-style: italic;
   line-height: 1.2;
   margin: 0;
@@ -232,7 +235,7 @@ em {
   font-size: 0.45em;
   margin-top: 6px;
   letter-spacing: 0.04em;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .drop-cap::first-letter {

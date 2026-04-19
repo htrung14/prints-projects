@@ -124,7 +124,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
           className="font-serif"
           lang="ar"
           style={{
-            fontWeight: 500,
+            fontWeight: 700,
             fontSize: 42,
             color: "var(--ink)",
             lineHeight: 1.05,
@@ -138,7 +138,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
           className="font-serif italic"
           style={{
             fontSize: 22,
-            fontWeight: 500,
+            fontWeight: 600,
             color: "var(--i8)",
             lineHeight: 1.15,
             marginBottom: 24,
