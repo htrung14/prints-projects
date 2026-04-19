@@ -1,45 +1,73 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
 
-/**
- * Cargo-style header: three plain text groups, edge to edge.
- *   LEFT   artist name
- *   CENTER project mark (Arabic + Latin transliteration) + Essay
- *   RIGHT  Info, Cart
- * Contact lives in the footer, not here.
- * The project mark (Arabic + Latin) and the Essay link all point to /essay.
- */
 export default function Header() {
   const { itemCount, openDrawer } = useCart();
+  const pathname = usePathname();
+  const isLanding = pathname === "/";
+  const [revealed, setRevealed] = useState(!isLanding);
+  const lastY = useRef(0);
+
+  // Landing: hide until scrolled ~past hero (55vh on mobile, 80% of a 150vh hero on desktop).
+  // Other pages: always visible, hide-on-scroll-down for focus.
+  useEffect(() => {
+    if (isLanding) {
+      const onScroll = () => {
+        const y = window.scrollY;
+        const vh = window.innerHeight;
+        const threshold = window.matchMedia("(max-width: 700px)").matches ? vh * 0.55 : vh * 1.2; // desktop hero is 150vh; emerge ~0.80 in
+        setRevealed(y > threshold);
+      };
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      return () => window.removeEventListener("scroll", onScroll);
+    }
+    // non-landing: hide on scroll down past a small threshold; reveal on scroll up.
+    const threshold = 8;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY.current;
+      if (y < 64) setRevealed(true);
+      else if (delta > threshold) setRevealed(false);
+      else if (delta < -threshold) setRevealed(true);
+      lastY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isLanding]);
 
   return (
     <header
-      className="sticky top-0 z-50 grid items-baseline gap-6 bg-bg px-6 py-5 md:px-10"
-      style={{ gridTemplateColumns: "1fr auto 1fr" }}
+      className="sticky top-0 z-50 grid grid-cols-[1fr_auto] items-baseline border-b border-ink-line bg-bg px-5 py-4 transition-opacity duration-300 ease-out md:px-11 md:py-[17px]"
+      style={{
+        opacity: revealed ? 1 : 0,
+        pointerEvents: revealed ? "auto" : "none",
+      }}
+      aria-hidden={!revealed}
     >
       <div className="justify-self-start">
-        <Link href="/" className="text-ink-strong">
-          Thalia Bassim
+        <Link href="/" className="text-[15px] font-normal tracking-[0.04em] text-ink">
+          {isLanding ? "Thalia Bassim" : "← Thalia Bassim"}
         </Link>
       </div>
 
-      <div className="hidden items-baseline gap-6 justify-self-center md:flex">
-        <Link href="/essay" className="arabic" dir="rtl" lang="ar">
-          التمسّك
+      <nav className="flex items-baseline gap-6 justify-self-end md:gap-7">
+        <Link href="/#prints" className="text-[15px] font-normal tracking-[0.04em] text-ink">
+          {isLanding ? "View prints" : "All prints"}
         </Link>
-        <Link href="/essay" className="text-ink-strong">
-          At-Tamassok
-        </Link>
-        <Link href="/essay">Essay</Link>
-      </div>
-
-      <div className="flex items-baseline gap-6 justify-self-end">
-        <button type="button" onClick={openDrawer} className="text-ink-strong">
-          Cart{itemCount > 0 ? ` (${itemCount})` : ""}
+        <button
+          type="button"
+          onClick={openDrawer}
+          className="text-[15px] font-normal tracking-[0.04em] text-ink"
+        >
+          Cart
+          <span className="ml-1 text-ink-faint">({itemCount})</span>
         </button>
-      </div>
+      </nav>
     </header>
   );
 }
