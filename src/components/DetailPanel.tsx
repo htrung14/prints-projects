@@ -1,16 +1,9 @@
 import BuyUI from "./BuyUI";
-import DetailCloseLink from "./DetailCloseLink";
 import type { Photo } from "@/lib/types";
 
-export default function DetailPanel({ photo, modal = false }: { photo: Photo; modal?: boolean }) {
+export default function DetailPanel({ photo }: { photo: Photo }) {
   return (
     <article>
-      {!modal ? (
-        <div className="flex items-center justify-end gap-6 border-b border-ink-line px-6 py-3 md:px-11">
-          <DetailCloseLink modal={modal} />
-        </div>
-      ) : null}
-
       <div
         className="grid min-h-[calc(100vh-63px)] grid-cols-1 gap-0 lg:grid-cols-[1fr_38vw]"
         style={{ maxWidth: 1600, margin: "0 auto" }}

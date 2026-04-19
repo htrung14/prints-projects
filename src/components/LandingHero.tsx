@@ -75,7 +75,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
 
   return (
     <section ref={heroRef} id="hero" className="relative" style={{ height: "150vh" }}>
-      <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden md:block md:h-screen">
+      <div className="hero-pin sticky top-0 flex h-screen items-center justify-center overflow-hidden">
         <div
           ref={compRef}
           className="comp relative will-change-[opacity,transform]"
@@ -117,11 +117,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
               <img
                 src={lead.imageUrl}
                 alt={lead.imageAlt}
-                className="block object-cover"
-                style={{
-                  width: "min(400px, 45vh)",
-                  height: "calc(min(400px, 45vh) * 1.25)",
-                }}
+                className="hero-frame-img block object-cover"
               />
             </div>
           </div>
@@ -184,7 +180,15 @@ export default function LandingHero({ lead }: { lead: Photo }) {
 
       {/* Mobile override: static stack, left-aligned to Arabic header */}
       <style jsx>{`
+        .hero-frame-img {
+          width: min(400px, 45vh);
+          height: calc(min(400px, 45vh) * 1.25);
+        }
         @media (max-width: 700px) {
+          .hero-frame-img {
+            width: min(74vw, 280px);
+            height: calc(min(74vw, 280px) * 1.25);
+          }
           section {
             height: auto !important;
           }
