@@ -3,12 +3,14 @@
 /**
  * /checkout — cart review + "Proceed to Stripe" button.
  *
- * Hosted Checkout: we never mount Stripe Elements. On click, POST the cart
- * to `/api/checkout`, receive `{ url }`, then `window.location.assign(url)`.
+ * Currently uses hosted Stripe Checkout — on click we POST to /api/checkout,
+ * get `{ url }` back, and window.location.assign() to it. Hosted Checkout
+ * already surfaces Apple Pay, Google Pay, and Link natively; no extra
+ * integration needed.
  *
- * Visual: Cargo aesthetic — Diatype-weight 900, rgba(0,0,0,0.6) ink, no
- * rounded buttons. Reuses the `btn-ghost` utility from globals.css so the
- * button matches the rest of the site.
+ * Paper upsell: if a line is on a paper that has a more expensive sibling
+ * available in that photo's `papers[]`, show an inline "Upgrade to …" chip
+ * that calls `updatePaper(index, paperId)` on the cart context.
  */
 
 import Link from "next/link";
@@ -16,10 +18,10 @@ import { useState } from "react";
 import { useCart } from "@/lib/cart";
 import { getAllPhotos } from "@/lib/photos";
 import { formatUsd, priceCents } from "@/lib/pricing";
-import type { PaperType } from "@/lib/types";
+import type { PaperType, PaperOption, Photo } from "@/lib/types";
 
 export default function CheckoutPage() {
-  const { lines, subtotalCents, itemCount, remove } = useCart();
+  const { lines, subtotalCents, itemCount, remove, updatePaper } = useCart();
   const photos = getAllPhotos();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +56,6 @@ export default function CheckoutPage() {
   }
 
   if (lines.length === 0) {
-    // Preserve the tone of the old stub's empty state.
     return (
       <div className="border-t border-ink-line px-6 py-16 md:px-8">
         <div className="mx-auto max-w-xl space-y-5">
@@ -85,46 +86,16 @@ export default function CheckoutPage() {
           {lines.map((line, i) => {
             const photo = photos.find((p) => p.slug === line.photoSlug);
             if (!photo) return null;
-            const size = photo.sizes.find((s) => s.id === line.sizeId);
-            const paper = photo.papers.find((p) => p.id === (line.paperId as PaperType));
-            const lineUnit = priceCents(photo, line.sizeId, line.paperId as PaperType);
             return (
-              <li
+              <CheckoutLine
                 key={`${line.photoSlug}-${line.sizeId}-${line.paperId}-${i}`}
-                className="flex gap-4 py-5"
-              >
-                <img
-                  src={photo.imageUrl}
-                  alt={photo.imageAlt}
-                  className="h-24 w-24 flex-none object-cover"
-                />
-                <div className="flex flex-1 flex-col text-sm leading-snug">
-                  <span className="text-ink-strong">
-                    {photo.title}
-                    {photo.titleItalic ? (
-                      <>
-                        {" "}
-                        <em>{photo.titleItalic}</em>
-                      </>
-                    ) : null}
-                  </span>
-                  <span className="text-ink-faint">
-                    {size?.label} · {paper?.name}
-                  </span>
-                  <span className="text-ink-faint">Qty {line.quantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => remove(i)}
-                    className="mt-1 self-start text-ink-faint underline"
-                    disabled={pending}
-                  >
-                    Remove
-                  </button>
-                </div>
-                <span className="text-ink-strong self-start">
-                  {formatUsd(lineUnit * line.quantity)}
-                </span>
-              </li>
+                index={i}
+                photo={photo}
+                line={{ ...line }}
+                disabled={pending}
+                onRemove={() => remove(i)}
+                onUpgrade={(paperId) => updatePaper(i, paperId)}
+              />
             );
           })}
         </ul>
@@ -164,8 +135,7 @@ export default function CheckoutPage() {
             </p>
           ) : null}
           <p className="text-[11px] text-ink-faint">
-            You&rsquo;ll be redirected to Stripe to enter payment and shipping. We never see or
-            store card details.
+            Payment is processed securely by Stripe. We never see or store card details.
           </p>
         </div>
 
@@ -176,5 +146,129 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+
+function CheckoutLine({
+  index,
+  photo,
+  line,
+  disabled,
+  onRemove,
+  onUpgrade,
+}: {
+  index: number;
+  photo: Photo;
+  line: {
+    photoSlug: string;
+    sizeId: string;
+    paperId: PaperType;
+    quantity: number;
+  };
+  disabled: boolean;
+  onRemove: () => void;
+  onUpgrade: (paperId: PaperType) => void;
+}) {
+  // Unused but explicit: keeps the signature stable if we later need it
+  // (e.g. "Line 2 of 4" labels).
+  void index;
+
+  const size = photo.sizes.find((s) => s.id === line.sizeId);
+  const paper = photo.papers.find((p) => p.id === line.paperId);
+  const lineUnit = priceCents(photo, line.sizeId, line.paperId);
+
+  // Paper upsell — offer the next more-expensive paper on this photo, if any.
+  const currentPaperCents = paper?.surchargeCents ?? 0;
+  const upgrade: PaperOption | null =
+    photo.papers
+      .filter((p) => p.surchargeCents > currentPaperCents)
+      .sort((a, b) => a.surchargeCents - b.surchargeCents)[0] ?? null;
+  const upgradeDeltaPerUnit = upgrade ? upgrade.surchargeCents - currentPaperCents : 0;
+
+  return (
+    <li className="flex flex-col gap-3 py-5">
+      {/* Row 1 — thumbnail, title, price */}
+      <div className="flex items-start gap-4">
+        <img
+          src={photo.imageUrl}
+          alt={photo.imageAlt}
+          className="h-24 w-24 flex-none object-cover"
+        />
+        <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
+          <span className="text-ink-strong">
+            {photo.title}
+            {photo.titleItalic ? (
+              <>
+                {" "}
+                <em>{photo.titleItalic}</em>
+              </>
+            ) : null}
+          </span>
+          <span
+            className="text-ink-strong font-mono"
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {formatUsd(lineUnit * line.quantity)}
+          </span>
+        </div>
+      </div>
+
+      {/* Row 2 — details concatenated on their own dedicated line, full-width
+          so the phrase never breaks mid-paper-name on narrow viewports. */}
+      <p className="text-[13px] leading-snug text-ink-faint">
+        {size?.label} · {paper?.name}
+      </p>
+
+      {/* Row 3 — qty + remove + upsell */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-ink-faint">
+        <span>Qty {line.quantity}</span>
+        <button type="button" onClick={onRemove} className="underline" disabled={disabled}>
+          Remove
+        </button>
+        {upgrade ? (
+          <button
+            type="button"
+            onClick={() => onUpgrade(upgrade.id)}
+            disabled={disabled}
+            className="upsell-chip"
+            title={`Switch this print to ${upgrade.name}`}
+          >
+            Upgrade to {upgrade.name}
+            <span className="upsell-delta">+{formatUsd(upgradeDeltaPerUnit * line.quantity)}</span>
+          </button>
+        ) : null}
+      </div>
+
+      <style>{`
+        .upsell-chip {
+          display: inline-flex;
+          align-items: baseline;
+          gap: 8px;
+          padding: 6px 10px;
+          border: 1px solid var(--rule);
+          background: var(--bg);
+          color: var(--ink);
+          font-size: 12px;
+          letter-spacing: 0.04em;
+          cursor: pointer;
+          transition: background-color 160ms ease, border-color 160ms ease;
+        }
+        .upsell-chip:hover:not(:disabled) {
+          background: rgba(12, 11, 10, 0.04);
+          border-color: var(--i3);
+        }
+        .upsell-chip:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .upsell-delta {
+          font-family: var(--font-mono);
+          color: var(--i5);
+          font-size: 11px;
+        }
+      `}</style>
+    </li>
   );
 }

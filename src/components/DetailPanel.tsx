@@ -52,9 +52,20 @@ export default function DetailPanel({ photo }: { photo: Photo }) {
           }
           article > .grid > section {
             padding: 20px 20px 32px !important;
+            min-width: 0;
           }
           article > .grid > section .mat-o {
             padding: 10px;
+            /* Cap the frame to the viewport so wide images can't push the
+               page horizontally on narrow screens. Pair with max-width on
+               the inner mat + img so the image shrinks proportionally. */
+            max-width: 100%;
+            box-sizing: border-box;
+          }
+          article > .grid > section .mat-i,
+          article > .grid > section .mat-i > img {
+            max-width: 100%;
+            height: auto !important;
           }
           article > .grid > aside {
             padding: 32px 20px 48px !important;

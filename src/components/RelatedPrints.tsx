@@ -9,13 +9,11 @@ type Feed = "recent" | "similar";
 
 export default function RelatedPrints({ current, all }: { current: Photo; all: Photo[] }) {
   const [feed, setFeed] = useState<Feed>("recent");
-  const gridRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
 
   const { recent, similar } = useMemo(() => {
     const others = all.filter((p) => p.slug !== current.slug);
-    // Recent: first 6 in catalog order excluding current.
     const recent = others.slice(0, 6);
-    // Similar: next 6 by edition-total proximity, same basePriceCents tier.
     const similar = [...others]
       .sort(
         (a, b) =>
@@ -29,22 +27,17 @@ export default function RelatedPrints({ current, all }: { current: Photo; all: P
   const items = feed === "recent" ? recent : similar;
 
   const scroll = (dir: 1 | -1) => {
-    const grid = gridRef.current;
-    if (!grid) return;
-    const cell = grid.querySelector<HTMLAnchorElement>("a");
+    const rail = railRef.current;
+    if (!rail) return;
+    const cell = rail.querySelector<HTMLAnchorElement>("a");
     const dx = (cell?.getBoundingClientRect().width ?? 260) + 28;
-    grid.scrollBy({ left: dx * dir, behavior: "smooth" });
+    rail.scrollBy({ left: dx * dir, behavior: "smooth" });
   };
 
   return (
-    <section
-      data-related-sentinel
-      aria-label="Related prints"
-      className="px-5 md:px-11"
-      style={{ padding: "72px 44px 96px" }}
-    >
-      <header className="mb-8 flex items-center justify-between md:flex-row">
-        <nav role="tablist" className="flex flex-nowrap" style={{ gap: 28 }}>
+    <section data-related-sentinel aria-label="Related prints" className="related-wrap">
+      <header className="related-head">
+        <nav role="tablist" className="related-tabs">
           <Tab active={feed === "recent"} onClick={() => setFeed("recent")}>
             Recently viewed
           </Tab>
@@ -52,7 +45,7 @@ export default function RelatedPrints({ current, all }: { current: Photo; all: P
             You may also like
           </Tab>
         </nav>
-        <div className="hidden md:flex" style={{ gap: 6 }}>
+        <div className="related-arrows" aria-hidden>
           <Arrow label="Scroll left" onClick={() => scroll(-1)}>
             ‹
           </Arrow>
@@ -62,38 +55,15 @@ export default function RelatedPrints({ current, all }: { current: Photo; all: P
         </div>
       </header>
 
-      <div
-        ref={gridRef}
-        role="tabpanel"
-        className="flex overflow-x-auto scroll-snap-x"
-        style={{
-          gap: 28,
-          scrollSnapType: "x mandatory",
-          scrollbarWidth: "none",
-          paddingBottom: 8,
-          margin: "0 -8px",
-        }}
-      >
+      <div ref={railRef} role="tabpanel" className="related-rail">
         {items.map((p) => (
           <Link
             key={p.slug}
             href={`/photos/${p.slug}`}
-            className="block flex-none"
-            style={{
-              width: 260,
-              scrollSnapAlign: "start",
-              color: "inherit",
-              padding: "0 8px",
-            }}
+            className="related-cell"
+            style={{ color: "inherit" }}
           >
-            <div
-              className="relative overflow-hidden"
-              style={{
-                background: "#ebe9e4",
-                aspectRatio: "4 / 5",
-                marginBottom: 14,
-              }}
-            >
+            <div className="related-frame">
               <img
                 src={p.imageUrl}
                 alt={p.imageAlt}
@@ -119,14 +89,54 @@ export default function RelatedPrints({ current, all }: { current: Photo; all: P
       </div>
 
       <style>{`
-        [data-related-sentinel] > div::-webkit-scrollbar { display: none; }
+        .related-wrap {
+          padding: 72px 44px 96px;
+        }
+        .related-head {
+          margin-bottom: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .related-tabs {
+          display: flex;
+          flex-wrap: nowrap;
+          gap: 28px;
+        }
+        .related-arrows {
+          display: flex;
+          gap: 6px;
+        }
+        .related-rail {
+          display: flex;
+          gap: 28px;
+          overflow-x: auto;
+          padding-bottom: 8px;
+          scroll-snap-type: x mandatory;
+          scrollbar-width: none;
+          /* Let cells align to the container's visual left edge cleanly —
+             no inner padding on cells, so the first item doesn't render as
+             a thin sliver on scroll-reset. */
+        }
+        .related-rail::-webkit-scrollbar { display: none; }
+        .related-cell {
+          display: block;
+          flex: 0 0 auto;
+          width: 280px;
+          scroll-snap-align: start;
+        }
+        .related-frame {
+          position: relative;
+          overflow: hidden;
+          background: #ebe9e4;
+          aspect-ratio: 4 / 5;
+          margin-bottom: 14px;
+        }
         @media (max-width: 900px) {
-          [data-related-sentinel] { padding: 48px 20px !important; }
-          [data-related-sentinel] header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 16px;
-          }
+          .related-wrap { padding: 48px 20px 64px; }
+          .related-head { flex-direction: column; align-items: flex-start; gap: 16px; }
+          .related-arrows { display: none; }
+          .related-cell { width: min(72vw, 280px); }
         }
       `}</style>
     </section>

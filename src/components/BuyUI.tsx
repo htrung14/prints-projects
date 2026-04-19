@@ -15,7 +15,7 @@ const FIXED_SIZE_ID = "16x20";
 const FIXED_SIZE_LABEL = "16 × 20 in";
 
 export default function BuyUI({ photo }: { photo: Photo }) {
-  const { add } = useCart();
+  const { add, drawerOpen } = useCart();
   const [paperId, setPaperId] = useState<PaperType>(photo.papers[0].id);
   const [qty] = useState(1);
   const [open, setOpen] = useState<Record<DiscKey, boolean>>({
@@ -255,20 +255,21 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         </div>
       </Disclosure>
 
-      {/* Mobile sticky bar */}
+      {/* Mobile sticky bar — hides when cart drawer is open so it doesn't
+          sit on top of the drawer's primary CTA. */}
       <div
         className="fixed inset-x-0 bottom-0 z-[80] grid grid-cols-[1fr_auto] items-center gap-[18px] border-t border-ink-line bg-bg lg:hidden"
         style={{
           padding: "14px 24px calc(14px + env(safe-area-inset-bottom, 0px))",
-          transform: showSticky ? "translateY(0)" : "translateY(110%)",
+          transform: showSticky && !drawerOpen ? "translateY(0)" : "translateY(110%)",
           transition: "transform 380ms cubic-bezier(.2,.6,.2,1)",
-          boxShadow: showSticky ? "0 -10px 32px rgba(12,11,10,.06)" : "none",
-          pointerEvents: showSticky ? "auto" : "none",
+          boxShadow: showSticky && !drawerOpen ? "0 -10px 32px rgba(12,11,10,.06)" : "none",
+          pointerEvents: showSticky && !drawerOpen ? "auto" : "none",
           willChange: "transform",
         }}
         role="region"
         aria-label="Buy bar"
-        aria-hidden={!showSticky}
+        aria-hidden={!showSticky || drawerOpen}
       >
         <div className="min-w-0">
           <span
