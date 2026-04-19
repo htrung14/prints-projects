@@ -8,9 +8,10 @@ Buy UI mockup (vanilla HTML/JS, source of truth for pricing math): [`docs/mockup
 
 ## Current state
 
-**Last updated: 2026-04-16**
+**Last updated: 2026-04-19**
 
 Phase 0 static shell is design-locked. Accent color `#1529DB`, footer F2 (80px gap), product detail P3 layout, 25 interleaved photos, Vercel Analytics wired. Pastel feedback batch A+B complete, `/terms` route live, ghost-button CTAs locked.
+_Update 04-19: Initialized Vercel environment variables, upgraded Stripe setup to use Restricted Keys, and documented precise Sanity and Stripe Webhook endpoints for Phase 2 preparation._
 
 Backend architecture is locked. Schema, order flow, print-shop hand-off (token-gated fulfillment), admin roles, and shipping-zone model all captured in the plan file: `/Users/haivotrung/.claude/plans/adaptive-hopping-snowglobe.md`. MemPalace drawer: `mempalace search "prints-projects master state"`.
 
@@ -97,6 +98,26 @@ The demo ships with multiple ways for a stakeholder to leave comments on the liv
 ## Next phases
 
 See [`docs/system-design.md` Section 11](docs/system-design.md) for the full build phase plan. Phase 0 is the work in this README.
+
+### Phase 2 Preparation
+
+These webhook endpoints will be built during Phase 2. Here is the exact configuration needed for the third-party dashboards when that time comes:
+
+#### Stripe Webhook
+
+- **URL**: `https://prints-projects.vercel.app/api/webhooks/stripe`
+- **Events to listen to**: `checkout.session.completed` (Required). You can also safely select "All Checkout events".
+- **Environment Variable**: `STRIPE_WEBHOOK_SECRET` (Found by clicking "Reveal" on the webhook's Signing Secret after creation).
+
+#### Sanity CMS Webhook
+
+- **URL**: `https://prints-projects.vercel.app/api/webhooks/sanity`
+- **Trigger on**: `Create`, `Update`, `Delete`
+- **Filter**: `_type == "photo"`
+- **Projection**: `{_type, "slug": slug.current}`
+- **Drafts & Versions**: Leave unchecked.
+- **Environment Variable**: `SANITY_WEBHOOK_SECRET` (A custom secure password you type into the "Secret" field in Sanity, which must exactly match your Vercel environment variable).
+  - _Note: Since Next.js generates static pages, this webhook is needed to automatically tell Vercel to revalidate the cache when you update photos in the CMS._
 
 ## Stakeholder review
 

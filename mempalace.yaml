@@ -1,0 +1,35 @@
+wing: prints_projects
+rooms:
+- name: documentation
+  description: Files from docs/
+  keywords:
+  - documentation
+  - docs
+- name: docs_ai
+  description: Files from docs-ai/
+  keywords:
+  - docs_ai
+  - docs-ai
+- name: public
+  description: Files from public/
+  keywords:
+  - public
+  - public
+- name: src
+  description: Files from src/
+  keywords:
+  - src
+  - src
+- name: design
+  description: Files from mockups/
+  keywords:
+  - design
+  - mockups
+- name: frontend
+  description: Files from components/
+  keywords:
+  - frontend
+  - components
+- name: general
+  description: Files that don't fit other rooms
+  keywords: []
