@@ -14,14 +14,13 @@ export default function Header() {
 
   const bg = isInfo ? "#0072BB" : isEssay ? "#E2E052" : "var(--bg)";
   const fg = isDark ? "#fff" : "var(--ink)";
-  const border = isDark ? "rgba(255,255,255,0.15)" : isEssay ? "rgba(0,0,0,0.1)" : undefined;
 
   return (
     <header
-      className="sticky top-0 z-50 grid grid-cols-[1fr_auto] items-baseline px-5 py-4 md:px-11 md:py-[17px]"
+      className="grid grid-cols-[1fr_auto] items-baseline px-5 py-4 md:px-11 md:py-[17px]"
       style={{
         background: bg,
-        borderBottom: `1px solid ${border || "var(--ink-line)"}`,
+        borderBottom: "none",
       }}
     >
       <div className="justify-self-start">

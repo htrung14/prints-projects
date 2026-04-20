@@ -45,6 +45,9 @@ export default function Footer() {
         <Link href="/info" style={{ color: fg, transition: "color 180ms" }}>
           Info
         </Link>
+        <Link href="/track" style={{ color: fg, transition: "color 180ms" }}>
+          Track order
+        </Link>
         <Link href="/terms#shipping" style={{ color: fg, transition: "color 180ms" }}>
           Shipping
         </Link>

@@ -11,20 +11,20 @@ export default function RelatedPrints({ current, all }: { current: Photo; all: P
   const [feed, setFeed] = useState<Feed>("recent");
   const railRef = useRef<HTMLDivElement>(null);
 
-  const { recent, similar } = useMemo(() => {
+  const { recent, discover } = useMemo(() => {
     const others = all.filter((p) => p.slug !== current.slug);
     const recent = others.slice(0, 6);
-    const similar = [...others]
-      .sort(
-        (a, b) =>
-          Math.abs(a.basePriceCents - current.basePriceCents) -
-          Math.abs(b.basePriceCents - current.basePriceCents)
-      )
+    const recentSlugs = new Set(recent.map((p) => p.slug));
+    const remaining = others.filter((p) => !recentSlugs.has(p.slug));
+    const pool = remaining.length >= 4 ? remaining : others;
+    const discover = [...pool]
+      .sort((a, b) => a.slug.localeCompare(b.slug))
+      .reverse()
       .slice(0, 6);
-    return { recent, similar };
-  }, [all, current.slug, current.basePriceCents]);
+    return { recent, discover };
+  }, [all, current.slug]);
 
-  const items = feed === "recent" ? recent : similar;
+  const items = feed === "recent" ? recent : discover;
 
   const scroll = (dir: 1 | -1) => {
     const rail = railRef.current;
@@ -42,7 +42,7 @@ export default function RelatedPrints({ current, all }: { current: Photo; all: P
             Recently viewed
           </Tab>
           <Tab active={feed === "similar"} onClick={() => setFeed("similar")}>
-            التمسّك
+            التمسّك At-Tamassok
           </Tab>
         </nav>
         <div className="related-arrows" aria-hidden>
@@ -71,10 +71,7 @@ export default function RelatedPrints({ current, all }: { current: Photo; all: P
                 loading="lazy"
               />
             </div>
-            <span
-              className="block font-serif italic"
-              style={{ fontSize: 19, color: "var(--ink)", marginBottom: 4 }}
-            >
+            <span className="block" style={{ fontSize: 19, color: "var(--ink)", marginBottom: 4 }}>
               {p.title}
               {p.titleItalic ? ` ${p.titleItalic}` : ""}
             </span>

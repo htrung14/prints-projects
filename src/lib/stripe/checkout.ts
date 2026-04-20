@@ -342,6 +342,7 @@ export async function createCheckoutSession(
     automatic_tax: { enabled: false },
     tax_id_collection: { enabled: false },
     billing_address_collection: "required",
+    phone_number_collection: { enabled: true },
     shipping_address_collection: {
       allowed_countries: [...ALLOWED_COUNTRIES],
     },

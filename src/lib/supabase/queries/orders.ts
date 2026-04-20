@@ -297,6 +297,21 @@ export async function getOrderById(id: string): Promise<Order | null> {
   return rowToOrder(data as OrderRow);
 }
 
+export async function getOrderBySessionId(sessionId: string): Promise<Order | null> {
+  const db = serverClient();
+  const { data, error } = await db
+    .from("orders")
+    .select(ORDER_COLUMNS)
+    .eq("stripe_checkout_session_id", sessionId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`getOrderBySessionId failed: ${error.message}`);
+  }
+  if (!data) return null;
+  return rowToOrder(data as OrderRow);
+}
+
 export async function getOrderByToken(token: string): Promise<Order | null> {
   const db = serverClient();
   const { data, error } = await db
@@ -344,6 +359,22 @@ export async function updateOrderStatus(
       `updateOrderStatus(${id}): audit log insert failed (${logErr.message}); continuing`
     );
   }
+}
+
+export async function getOrdersByEmail(email: string): Promise<Order[]> {
+  const db = serverClient();
+  const { data, error } = await db
+    .from("orders")
+    .select(ORDER_COLUMNS)
+    .ilike("customer_email", email.trim())
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  if (error) {
+    throw new Error(`getOrdersByEmail failed: ${error.message}`);
+  }
+  const rows = (data ?? []) as OrderRow[];
+  return rows.map(rowToOrder);
 }
 
 export type ListOrdersFilter = {

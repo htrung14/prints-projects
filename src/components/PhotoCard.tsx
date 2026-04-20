@@ -38,7 +38,7 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
       </figure>
       <div className="flex items-baseline justify-between gap-4">
         <h3
-          className="font-serif overflow-hidden text-ellipsis whitespace-nowrap min-w-0"
+          className="overflow-hidden text-ellipsis whitespace-nowrap min-w-0"
           style={{
             fontSize: "clamp(14px, 2.5vw, 21px)",
             color: "var(--ink)",
@@ -47,7 +47,7 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
           }}
         >
           {photo.title}
-          {photo.titleItalic ? <>, {photo.titleItalic}</> : null}
+          {photo.titleItalic ? <> {photo.titleItalic}</> : null}
         </h3>
         <span
           className="font-mono opacity-100 lg:opacity-0 transition-opacity duration-300 group-hover:opacity-100 shrink-0"
