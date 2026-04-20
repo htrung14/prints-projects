@@ -144,9 +144,9 @@ export async function resolveCartLines(lines: CartLine[]): Promise<ResolvedCartL
     if (typeof line.paperId !== "string" || !line.paperId) {
       throw new Error(`resolveCartLines: missing paperId on ${line.photoSlug}`);
     }
-    if (!Number.isInteger(line.quantity) || line.quantity !== 1) {
+    if (!Number.isInteger(line.quantity) || line.quantity <= 0 || line.quantity > 10) {
       throw new Error(
-        `resolveCartLines: quantity must be 1 per photo (got ${line.quantity} on ${line.photoSlug})`
+        `resolveCartLines: quantity must be 1-10 per photo (got ${line.quantity} on ${line.photoSlug})`
       );
     }
 

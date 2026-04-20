@@ -188,13 +188,13 @@ describe("resolveCartLines", () => {
 
   it("throws on zero quantity", async () => {
     await expect(resolveCartLines([{ ...VALID_CART_LINE, quantity: 0 }])).rejects.toThrow(
-      "quantity must be 1"
+      "quantity must be 1-10"
     );
   });
 
   it("throws on negative quantity", async () => {
     await expect(resolveCartLines([{ ...VALID_CART_LINE, quantity: -1 }])).rejects.toThrow(
-      "quantity must be 1"
+      "quantity must be 1-10"
     );
   });
 
