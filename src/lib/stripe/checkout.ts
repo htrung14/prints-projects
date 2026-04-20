@@ -339,7 +339,7 @@ export async function createCheckoutSession(
   const params: SessionCreateParams = {
     mode: "payment",
     line_items: lineItems,
-    automatic_tax: { enabled: process.env.NODE_ENV === "production" },
+    automatic_tax: { enabled: false },
     tax_id_collection: { enabled: false },
     billing_address_collection: "required",
     shipping_address_collection: {
