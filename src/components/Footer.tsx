@@ -10,8 +10,8 @@ export default function Footer() {
   const isDark = isInfo;
 
   const bg = isInfo ? "#0072BB" : isEssay ? "#E2E052" : undefined;
-  const fg = isDark ? "rgba(255,255,255,0.7)" : "var(--i5)";
-  const fgCopy = isDark ? "rgba(255,255,255,0.4)" : "var(--i3)";
+  const fg = isDark ? "#fff" : "var(--i5)";
+  const fgCopy = isDark ? "rgba(255,255,255,0.75)" : "var(--i3)";
   const border = isDark
     ? "rgba(255,255,255,0.15)"
     : isEssay
@@ -35,7 +35,7 @@ export default function Footer() {
           Contact
         </Link>
         <Link
-          href="https://instagram.com"
+          href="https://www.instagram.com/thaliabassim/"
           rel="noreferrer noopener"
           target="_blank"
           style={{ color: fg, transition: "color 180ms" }}

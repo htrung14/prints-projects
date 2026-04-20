@@ -159,6 +159,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
           flex-direction: column;
           align-items: center;
           gap: 10px;
+          text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
           text-align: center;
         }
         .hfb-inner {

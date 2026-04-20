@@ -614,7 +614,7 @@ em {
   grid-template-columns: 1fr auto;
   align-items: center;
   width: 100%;
-  padding: 10px 22px;
+  padding: 14px 22px;
   background: var(--btn-accent);
   color: #ffffff;
   border: 0;
@@ -793,7 +793,7 @@ em {
   font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--i3);
+  color: var(--i5);
   flex: 0 0 auto;
   transform: translateY(-1px);
 }

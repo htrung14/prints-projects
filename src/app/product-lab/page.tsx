@@ -393,8 +393,8 @@ function P5({ photo }: { photo: Photo }) {
             International shipping available; customs fees are the collector&apos;s responsibility.
           </p>
           <p>
-            Returns accepted only for damage in transit or production defects, within 14 days of
-            delivery.
+            If your print arrives damaged, reach out within 7 days with a photo of the damage and
+            unopened packaging. We&apos;ll replace it at no cost.
           </p>
         </div>
       </div>

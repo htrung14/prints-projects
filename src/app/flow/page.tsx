@@ -101,7 +101,7 @@ const EMAILS = [
     trigger: "Rob submits tracking on dispatch page",
     subject: "Order TB-2026-D479 shipped",
     preview:
-      "Carrier + tracking number. Care note: open flat, inspect on arrival, reply within 14 days if damaged.",
+      "Carrier + tracking number. Care note: open flat, inspect on arrival, reply within 7 days if damaged.",
   },
   {
     name: "Post-Purchase (7 touches)",
