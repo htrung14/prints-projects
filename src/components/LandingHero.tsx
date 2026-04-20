@@ -177,7 +177,15 @@ export default function LandingHero({ lead }: { lead: Photo }) {
           left: clamp(28px, 5vw, 56px);
         }
 
+        @media (min-width: 821px) {
+          .hfb {
+            height: calc(100dvh + var(--header-height, 63px) - 45px);
+          }
+        }
         @media (max-width: 820px) {
+          .hfb {
+            height: calc(90dvh + var(--header-height, 63px));
+          }
           .hfb-text {
             position: absolute;
             bottom: 0;
