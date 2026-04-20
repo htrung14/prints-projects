@@ -189,7 +189,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
             textAlign: "center",
           }}
         >
-          Each print made to order · ships within 14 business days
+          Made to order · archival packaging, fully insured · ships within 14 business days
         </p>
       </div>
 
