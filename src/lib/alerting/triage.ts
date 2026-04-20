@@ -35,55 +35,92 @@ const passThrough = (alert: Alert, reasoning: string): TriageResult => ({
   reasoning,
 });
 
-export async function triageAlert(alert: Alert): Promise<TriageResult> {
+async function callOpenRouter(alert: Alert): Promise<TriageResult> {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    return passThrough(alert, "Triage skipped: OPENROUTER_API_KEY not set.");
+  if (!apiKey) throw new Error("OPENROUTER_API_KEY not set");
+
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemma-4-31b-it:free",
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: `Triage this alert:\n${JSON.stringify(alert, null, 2)}` },
+      ],
+      max_tokens: 300,
+      temperature: 0.1,
+    }),
+  });
+
+  if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${await res.text()}`);
+
+  const data = await res.json();
+  const text: string = data.choices?.[0]?.message?.content?.trim() ?? "";
+  return parseTriageResponse(text);
+}
+
+async function callGoogleAI(alert: Alert): Promise<TriageResult> {
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  if (!apiKey) throw new Error("GOOGLE_AI_API_KEY not set");
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: [{ parts: [{ text: `Triage this alert:\n${JSON.stringify(alert, null, 2)}` }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 300 },
+      }),
+    }
+  );
+
+  if (!res.ok) throw new Error(`Google AI ${res.status}: ${await res.text()}`);
+
+  const data = await res.json();
+  const text: string = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
+  return parseTriageResponse(text);
+}
+
+function parseTriageResponse(text: string): TriageResult {
+  const jsonText = text.replace(/^```json\n?|```$/g, "").trim();
+  const result = JSON.parse(jsonText) as TriageResult;
+
+  if (
+    typeof result.shouldNotify !== "boolean" ||
+    !["critical", "warning", "info"].includes(result.revisedSeverity) ||
+    typeof result.summary !== "string"
+  ) {
+    throw new Error("Invalid triage response shape");
   }
 
+  result.reasoning = result.reasoning ?? "No reasoning provided";
+  return result;
+}
+
+export async function triageAlert(alert: Alert): Promise<TriageResult> {
+  // Try OpenRouter first, fall back to Google AI Studio
   try {
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemma-4-31b-it:free",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          {
-            role: "user",
-            content: `Triage this alert:\n${JSON.stringify(alert, null, 2)}`,
-          },
-        ],
-        max_tokens: 300,
-        temperature: 0.1,
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error(`OpenRouter ${res.status}: ${await res.text()}`);
+    return await callOpenRouter(alert);
+  } catch (openRouterErr) {
+    try {
+      return await callGoogleAI(alert);
+    } catch (googleErr) {
+      console.error(
+        "[triage] Both providers failed:",
+        (openRouterErr as Error).message,
+        (googleErr as Error).message
+      );
+      return passThrough(
+        alert,
+        `Triage failed: OpenRouter (${(openRouterErr as Error).message}), Google (${(googleErr as Error).message})`
+      );
     }
-
-    const data = await res.json();
-    const text: string = data.choices?.[0]?.message?.content?.trim() ?? "";
-    const jsonText = text.replace(/^```json\n?|```$/g, "").trim();
-    const result = JSON.parse(jsonText) as TriageResult;
-
-    if (
-      typeof result.shouldNotify !== "boolean" ||
-      !["critical", "warning", "info"].includes(result.revisedSeverity) ||
-      typeof result.summary !== "string"
-    ) {
-      throw new Error("Invalid triage response shape");
-    }
-
-    result.reasoning = result.reasoning ?? "No reasoning provided";
-    return result;
-  } catch (err) {
-    console.error("[triage] LLM call failed:", (err as Error).message);
-    return passThrough(alert, `Triage failed: ${(err as Error).message}`);
   }
 }
 

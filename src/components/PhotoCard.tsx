@@ -6,12 +6,13 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
   const soldOut = isSoldOut(photo);
   return (
     <Link href={`/photos/${photo.slug}`} className="group block">
-      <div
+      <figure
         className="relative overflow-hidden"
         style={{
           aspectRatio: "4 / 5",
           background: "#ebe9e4",
           marginBottom: 16,
+          margin: 0,
         }}
       >
         <img
@@ -29,15 +30,20 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
             Sold out
           </span>
         ) : null}
-      </div>
+      </figure>
       <div className="flex items-baseline justify-between gap-4">
-        <span
+        <h3
           className="font-serif overflow-hidden text-ellipsis whitespace-nowrap min-w-0"
-          style={{ fontSize: "clamp(14px, 2.5vw, 21px)", color: "var(--ink)" }}
+          style={{
+            fontSize: "clamp(14px, 2.5vw, 21px)",
+            color: "var(--ink)",
+            margin: 0,
+            fontWeight: 400,
+          }}
         >
           {photo.title}
           {photo.titleItalic ? <>, {photo.titleItalic}</> : null}
-        </span>
+        </h3>
         <span
           className="font-mono opacity-100 lg:opacity-0 transition-opacity duration-300 group-hover:opacity-100 shrink-0"
           style={{ fontSize: "clamp(12px, 2vw, 15px)", fontWeight: 400, color: "var(--ink)" }}

@@ -25,12 +25,12 @@ export default function LandingHero({ lead }: { lead: Photo }) {
             draggable={false}
           />
         </figure>
-        <div className="hfb-center">
+        <h1 className="hfb-center" style={{ margin: 0, fontWeight: "normal" }}>
           <span className="h-arabic" lang="ar">
             التمسّك
           </span>
           <span className="h-title">At-Tamassok</span>
-        </div>
+        </h1>
         <div className="hfb-text">
           <div className="hfb-inner">
             <p className="h-pull">
