@@ -60,9 +60,10 @@ export default function TermsPage() {
 
         <Section id="returns" n={2} heading="Refunds &amp; Returns">
           <p>
-            Each print is made to order and all sales are final. If your print arrives damaged, let
-            us know within 7 days with a photo of the damage and the unopened packaging. We&apos;ll
-            send a replacement at no cost.
+            Each print is made to order and all sales are final. If your print arrives damaged,
+            contact us within 7 days with a clear photo showing the damage alongside the sealed,
+            unopened shipping packaging. We verify all claims against our shipping records before
+            issuing replacements at no cost.
           </p>
           <p>
             <strong>How to request a replacement.</strong> Contact <Tbd label="support email" />{" "}

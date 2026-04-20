@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { Photo } from "@/lib/types";
-import { formatUsd, isSoldOut } from "@/lib/pricing";
+import { formatUsd, isSoldOut, editionRemaining } from "@/lib/pricing";
+import { SaveButton } from "@/components/SaveButton";
 
 export default function PhotoCard({ photo }: { photo: Photo }) {
   const soldOut = isSoldOut(photo);
+  const remaining = editionRemaining(photo);
   return (
     <Link href={`/photos/${photo.slug}`} className="group block">
       <figure
@@ -15,6 +17,7 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
           margin: 0,
         }}
       >
+        <SaveButton slug={photo.slug} />
         <img
           src={photo.imageUrl}
           alt={photo.imageAlt}
@@ -51,6 +54,14 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
           {formatUsd(photo.basePriceCents)}
         </span>
       </div>
+      {!soldOut && remaining <= 5 && (
+        <span
+          className="font-mono"
+          style={{ fontSize: 11, color: "var(--i4)", marginTop: 4, display: "block" }}
+        >
+          {remaining} of {photo.editionTotal} available
+        </span>
+      )}
     </Link>
   );
 }
