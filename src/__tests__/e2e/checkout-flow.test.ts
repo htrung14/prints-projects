@@ -93,6 +93,7 @@ const VALID_CART_LINE: CartLine = {
 function makeStripeSession(overrides: Record<string, unknown> = {}) {
   return {
     id: "cs_test_session_123",
+    payment_status: "paid",
     metadata: {
       cart_lines_json: JSON.stringify([VALID_CART_LINE]),
     },
@@ -227,7 +228,7 @@ describe("createCheckoutSession", () => {
     expect(params.line_items).toHaveLength(1);
     expect(params.line_items[0].price_data.unit_amount).toBe(30000);
     expect(params.line_items[0].price_data.currency).toBe("usd");
-    expect(params.automatic_tax.enabled).toBe(true);
+    expect(params.automatic_tax.enabled).toBe(process.env.NODE_ENV === "production");
     expect(params.metadata.cart_lines_json).toBe(JSON.stringify([VALID_CART_LINE]));
     expect(session.url).toBe("https://checkout.stripe.com/test");
   });
@@ -350,13 +351,14 @@ describe("handleCheckoutSessionCompleted (webhook)", () => {
     expect(mockSendOrderConfirmation).not.toHaveBeenCalled();
   });
 
-  it("throws on edition exhausted (sold out)", async () => {
+  it("auto-refunds on edition exhausted and returns idempotent", async () => {
     mockInsertOrderWithItems.mockRejectedValue(new Error("EDITION_EXCEEDED: all editions sold"));
 
     const session = makeStripeSession();
-    await expect(
-      handleCheckoutSessionCompleted(session as unknown as Stripe.Checkout.Session)
-    ).rejects.toThrow("EDITION_EXCEEDED");
+    const result = await handleCheckoutSessionCompleted(
+      session as unknown as Stripe.Checkout.Session
+    );
+    expect(result).toEqual({ idempotent: true });
   });
 
   it("throws on missing metadata", async () => {

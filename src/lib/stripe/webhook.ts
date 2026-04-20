@@ -163,6 +163,16 @@ export async function handleCheckoutSessionCompleted(
 ): Promise<
   { order: Order; items: OrderItem[]; dispatchUrl: string | null } | { idempotent: true }
 > {
+  // ---- 0. Gate on payment_status === "paid" ----
+  // For async payment methods (bank transfers, SEPA), checkout.session.completed
+  // fires BEFORE payment settles. Only proceed when funds are confirmed.
+  if (session.payment_status !== "paid") {
+    console.info(
+      `webhook: session ${session.id} has payment_status="${session.payment_status}" — skipping until paid`
+    );
+    return { idempotent: true };
+  }
+
   // ---- 1. Rebuild cart + re-price defensively ----
   const cartLines = parseCartLinesFromMetadata(session.metadata);
   const resolved = await resolveCartLines(cartLines);
@@ -221,8 +231,14 @@ export async function handleCheckoutSessionCompleted(
       return { idempotent: true };
     }
 
-    // Anything else (edition exhausted, bad payload, RPC error) bubbles up
-    // so the route returns 500 and Stripe retries.
+    // Edition exhausted after payment: auto-refund the customer.
+    if (/EDITION_EXCEEDED/i.test(msg)) {
+      await handleEditionExceeded(session, msg);
+      return { idempotent: true };
+    }
+
+    // Anything else (bad payload, RPC error) bubbles up so the route
+    // returns 500 and Stripe retries.
     throw err;
   }
 
@@ -306,6 +322,171 @@ async function runSafely(label: string, fn: () => Promise<void>, orderId: string
 }
 
 // ---------------------------------------------------------------------------
+// Handle charge.refunded
+// ---------------------------------------------------------------------------
+
+async function handleChargeRefunded(charge: Stripe.Charge): Promise<void> {
+  const piId =
+    typeof charge.payment_intent === "string"
+      ? charge.payment_intent
+      : (charge.payment_intent?.id ?? null);
+
+  if (!piId) {
+    console.warn("webhook: charge.refunded has no payment_intent — cannot map to order");
+    return;
+  }
+
+  const db = await import("@/lib/supabase/server").then((m) => m.serverClient());
+  const { data } = await db
+    .from("orders")
+    .select("id, status")
+    .eq("stripe_payment_intent_id", piId)
+    .maybeSingle();
+
+  if (!data) {
+    console.info(`webhook: charge.refunded for PI ${piId} — no matching order found`);
+    return;
+  }
+
+  if (data.status === "refunded") return;
+
+  await import("@/lib/supabase/queries/orders").then((m) =>
+    m.updateOrderStatus(data.id, "refunded", {
+      trigger: "stripe_charge.refunded",
+      chargeId: charge.id,
+    })
+  );
+
+  const { getDispatcher } = await import("@/lib/alerting/dispatcher");
+  const dispatcher = getDispatcher();
+  await dispatcher.send({
+    type: "system_error",
+    severity: "warning",
+    title: "Order refunded via Stripe",
+    whatHappened: `Order ${data.id} was refunded (charge ${charge.id}). Payment intent: ${piId}.`,
+    autoHandled: "Order status updated to 'refunded' in database.",
+    actionRequired: false,
+    actionInstructions:
+      "None — refund processed. Check if edition needs to be released back to inventory.",
+    timestamp: new Date().toISOString(),
+    metadata: { orderId: data.id, chargeId: charge.id, paymentIntentId: piId },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Handle charge.dispute.created
+// ---------------------------------------------------------------------------
+
+async function handleDisputeCreated(dispute: Stripe.Dispute): Promise<void> {
+  const piId =
+    typeof dispute.payment_intent === "string"
+      ? dispute.payment_intent
+      : (dispute.payment_intent?.id ?? null);
+
+  if (!piId) {
+    console.warn("webhook: charge.dispute.created has no payment_intent");
+    return;
+  }
+
+  const db = await import("@/lib/supabase/server").then((m) => m.serverClient());
+  const { data } = await db
+    .from("orders")
+    .select("id, customer_email, total_cents")
+    .eq("stripe_payment_intent_id", piId)
+    .maybeSingle();
+
+  const { getDispatcher } = await import("@/lib/alerting/dispatcher");
+  const dispatcher = getDispatcher();
+
+  await dispatcher.send({
+    type: "system_error",
+    severity: "critical",
+    title: "Payment dispute opened",
+    whatHappened: `Dispute ${dispute.id} opened for payment intent ${piId}. Reason: ${dispute.reason}. ${data ? `Order: ${data.id}, customer: ${data.customer_email}, amount: $${((data.total_cents as number) / 100).toFixed(2)}.` : "No matching order found."}`,
+    autoHandled: "Nothing — disputes require manual response in Stripe Dashboard.",
+    actionRequired: true,
+    actionInstructions:
+      "Respond to the dispute in Stripe Dashboard within 7 days. Gather shipping proof, COA photo, and delivery confirmation.",
+    timestamp: new Date().toISOString(),
+    metadata: {
+      disputeId: dispute.id,
+      paymentIntentId: piId,
+      orderId: data?.id,
+      reason: dispute.reason,
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Auto-refund on EDITION_EXCEEDED
+// ---------------------------------------------------------------------------
+
+export async function handleEditionExceeded(
+  session: Stripe.Checkout.Session,
+  errorMessage: string
+): Promise<void> {
+  const piId = extractPaymentIntentId(session);
+  if (!piId) {
+    console.error("webhook: EDITION_EXCEEDED but no payment_intent to refund");
+    return;
+  }
+
+  const stripe = (await import("./client")).stripeClient();
+  try {
+    await stripe.refunds.create({ payment_intent: piId });
+  } catch (refundErr) {
+    console.error(`webhook: auto-refund failed for PI ${piId}: ${(refundErr as Error).message}`);
+  }
+
+  const email = session.customer_details?.email ?? session.customer_email;
+  if (email) {
+    try {
+      const { getResend, fromAddress } = await import("@/lib/email/client");
+      const resend = getResend();
+      await resend.emails.send({
+        from: fromAddress(),
+        to: email,
+        subject: "We're sorry — your order could not be fulfilled",
+        text: [
+          `Hi ${session.customer_details?.name ?? "there"},`,
+          ``,
+          `We sincerely apologize — one or more prints in your order sold out between checkout and payment confirmation.`,
+          ``,
+          `A full refund has been issued to your original payment method. You should see it within 5-10 business days.`,
+          ``,
+          `If you'd like to select a different print, we'd love to have you back:`,
+          `${process.env.NEXT_PUBLIC_APP_URL ?? "https://attamassok.com"}`,
+          ``,
+          `Thank you for your understanding.`,
+          `— Thalia Bassim Studio`,
+        ].join("\n"),
+      });
+    } catch (emailErr) {
+      console.error(`webhook: apology email failed for ${email}: ${(emailErr as Error).message}`);
+    }
+  }
+
+  try {
+    const { getDispatcher } = await import("@/lib/alerting/dispatcher");
+    const dispatcher = getDispatcher();
+    await dispatcher.send({
+      type: "system_error",
+      severity: "critical",
+      title: "Edition exceeded — auto-refund issued",
+      whatHappened: `Session ${session.id} paid but edition was exhausted. Auto-refund issued to PI ${piId}. Customer: ${email ?? "unknown"}. Error: ${errorMessage}`,
+      autoHandled: "Full refund issued automatically. Apology email sent to customer.",
+      actionRequired: false,
+      actionInstructions:
+        "None — handled automatically. Verify refund appeared in Stripe Dashboard if concerned.",
+      timestamp: new Date().toISOString(),
+      metadata: { sessionId: session.id, paymentIntentId: piId, email, error: errorMessage },
+    });
+  } catch (alertErr) {
+    console.error(`webhook: edition-exceeded alert failed: ${(alertErr as Error).message}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Top-level dispatcher - route calls this after signature verification.
 // ---------------------------------------------------------------------------
 
@@ -319,6 +500,18 @@ export async function dispatchWebhookEvent(event: Stripe.Event): Promise<Dispatc
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
       return await handleCheckoutSessionCompleted(session);
+    }
+    case "checkout.session.async_payment_succeeded": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      return await handleCheckoutSessionCompleted(session);
+    }
+    case "charge.refunded": {
+      await handleChargeRefunded(event.data.object as Stripe.Charge);
+      return null;
+    }
+    case "charge.dispute.created": {
+      await handleDisputeCreated(event.data.object as Stripe.Dispute);
+      return null;
     }
     default:
       console.info(`webhook: ignoring event type ${event.type}`);

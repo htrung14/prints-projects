@@ -208,6 +208,27 @@ export async function insertOrderWithItems(
   }
 
   const db = serverClient();
+
+  // Idempotency: if an order already exists for this session, return it
+  const { data: existing } = await db
+    .from("orders")
+    .select(ORDER_COLUMNS)
+    .eq("stripe_checkout_session_id", args.stripeSessionId)
+    .maybeSingle();
+
+  if (existing) {
+    const { data: existingItems, error: itemsErr } = await db
+      .from("order_items")
+      .select("*")
+      .eq("order_id", existing.id);
+    if (itemsErr)
+      throw new Error(`insertOrderWithItems: failed to fetch existing items: ${itemsErr.message}`);
+    return {
+      order: rowToOrder(existing as OrderRow),
+      items: (existingItems ?? []).map((i) => rowToOrderItem(i as OrderItemRow)),
+    };
+  }
+
   const payload = {
     stripeCheckoutSessionId: args.stripeSessionId,
     stripePaymentIntentId: args.stripePaymentIntentId,

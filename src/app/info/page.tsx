@@ -187,7 +187,7 @@ export default function InfoPage() {
                   Email
                 </Link>
                 <Link
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/thaliabassim/"
                   target="_blank"
                   rel="noreferrer noopener"
                   style={{ color: "#fff" }}

@@ -119,6 +119,20 @@ export type ResolvedCartLine = {
   unitPriceCents: number;
 };
 
+function dedupeCartLines(lines: CartLine[]): CartLine[] {
+  const map = new Map<string, CartLine>();
+  for (const line of lines) {
+    const key = `${line.photoSlug}::${line.sizeId}::${line.paperId}`;
+    const existing = map.get(key);
+    if (existing) {
+      existing.quantity += line.quantity;
+    } else {
+      map.set(key, { ...line });
+    }
+  }
+  return Array.from(map.values());
+}
+
 /**
  * Resolve each incoming cart line against the catalog and compute the
  * server-side unit price. Throws on any line that references an unknown
@@ -133,8 +147,11 @@ export async function resolveCartLines(lines: CartLine[]): Promise<ResolvedCartL
     throw new Error("resolveCartLines: cart must contain at least one line");
   }
 
+  // Dedupe: aggregate quantities for identical (photoSlug, sizeId, paperId) combos
+  const deduped = dedupeCartLines(lines);
+
   const resolved: ResolvedCartLine[] = [];
-  for (const line of lines) {
+  for (const line of deduped) {
     if (typeof line.photoSlug !== "string" || !line.photoSlug) {
       throw new Error("resolveCartLines: missing photoSlug");
     }
@@ -322,7 +339,7 @@ export async function createCheckoutSession(
   const params: SessionCreateParams = {
     mode: "payment",
     line_items: lineItems,
-    automatic_tax: { enabled: true },
+    automatic_tax: { enabled: process.env.NODE_ENV === "production" },
     tax_id_collection: { enabled: false },
     billing_address_collection: "required",
     shipping_address_collection: {

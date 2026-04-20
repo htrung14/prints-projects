@@ -1,6 +1,5 @@
 import "server-only";
 import { serverClient } from "@/lib/supabase/server";
-import { listOrders } from "@/lib/supabase/queries/orders";
 import { batchReadyAlert } from "@/lib/alerting";
 import { getDispatcher } from "@/lib/alerting/dispatcher";
 import { getResend, fromAddress } from "@/lib/email/client";
@@ -47,17 +46,22 @@ export async function batchOrdersForPrint(actorEmail: string): Promise<{
 }> {
   const db = serverClient();
 
-  const paidOrders = await listOrders({ status: "paid" });
-  if (paidOrders.length === 0) {
-    return { batched: 0, orderIds: [] };
-  }
-
-  const orderIds = paidOrders.map((o) => o.id);
   const newStatus: OrderStatus = "queued_for_print";
 
-  const { error } = await db.from("orders").update({ status: newStatus }).in("id", orderIds);
+  // Atomic: only update rows still in "paid" status (guards against concurrent dispatch)
+  const { data: updated, error } = await db
+    .from("orders")
+    .update({ status: newStatus })
+    .eq("status", "paid")
+    .select("id");
+
   if (error) {
     throw new Error(`Failed to batch orders: ${error.message}`);
+  }
+
+  const orderIds = (updated ?? []).map((r: { id: string }) => r.id);
+  if (orderIds.length === 0) {
+    return { batched: 0, orderIds: [] };
   }
 
   await runSafely(async () => {
@@ -73,11 +77,11 @@ export async function batchOrdersForPrint(actorEmail: string): Promise<{
 
   const dispatcher = getDispatcher();
   await runSafely(
-    () => dispatcher.send(batchReadyAlert(paidOrders.length, orderIds)),
+    () => dispatcher.send(batchReadyAlert(orderIds.length, orderIds)),
     "batch ready alert"
   );
 
-  await runSafely(() => sendPrinterBatchEmail(paidOrders.length, orderIds), "printer batch email");
+  await runSafely(() => sendPrinterBatchEmail(orderIds.length, orderIds), "printer batch email");
 
-  return { batched: paidOrders.length, orderIds };
+  return { batched: orderIds.length, orderIds };
 }

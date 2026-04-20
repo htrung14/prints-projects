@@ -35,10 +35,13 @@ export async function POST(req: NextRequest): Promise<Response> {
     return new Response("Missing Stripe-Signature header", { status: 400 });
   }
 
-  // `req.text()` returns the raw body as delivered - required for
-  // signature verification. Using req.json() would re-serialize with
-  // different whitespace and the HMAC would not match.
-  const rawBody = await req.text();
+  let rawBody: string;
+  try {
+    rawBody = await req.text();
+  } catch (err) {
+    console.error(`Stripe webhook: failed to read request body: ${(err as Error).message}`);
+    return new Response("Failed to read request body", { status: 400 });
+  }
 
   const stripe = stripeClient();
   let event;

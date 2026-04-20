@@ -17,6 +17,7 @@
 import type { NextRequest } from "next/server";
 import type { CartLine } from "@/lib/types";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
+import { softInventoryCheck } from "@/lib/stripe/inventory-check";
 
 // Force the Node runtime - the Stripe SDK and Supabase service-role client
 // rely on Node-only APIs (crypto, Buffer). Edge would silently fail at runtime.
@@ -72,6 +73,13 @@ export async function POST(req: NextRequest): Promise<Response> {
       return Response.json({ error: err.message }, { status: 400 });
     }
     throw err;
+  }
+
+  // Soft inventory check — non-blocking best-effort to avoid sending
+  // customers to checkout for sold-out editions
+  const stockIssue = await softInventoryCheck(parsed.lines);
+  if (stockIssue) {
+    return Response.json({ error: stockIssue }, { status: 409 });
   }
 
   try {
