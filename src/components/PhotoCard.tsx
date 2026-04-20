@@ -36,7 +36,7 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
           </span>
         ) : null}
       </figure>
-      <div className="flex items-baseline justify-between gap-4">
+      <div className="flex items-baseline justify-between gap-4 mt-4">
         <h3
           className="overflow-hidden text-ellipsis whitespace-nowrap min-w-0"
           style={{
