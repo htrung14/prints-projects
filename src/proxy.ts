@@ -3,16 +3,15 @@
  *
  * Next 16 renamed `middleware` to `proxy` (see
  * node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md).
- * The old filename + `middleware` export name still work for back-compat in
- * 16.x, and the Track E ownership map in docs-ai/backend-plan.md still refers
- * to it as `src/middleware.ts`, so we keep the filename. Internally we use the
- * proxy/ssr refresh pattern the @supabase/ssr docs describe.
+ * Filename and exported function both updated (2026-04-20) to clear the
+ * deprecation warning surfaced in dev. Internally we use the proxy/ssr
+ * refresh pattern the @supabase/ssr docs describe.
  *
  * What this does, per the Track E spec:
  * 1. Refreshes the Supabase session cookie on every matched request. The
- *    whole point of doing this in middleware is that refresh tokens are
- *    single-use - without a per-request refresh, concurrent page loads race
- *    and randomly log users out (@supabase/ssr README "Concurrent requests").
+ *    whole point of doing this here is that refresh tokens are single-use -
+ *    without a per-request refresh, concurrent page loads race and randomly
+ *    log users out (@supabase/ssr README "Concurrent requests").
  * 2. Allows `/admin/sign-in` and `/admin/auth/callback` through unauthenticated
  *    so the sign-in flow itself works.
  * 3. Redirects unauthenticated or non-allowlisted visitors to
@@ -34,7 +33,7 @@ function isPublicAdminPath(pathname: string): boolean {
   return pathname.startsWith("/admin/auth/callback/");
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // The matcher already scopes us to /admin/:path*, but double-check: this is

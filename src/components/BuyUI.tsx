@@ -1,26 +1,29 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { formatUsd, isSoldOut, priceCents } from "@/lib/pricing";
 import type { PaperType, Photo } from "@/lib/types";
 
-type DiscKey = "paper" | "description" | "shipping" | "care";
+type DiscKey = "shipping" | "care";
 
 // Placeholder: each print is a single size. Stakeholder to confirm.
 // Falls back to the first fixture size if the expected id is absent so
 // cart/Stripe flow keeps working while the size is finalized.
-const FIXED_SIZE_ID = "16x20";
-const FIXED_SIZE_LABEL = "16 × 20 in";
+const FIXED_SIZE_ID = "8x10";
+const FIXED_SIZE_LABEL = "8 × 10 in";
 
 export default function BuyUI({ photo }: { photo: Photo }) {
   const { add, drawerOpen } = useCart();
-  const [paperId, setPaperId] = useState<PaperType>(photo.papers[0].id);
+  const [paperId] = useState<PaperType>(photo.papers[0].id);
   const [qty] = useState(1);
+
+  // Post-Lemaire restructure (2026-04-20): two of the previous four accordions
+  // (Paper, Description) flattened into always-visible blocks so the page
+  // scans at a glance the way lemaire.fr's PDP does. Shipping & Care stay
+  // collapsed because that content is reference detail - users who want it
+  // will open it, but it shouldn't compete with the photograph for attention.
   const [open, setOpen] = useState<Record<DiscKey, boolean>>({
-    paper: false,
-    description: false,
     shipping: false,
     care: false,
   });
@@ -40,10 +43,8 @@ export default function BuyUI({ photo }: { photo: Photo }) {
 
   const soldOut = isSoldOut(photo);
   const currentPrice = priceCents(photo, sizeId, paperId);
-  const currentPaper = photo.papers.find((p) => p.id === paperId);
 
   const toggleDisc = (key: DiscKey) => setOpen((o) => ({ ...o, [key]: !o[key] }));
-  const closeDisc = (key: DiscKey) => setOpen((o) => ({ ...o, [key]: false }));
 
   // Sticky bar - show when the main CTA is out of viewport AND the related
   // section is NOT yet in viewport. Same dual IntersectionObserver as prototype.
@@ -98,27 +99,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
 
   return (
     <section className="flex flex-col self-start">
-      {/* Breadcrumb */}
-      <p
-        className="font-mono mb-7"
-        style={{
-          fontSize: 12,
-          letterSpacing: "0.12em",
-          color: "var(--i5)",
-          textTransform: "uppercase",
-        }}
-      >
-        <Link href="/#prints" className="text-[color:var(--i5)] hover:text-ink">
-          Prints
-        </Link>
-        <span className="mx-2 opacity-55">/</span>
-        <span>
-          {photo.title}
-          {photo.titleItalic ? ` ${photo.titleItalic}` : ""}
-        </span>
-      </p>
-
-      {/* Title: Arabic above English italic */}
+      {/* Title: Arabic above English */}
       <h1 className="flex flex-col">
         <span
           className="font-serif"
@@ -135,76 +116,57 @@ export default function BuyUI({ photo }: { photo: Photo }) {
           التمسّك
         </span>
         <span
-          className="font-serif italic"
+          className="font-serif"
           style={{
             fontSize: 22,
-            fontWeight: 600,
+            fontWeight: 400,
             color: "var(--i8)",
             lineHeight: 1.15,
-            marginBottom: 24,
+            marginBottom: 18,
           }}
         >
           {photo.title}
-          {photo.titleItalic ? <> {photo.titleItalic}</> : null}
+          {photo.titleItalic ? <>, {photo.titleItalic}</> : null}
         </span>
       </h1>
 
-      {/* Static size meta - placeholder, one size per print (TBD) */}
+      {/* Price block - per Lemaire pattern: tiny caps label above, prominent
+          numeral below, subtle rule under. Keeps the price legible without
+          waiting for the CTA to reveal it. */}
+      <div style={{ marginBottom: 20 }}>
+        <p
+          className="font-sans"
+          style={{
+            fontSize: 30,
+            fontWeight: 400,
+            color: "var(--ink)",
+            letterSpacing: "-0.01em",
+            lineHeight: 1,
+          }}
+        >
+          {formatUsd(currentPrice)}
+        </p>
+      </div>
+
+      {/* Fixed size + edition meta. Archival context now lives with the paper
+          picker (below) so this line is tight. */}
       <p
         className="font-mono"
         style={{
           fontSize: 12,
           color: "var(--i5)",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          marginBottom: 12,
+          letterSpacing: "0.04em",
+          marginBottom: 26,
+          paddingBottom: 18,
+          borderBottom: "1px solid var(--i1)",
         }}
       >
-        Size · {FIXED_SIZE_LABEL}
+        {FIXED_SIZE_LABEL} · Archival pigment · Ed. of {photo.editionTotal}
       </p>
 
-      {/* Desktop: the headline price lives on the Add-to-Cart CTA below, so
-          we don't repeat it here. On the narrow mobile sticky bar the title
-          is echoed with its own price so the button can stay compact. */}
-      <div style={{ marginBottom: 32 }} aria-hidden />
-
-      {/* Paper disclosure - each option shows the surcharge delta ("+ $20")
-          rather than the full resolved line price. The base paper shows
-          "Included" so the zero-surcharge state reads as intentional, not as
-          missing data. Selected state uses a row highlight instead of a dot. */}
-      <Disclosure
-        label="Paper"
-        value={currentPaper?.name ?? "Select"}
-        open={open.paper}
-        onToggle={() => toggleDisc("paper")}
-      >
-        {photo.papers.map((p) => {
-          // Surcharge in cents - 0 for the base paper. Display a sign so the
-          // delta is legible at a glance ("+ $20") without doing math.
-          const surcharge = p.surchargeCents;
-          const deltaLabel = surcharge === 0 ? "Included" : `+ ${formatUsd(surcharge)}`;
-          return (
-            <button
-              key={p.id}
-              type="button"
-              className="disc-opt"
-              aria-pressed={paperId === p.id}
-              onClick={() => {
-                setPaperId(p.id);
-                closeDisc("paper");
-              }}
-            >
-              {p.name}
-              <span className="opt-meta">{deltaLabel}</span>
-            </button>
-          );
-        })}
-      </Disclosure>
-
-      {/* CTA - the shipping/edition copy lives in the Shipping & returns
-          disclosure below, so we don't duplicate it as a caps-mono preamble
-          above the button. */}
-      <div className="mt-7 mb-3.5">
+      {/* CTA + micro-meta below. The button keeps the headline price on its
+          right edge as a redundancy check right before commit. */}
+      <div style={{ marginBottom: 10 }}>
         <button
           ref={ctaRef}
           type="button"
@@ -217,15 +179,42 @@ export default function BuyUI({ photo }: { photo: Photo }) {
           <span>{soldOut ? "Edition closed" : justAdded ? "Added to cart ✓" : "Add to cart"}</span>
           <span className="btn-ink-price">{justAdded ? "" : formatUsd(currentPrice)}</span>
         </button>
+        <p
+          className="font-mono"
+          style={{
+            fontSize: 11,
+            letterSpacing: "0.04em",
+            color: "var(--i5)",
+            marginTop: 10,
+            textAlign: "center",
+          }}
+        >
+          Each print made to order · ships within 14 business days
+        </p>
       </div>
 
-      {/* Description */}
-      <Disclosure
-        label="Description"
-        value=""
-        open={open.description}
-        onToggle={() => toggleDisc("description")}
+      {/* Description - always open. Pulled out of an accordion because
+          this is the emotional hook of the product page; Lemaire leaves
+          it visible below the CTA for the same reason. */}
+      <section
+        aria-label="Description"
+        style={{
+          marginTop: 16,
+          paddingTop: 16,
+          borderTop: "1px solid var(--i1)",
+        }}
       >
+        <h2
+          className="font-mono"
+          style={{
+            fontSize: 13,
+            letterSpacing: "0.04em",
+            color: "var(--ink)",
+            marginBottom: 14,
+          }}
+        >
+          Description
+        </h2>
         <div style={{ fontSize: 16, lineHeight: 1.65, color: "var(--ink)", maxWidth: "58ch" }}>
           {photo.description.map((para, i) => (
             <p key={i} style={{ marginTop: i === 0 ? 0 : 10 }}>
@@ -233,25 +222,30 @@ export default function BuyUI({ photo }: { photo: Photo }) {
             </p>
           ))}
         </div>
-      </Disclosure>
+      </section>
 
-      {/* Shipping & returns */}
+      {/* Shipping & returns - kept collapsed. Reference detail; the
+          essential "ships in 14 business days" line already sits under
+          the CTA, so this accordion is for the longer policy copy. */}
       <Disclosure
-        label="Shipping & returns"
+        label="Shipping & Returns"
         value=""
         open={open.shipping}
         onToggle={() => toggleDisc("shipping")}
       >
         <div style={{ fontSize: 16, lineHeight: 1.65, color: "var(--ink)", maxWidth: "58ch" }}>
+          <p style={{ marginBottom: 12 }}>
+            Ships in a flat waterproof package within 14 business days.
+          </p>
           <p>
-            Ships flat in an archival tube within 7 working days via insured courier, worldwide. A
-            replacement can be arranged if the package arrives damaged or with the seal broken -
-            just email a photo of the outer tube and the print within 48 hours of delivery.
+            Dispatched worldwide via insured courier. A replacement can be arranged if the package
+            arrives damaged or with the seal broken - just email a photo of the outer package and
+            the print within 48 hours of delivery.
           </p>
         </div>
       </Disclosure>
 
-      {/* Care */}
+      {/* Care - kept collapsed. Post-purchase reference, not a purchase driver. */}
       <Disclosure label="Care" value="" open={open.care} onToggle={() => toggleDisc("care")}>
         <div style={{ fontSize: 16, lineHeight: 1.65, color: "var(--ink)", maxWidth: "58ch" }}>
           <p>
@@ -283,7 +277,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
             style={{ fontSize: 17, color: "var(--ink)", lineHeight: 1, marginBottom: 5 }}
           >
             {photo.title}
-            {photo.titleItalic ? ` ${photo.titleItalic}` : ""}
+            {photo.titleItalic ? `, ${photo.titleItalic}` : ""}
           </span>
           <span className="block font-mono" style={{ fontSize: 13, color: "var(--ink)" }}>
             {formatUsd(currentPrice)}

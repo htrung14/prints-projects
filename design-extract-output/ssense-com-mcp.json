@@ -1,0 +1,457 @@
+{
+  "colors": {
+    "all": [
+      {
+        "hex": "#333333",
+        "rgb": {
+          "r": 51,
+          "g": 51,
+          "b": 51,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 20
+        },
+        "count": 827,
+        "contexts": ["text", "border"]
+      },
+      {
+        "hex": "#000000",
+        "rgb": {
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 0
+        },
+        "count": 634,
+        "contexts": ["text", "border"]
+      },
+      {
+        "hex": "#f4f4f4",
+        "rgb": {
+          "r": 244,
+          "g": 244,
+          "b": 244,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 96
+        },
+        "count": 28,
+        "contexts": ["background"]
+      },
+      {
+        "hex": "#888888",
+        "rgb": {
+          "r": 136,
+          "g": 136,
+          "b": 136,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 53
+        },
+        "count": 27,
+        "contexts": ["border", "text"]
+      },
+      {
+        "hex": "#979797",
+        "rgb": {
+          "r": 151,
+          "g": 151,
+          "b": 151,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 59
+        },
+        "count": 25,
+        "contexts": ["border", "background"]
+      },
+      {
+        "hex": "#ffffff",
+        "rgb": {
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 100
+        },
+        "count": 8,
+        "contexts": ["background"]
+      },
+      {
+        "hex": "#777777",
+        "rgb": {
+          "r": 119,
+          "g": 119,
+          "b": 119,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 47
+        },
+        "count": 5,
+        "contexts": ["border"]
+      },
+      {
+        "hex": "#cccccc",
+        "rgb": {
+          "r": 204,
+          "g": 204,
+          "b": 204,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 80
+        },
+        "count": 1,
+        "contexts": ["border"]
+      }
+    ]
+  },
+  "regions": [
+    {
+      "role": "nav",
+      "tag": "header",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1280,
+        "h": 55
+      },
+      "heading": null,
+      "buttonCount": 0,
+      "cardCount": 14,
+      "className": "header opaque-header"
+    },
+    {
+      "role": "nav",
+      "tag": "nav",
+      "bounds": {
+        "x": 20,
+        "y": 0,
+        "w": 545.59375,
+        "h": 50
+      },
+      "heading": null,
+      "buttonCount": 0,
+      "cardCount": 5,
+      "className": "span7 header-nav header-nav-left header-sm"
+    },
+    {
+      "role": "nav",
+      "tag": "div",
+      "bounds": {
+        "x": 565.59375,
+        "y": 0,
+        "w": 148.796875,
+        "h": 40
+      },
+      "heading": null,
+      "buttonCount": 0,
+      "cardCount": 0,
+      "className": "header-logo span2 span-sm icon-redesign"
+    },
+    {
+      "role": "nav",
+      "tag": "nav",
+      "bounds": {
+        "x": 714.390625,
+        "y": 0,
+        "w": 545.59375,
+        "h": 50
+      },
+      "heading": null,
+      "buttonCount": 0,
+      "cardCount": 9,
+      "className": "span7 header-nav header-nav-right header-sm"
+    },
+    {
+      "role": "features",
+      "tag": "main",
+      "bounds": {
+        "x": 0,
+        "y": 55,
+        "w": 1280,
+        "h": 3921.09375
+      },
+      "heading": "THE BEAUTY OF BAD TASTE",
+      "buttonCount": 0,
+      "cardCount": 8,
+      "className": "main container-fluid"
+    },
+    {
+      "role": "footer",
+      "tag": "footer",
+      "bounds": {
+        "x": 0,
+        "y": 4076.09375,
+        "w": 1280,
+        "h": 60
+      },
+      "heading": null,
+      "buttonCount": 2,
+      "cardCount": 32,
+      "className": "footer"
+    },
+    {
+      "role": "nav",
+      "tag": "nav",
+      "bounds": {
+        "x": 40.625,
+        "y": 4076.09375,
+        "w": 1198.734375,
+        "h": 25
+      },
+      "heading": null,
+      "buttonCount": 2,
+      "cardCount": 27,
+      "className": null
+    },
+    {
+      "role": "footer",
+      "tag": "footer",
+      "bounds": {
+        "x": 407.1875,
+        "y": 4101.09375,
+        "w": 465.625,
+        "h": 15
+      },
+      "heading": null,
+      "buttonCount": 0,
+      "cardCount": 5,
+      "className": null
+    }
+  ],
+  "componentClusters": [],
+  "accessibility": {
+    "remediation": []
+  },
+  "cssHealth": {
+    "sheets": [
+      {
+        "url": "https://www.ssense.com/",
+        "totalBytes": 58,
+        "usedBytes": 0,
+        "unusedBytes": 58,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://www.ssense.com/",
+        "totalBytes": 276926,
+        "usedBytes": 32256,
+        "unusedBytes": 244670,
+        "unusedPercent": 88
+      },
+      {
+        "url": "webpack://./src/client/views/components/country-select/Select.vue",
+        "totalBytes": 937,
+        "usedBytes": 0,
+        "unusedBytes": 937,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/pages/mobile-nav-burger-menu/components/language-menu/MobileBurgerLanguageMenu.scss",
+        "totalBytes": 4849,
+        "usedBytes": 0,
+        "unusedBytes": 4849,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/components/banner/BannerConnected.vue",
+        "totalBytes": 11135,
+        "usedBytes": 0,
+        "unusedBytes": 11135,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/pages/mobile-nav-burger-menu/MobileNavBurgerMenu.scss",
+        "totalBytes": 11538,
+        "usedBytes": 0,
+        "unusedBytes": 11538,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/pages/errors/NotFound.vue",
+        "totalBytes": 4964,
+        "usedBytes": 0,
+        "unusedBytes": 4964,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/components/modal/Backdrop.vue",
+        "totalBytes": 1486,
+        "usedBytes": 0,
+        "unusedBytes": 1486,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/pages/mobile-nav-burger-menu/components/category-menu/MobileBurgerCategoryMenu.scss",
+        "totalBytes": 1413,
+        "usedBytes": 0,
+        "unusedBytes": 1413,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/pages/mobile-nav-burger-menu/components/country-menu/MobileBurgerCountryMenu.scss",
+        "totalBytes": 6090,
+        "usedBytes": 0,
+        "unusedBytes": 6090,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/components/modal/Modal.vue",
+        "totalBytes": 6720,
+        "usedBytes": 0,
+        "unusedBytes": 6720,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/pages/layout/predictive-search/PredictiveSearch.scss",
+        "totalBytes": 21165,
+        "usedBytes": 0,
+        "unusedBytes": 21165,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/styles/_mixins.scss",
+        "totalBytes": 4213,
+        "usedBytes": 0,
+        "unusedBytes": 4213,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/components/forms/SearchForm.vue",
+        "totalBytes": 7798,
+        "usedBytes": 0,
+        "unusedBytes": 7798,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/pages/mobile-nav-burger-menu/components/menu-items/MobileBurgerMenuItems.scss",
+        "totalBytes": 6301,
+        "usedBytes": 0,
+        "unusedBytes": 6301,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/pages/layout/mobile-nav/MobileSearch.scss",
+        "totalBytes": 22821,
+        "usedBytes": 0,
+        "unusedBytes": 22821,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/styles/_mixins.scss",
+        "totalBytes": 5749,
+        "usedBytes": 0,
+        "unusedBytes": 5749,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/components/notification/Notification.vue",
+        "totalBytes": 18668,
+        "usedBytes": 0,
+        "unusedBytes": 18668,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./node_modules/@ssense/ssense-frontend-vue/src/client/views/components/carousel/Navigation.vue",
+        "totalBytes": 1773,
+        "usedBytes": 0,
+        "unusedBytes": 1773,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./node_modules/@ssense/ssense-frontend-vue/src/client/views/components/carousel/Pagination.vue",
+        "totalBytes": 1387,
+        "usedBytes": 0,
+        "unusedBytes": 1387,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./node_modules/@ssense/ssense-frontend-vue/src/client/views/components/homepage/OneHundred.vue",
+        "totalBytes": 23737,
+        "usedBytes": 0,
+        "unusedBytes": 23737,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./node_modules/@ssense/ssense-frontend-vue/src/client/scss/_include-media.scss",
+        "totalBytes": 29363,
+        "usedBytes": 0,
+        "unusedBytes": 29363,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./node_modules/@ssense/ssense-frontend-vue/src/client/scss/_include-media.scss",
+        "totalBytes": 29830,
+        "usedBytes": 0,
+        "unusedBytes": 29830,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./node_modules/@ssense/ssense-frontend-vue/src/client/views/elements/HomepageHeaderText.vue",
+        "totalBytes": 26557,
+        "usedBytes": 0,
+        "unusedBytes": 26557,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./LinkModule.vue",
+        "totalBytes": 65815,
+        "usedBytes": 0,
+        "unusedBytes": 65815,
+        "unusedPercent": 100
+      },
+      {
+        "url": "webpack://./src/client/views/pages/ChinaHomePage.vue",
+        "totalBytes": 28442,
+        "usedBytes": 0,
+        "unusedBytes": 28442,
+        "unusedPercent": 100
+      }
+    ],
+    "totalBytes": 619735,
+    "usedBytes": 32256,
+    "unusedBytes": 587479,
+    "unusedPercent": 95,
+    "importantCount": 138,
+    "duplicates": 5728,
+    "vendorPrefixes": {
+      "webkit": 155,
+      "moz": 124,
+      "ms": 46,
+      "o": 39
+    },
+    "keyframes": [],
+    "specificity": {
+      "max": [2, 6, 5],
+      "average": [0.05, 1.84, 0.33],
+      "count": 2460
+    },
+    "issues": ["138 !important rules", "5728 duplicate declarations", "95% unused CSS"]
+  }
+}

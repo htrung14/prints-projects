@@ -2,7 +2,7 @@
   {
     "slug": "north-lebanon-2-oct-2020",
     "referenceNumber": "AT-016",
-    "title": "North Lebanon II,",
+    "title": "North Lebanon (2)",
     "titleItalic": "October 2020",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2020,
@@ -12,11 +12,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-2-oct-2020.jpg",
     "imageAlt": "North Lebanon II, October 2020",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -29,12 +29,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -43,7 +43,7 @@
   {
     "slug": "north-lebanon-oct-2020",
     "referenceNumber": "AT-023",
-    "title": "North Lebanon,",
+    "title": "North Lebanon",
     "titleItalic": "October 2020",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2020,
@@ -53,11 +53,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-oct-2020.jpg",
     "imageAlt": "North Lebanon, October 2020",
-    "basePriceCents": 22000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -70,12 +70,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -84,7 +84,7 @@
   {
     "slug": "north-lebanon-2-jul-2021",
     "referenceNumber": "AT-013",
-    "title": "North Lebanon II,",
+    "title": "North Lebanon (2)",
     "titleItalic": "July 2021",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2021,
@@ -94,11 +94,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-2-jul-2021.jpg",
     "imageAlt": "North Lebanon II, July 2021",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -111,12 +111,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -125,7 +125,7 @@
   {
     "slug": "north-lebanon-jul-2021",
     "referenceNumber": "AT-021",
-    "title": "North Lebanon,",
+    "title": "North Lebanon",
     "titleItalic": "July 2021",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2021,
@@ -135,11 +135,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-jul-2021.jpg",
     "imageAlt": "North Lebanon, July 2021",
-    "basePriceCents": 22000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -152,12 +152,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -166,7 +166,7 @@
   {
     "slug": "tyre-feb-2022",
     "referenceNumber": "AT-025",
-    "title": "Tyre,",
+    "title": "Tyre",
     "titleItalic": "February 2022",
     "subtitle": "Tyre, Lebanon",
     "year": 2022,
@@ -176,11 +176,11 @@
     ],
     "imageUrl": "/images/catalog/tyre-feb-2022.jpg",
     "imageAlt": "Tyre, February 2022",
-    "basePriceCents": 28000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -193,12 +193,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -207,7 +207,7 @@
   {
     "slug": "north-lebanon-apr-2022",
     "referenceNumber": "AT-019",
-    "title": "North Lebanon,",
+    "title": "North Lebanon",
     "titleItalic": "April 2022",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2022,
@@ -217,11 +217,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-apr-2022.jpg",
     "imageAlt": "North Lebanon, April 2022",
-    "basePriceCents": 22000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -234,12 +234,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -248,7 +248,7 @@
   {
     "slug": "north-lebanon-jul-2022",
     "referenceNumber": "AT-022",
-    "title": "North Lebanon,",
+    "title": "North Lebanon",
     "titleItalic": "July 2022",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2022,
@@ -258,11 +258,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-jul-2022.jpg",
     "imageAlt": "North Lebanon, July 2022",
-    "basePriceCents": 22000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -275,12 +275,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -289,7 +289,7 @@
   {
     "slug": "mount-lebanon-mar-2023",
     "referenceNumber": "AT-011",
-    "title": "Mount Lebanon,",
+    "title": "Mount Lebanon",
     "titleItalic": "March 2023",
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2023,
@@ -299,11 +299,11 @@
     ],
     "imageUrl": "/images/catalog/mount-lebanon-mar-2023.jpg",
     "imageAlt": "Mount Lebanon, March 2023",
-    "basePriceCents": 22000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -316,12 +316,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -330,7 +330,7 @@
   {
     "slug": "mount-lebanon-jan-2025",
     "referenceNumber": "AT-010",
-    "title": "Mount Lebanon,",
+    "title": "Mount Lebanon",
     "titleItalic": "January 2025",
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2025,
@@ -340,11 +340,11 @@
     ],
     "imageUrl": "/images/catalog/mount-lebanon-jan-2025.jpg",
     "imageAlt": "Mount Lebanon, January 2025",
-    "basePriceCents": 22000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -357,12 +357,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -371,7 +371,7 @@
   {
     "slug": "bekaa-feb-2025",
     "referenceNumber": "AT-001",
-    "title": "Bekaa,",
+    "title": "Bekaa",
     "titleItalic": "February 2025",
     "subtitle": "Bekaa, Lebanon",
     "year": 2025,
@@ -381,11 +381,11 @@
     ],
     "imageUrl": "/images/catalog/bekaa-feb-2025.jpg",
     "imageAlt": "Bekaa, February 2025",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -398,12 +398,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -412,7 +412,7 @@
   {
     "slug": "mount-lebanon-2-feb-2025",
     "referenceNumber": "AT-004",
-    "title": "Mount Lebanon II,",
+    "title": "Mount Lebanon (2)",
     "titleItalic": "February 2025",
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2025,
@@ -422,11 +422,11 @@
     ],
     "imageUrl": "/images/catalog/mount-lebanon-2-feb-2025.jpg",
     "imageAlt": "Mount Lebanon II, February 2025",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -439,12 +439,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -453,7 +453,7 @@
   {
     "slug": "mount-lebanon-3-feb-2025",
     "referenceNumber": "AT-006",
-    "title": "Mount Lebanon III,",
+    "title": "Mount Lebanon (3)",
     "titleItalic": "February 2025",
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2025,
@@ -463,11 +463,11 @@
     ],
     "imageUrl": "/images/catalog/mount-lebanon-3-feb-2025.jpg",
     "imageAlt": "Mount Lebanon III, February 2025",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -480,12 +480,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -494,7 +494,7 @@
   {
     "slug": "mount-lebanon-4-feb-2025",
     "referenceNumber": "AT-008",
-    "title": "Mount Lebanon IV,",
+    "title": "Mount Lebanon (4)",
     "titleItalic": "February 2025",
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2025,
@@ -504,11 +504,11 @@
     ],
     "imageUrl": "/images/catalog/mount-lebanon-4-feb-2025.jpg",
     "imageAlt": "Mount Lebanon IV, February 2025",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -521,12 +521,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -535,7 +535,7 @@
   {
     "slug": "mount-lebanon-feb-2025",
     "referenceNumber": "AT-009",
-    "title": "Mount Lebanon,",
+    "title": "Mount Lebanon",
     "titleItalic": "February 2025",
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2025,
@@ -545,11 +545,11 @@
     ],
     "imageUrl": "/images/catalog/mount-lebanon-feb-2025.jpg",
     "imageAlt": "Mount Lebanon, February 2025",
-    "basePriceCents": 22000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -562,12 +562,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -576,7 +576,7 @@
   {
     "slug": "north-lebanon-2-feb-2025",
     "referenceNumber": "AT-014",
-    "title": "North Lebanon II,",
+    "title": "North Lebanon (2)",
     "titleItalic": "February 2025",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2025,
@@ -586,11 +586,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-2-feb-2025.jpg",
     "imageAlt": "North Lebanon II, February 2025",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -603,12 +603,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -617,7 +617,7 @@
   {
     "slug": "north-lebanon-feb-2025",
     "referenceNumber": "AT-020",
-    "title": "North Lebanon,",
+    "title": "North Lebanon",
     "titleItalic": "February 2025",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2025,
@@ -627,11 +627,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-feb-2025.jpg",
     "imageAlt": "North Lebanon, February 2025",
-    "basePriceCents": 22000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -644,12 +644,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -658,7 +658,7 @@
   {
     "slug": "keserwan-feb-2026",
     "referenceNumber": "AT-003",
-    "title": "Keserwan,",
+    "title": "Keserwan, Lebanon",
     "titleItalic": "February 2026",
     "subtitle": "Keserwan, Lebanon",
     "year": 2026,
@@ -668,11 +668,11 @@
     ],
     "imageUrl": "/images/catalog/keserwan-feb-2026.jpg",
     "imageAlt": "Keserwan, February 2026",
-    "basePriceCents": 22000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -685,12 +685,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -699,7 +699,7 @@
   {
     "slug": "north-lebanon-2-feb-2026",
     "referenceNumber": "AT-015",
-    "title": "North Lebanon II,",
+    "title": "North Lebanon (2)",
     "titleItalic": "February 2026",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2026,
@@ -709,11 +709,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-2-feb-2026.jpg",
     "imageAlt": "North Lebanon II, February 2026",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -726,12 +726,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -740,7 +740,7 @@
   {
     "slug": "north-lebanon-3-feb-2026",
     "referenceNumber": "AT-017",
-    "title": "North Lebanon III,",
+    "title": "North Lebanon (3)",
     "titleItalic": "February 2026",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2026,
@@ -750,11 +750,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-3-feb-2026.jpg",
     "imageAlt": "North Lebanon III, February 2026",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -767,12 +767,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -781,7 +781,7 @@
   {
     "slug": "north-lebanon-feb-2026",
     "referenceNumber": "AT-024",
-    "title": "North Lebanon,",
+    "title": "North Lebanon",
     "titleItalic": "February 2026",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2026,
@@ -791,11 +791,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-feb-2026.jpg",
     "imageAlt": "North Lebanon, February 2026",
-    "basePriceCents": 22000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -808,12 +808,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -822,7 +822,7 @@
   {
     "slug": "mount-lebanon-2-mar-2026",
     "referenceNumber": "AT-005",
-    "title": "Mount Lebanon II,",
+    "title": "Mount Lebanon (2)",
     "titleItalic": "March 2026",
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2026,
@@ -832,11 +832,11 @@
     ],
     "imageUrl": "/images/catalog/mount-lebanon-2-mar-2026.jpg",
     "imageAlt": "Mount Lebanon II, March 2026",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -849,12 +849,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -863,7 +863,7 @@
   {
     "slug": "mount-lebanon-3-mar-2026",
     "referenceNumber": "AT-007",
-    "title": "Mount Lebanon III,",
+    "title": "Mount Lebanon (3)",
     "titleItalic": "March 2026",
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2026,
@@ -873,11 +873,11 @@
     ],
     "imageUrl": "/images/catalog/mount-lebanon-3-mar-2026.jpg",
     "imageAlt": "Mount Lebanon III, March 2026",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -890,12 +890,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -904,7 +904,7 @@
   {
     "slug": "mount-lebanon-mar-2026",
     "referenceNumber": "AT-012",
-    "title": "Mount Lebanon,",
+    "title": "Mount Lebanon",
     "titleItalic": "March 2026",
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2026,
@@ -914,11 +914,11 @@
     ],
     "imageUrl": "/images/catalog/mount-lebanon-mar-2026.jpg",
     "imageAlt": "Mount Lebanon, March 2026",
-    "basePriceCents": 22000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -931,12 +931,12 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
@@ -945,7 +945,7 @@
   {
     "slug": "north-lebanon-3-mar-2026",
     "referenceNumber": "AT-018",
-    "title": "North Lebanon III,",
+    "title": "North Lebanon (3)",
     "titleItalic": "March 2026",
     "subtitle": "North Lebanon, Lebanon",
     "year": 2026,
@@ -955,11 +955,11 @@
     ],
     "imageUrl": "/images/catalog/north-lebanon-3-mar-2026.jpg",
     "imageAlt": "North Lebanon III, March 2026",
-    "basePriceCents": 32000,
+    "basePriceCents": 30000,
     "sizes": [
       {
-        "id": "16x20",
-        "label": "16 × 20 in",
+        "id": "8x10",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
@@ -972,12 +972,53 @@
       {
         "id": "baryta",
         "name": "Canson Baryta",
-        "surchargeCents": 2000
+        "surchargeCents": 0
       },
       {
         "id": "bamboo",
         "name": "Hahnemühle Bamboo",
-        "surchargeCents": 4000
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 3
+  },
+  {
+    "slug": "north-lebanon-4-oct-2020",
+    "referenceNumber": "AT-025",
+    "title": "North Lebanon (4)",
+    "titleItalic": "October 2020",
+    "subtitle": "North Lebanon, Lebanon",
+    "year": 2020,
+    "description": [
+      "Photographed in North Lebanon, October 2020. Part of At-Tamassok — a series on the small domestic rituals that persist across distance and displacement.",
+      "Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/north-lebanon-oct-2020.jpg",
+    "imageAlt": "North Lebanon IV, October 2020",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
       }
     ],
     "editionTotal": 10,

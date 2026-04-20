@@ -104,7 +104,7 @@ export default function CartDrawer() {
                       {photo.title}
                       {photo.titleItalic ? (
                         <>
-                          {" "}
+                          {", "}
                           <em>{photo.titleItalic}</em>
                         </>
                       ) : null}
@@ -166,7 +166,7 @@ export default function CartDrawer() {
             className="mb-3 text-ink-faint"
             style={{ fontSize: 12, fontWeight: 400, lineHeight: 1.5 }}
           >
-            Shipping calculated at checkout. Free US shipping on 2 prints or more.
+            Shipping calculated at checkout.
           </p>
           <Link
             href="/checkout"

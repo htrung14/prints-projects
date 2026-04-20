@@ -1,0 +1,107 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "settings": {
+    "color": {
+      "palette": [
+        {
+          "slug": "primary",
+          "color": "#faf8ed",
+          "name": "Primary"
+        },
+        {
+          "slug": "accent",
+          "color": "#faf8ed",
+          "name": "Accent"
+        },
+        {
+          "slug": "neutral-1",
+          "color": "#000000",
+          "name": "Neutral 1"
+        },
+        {
+          "slug": "neutral-2",
+          "color": "#161616",
+          "name": "Neutral 2"
+        },
+        {
+          "slug": "bg-161616",
+          "color": "#161616",
+          "name": "Background #161616"
+        },
+        {
+          "slug": "bg-faf8ed",
+          "color": "#faf8ed",
+          "name": "Background #faf8ed"
+        }
+      ],
+      "gradients": []
+    },
+    "typography": {
+      "fontFamilies": [
+        {
+          "fontFamily": "Diatype Variable",
+          "slug": "diatype-variable",
+          "name": "Diatype Variable"
+        },
+        {
+          "fontFamily": "-apple-system",
+          "slug": "-apple-system",
+          "name": "-apple-system"
+        },
+        {
+          "fontFamily": "Times",
+          "slug": "times",
+          "name": "Times"
+        }
+      ],
+      "fontSizes": [
+        {
+          "size": "14.5px",
+          "slug": "size-14.5",
+          "name": "14.5px"
+        },
+        {
+          "size": "13.824px",
+          "slug": "size-13.824",
+          "name": "13.824px"
+        },
+        {
+          "size": "11.52px",
+          "slug": "size-11.52",
+          "name": "11.52px"
+        }
+      ]
+    },
+    "spacing": {
+      "spacingSizes": [
+        {
+          "size": "26px",
+          "slug": "spacing-26",
+          "name": "26px"
+        },
+        {
+          "size": "330px",
+          "slug": "spacing-330",
+          "name": "330px"
+        }
+      ]
+    },
+    "layout": {
+      "contentSize": "100%",
+      "wideSize": "1400px"
+    }
+  },
+  "styles": {
+    "color": {
+      "background": "#161616",
+      "text": "#000000"
+    },
+    "typography": {
+      "fontSize": "13.824px",
+      "lineHeight": "21.4272px",
+      "fontFamily": "Diatype Variable"
+    },
+    "spacing": {}
+  }
+}

@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>At-Tamassok — Proposed Design</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Geist+Mono:wght@400;700&display=swap');
+
+  /* Favorit by Dinamo */
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritLightC.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritLightC-Italic.woff2') format('woff2'); font-weight: 300; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritBookC.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritBookC-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritC.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritC-Italic.woff2') format('woff2'); font-weight: 500; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritC-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritC-BoldItalic.woff2') format('woff2'); font-weight: 700; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritExtraBoldC.woff2') format('woff2'); font-weight: 800; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritExtraBold-Italic.woff2') format('woff2'); font-weight: 800; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritHeavyC.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Favorit'; src: url('fonts/FavoritHeavyC-Italic.woff2') format('woff2'); font-weight: 900; font-style: italic; font-display: swap; }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f5f0;
+    --bg-soft: #edeae3;
+    --ink: rgba(35,30,25,0.78);
+    --ink-strong: rgba(35,30,25,0.95);
+    --ink-line: rgba(35,30,25,0.14);
+    --ink-faint: rgba(35,30,25,0.45);
+    --accent: #8b5e3c;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Favorit', -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: 0;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  a:hover { opacity: 0.7; }
+
+  /* ===================== HEADER ===================== */
+
+  .header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: baseline;
+    gap: 24px;
+    padding: 20px 32px;
+    background: transparent;
+    color: white;
+  }
+  .header a { color: white; }
+  .header-left {
+    font-weight: 400;
+    font-size: 13px;
+    justify-self: start;
+    letter-spacing: 0.06em;
+  }
+  .header-center {
+    display: flex;
+    gap: 24px;
+    align-items: baseline;
+    font-size: 13px;
+    justify-self: center;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+  }
+  .header-center .arabic {
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .header-center .essay-link {
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    font-weight: 400;
+    opacity: 0.6;
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+  .header-right {
+    justify-self: end;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+  }
+
+  /* ===================== HERO ===================== */
+
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 60vh;
+    min-height: 400px;
+    max-height: 550px;
+    overflow: hidden;
+  }
+  .hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, transparent 70%);
+  }
+  .hero-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0 40px 56px;
+  }
+  .hero-text {
+    font-family: 'EB Garamond', 'Times New Roman', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 400;
+    font-style: italic;
+    color: white;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    margin-bottom: 40px;
+    opacity: 0.9;
+  }
+  .hero-text em {
+    font-style: normal;
+    font-weight: 400;
+    display: block;
+    font-size: 0.7em;
+    margin-top: 6px;
+    opacity: 0.55;
+    font-family: 'Favorit', sans-serif;
+    letter-spacing: 0.04em;
+  }
+  .hero-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .hero-essay {
+    max-width: 420px;
+  }
+  .hero-essay p {
+    font-family: 'EB Garamond', 'Times New Roman', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: white;
+    opacity: 0.85;
+    line-height: 1.65;
+    margin-bottom: 20px;
+    letter-spacing: 0.01em;
+  }
+  .hero-essay-link {
+    font-family: 'Favorit', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: white;
+    opacity: 0.5;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    letter-spacing: 0.04em;
+  }
+  .hero-essay-link:hover { opacity: 1 !important; }
+  .hero-essay-link .arrow {
+    display: inline-block;
+    transition: transform 200ms ease;
+  }
+  .hero-essay-link:hover .arrow { transform: translateX(3px); }
+  .hero-cta {
+    display: inline-block;
+    padding: 12px 28px;
+    font-size: 12px;
+    font-weight: 300;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.35);
+    background: transparent;
+    cursor: pointer;
+    transition: border-color 200ms ease, opacity 200ms ease;
+    font-family: 'Favorit', -apple-system, sans-serif;
+    text-decoration: none;
+    white-space: nowrap;
+    letter-spacing: 0.06em;
+  }
+  .hero-cta:hover {
+    border-color: white;
+    opacity: 1 !important;
+  }
+
+  @media (max-width: 768px) {
+    .hero-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 24px;
+    }
+    .hero-text { font-size: clamp(3rem, 12vw, 5rem); }
+  }
+
+  /* ===================== ESSAY SNIPPET ===================== */
+
+  .essay-snippet {
+    padding: 64px 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .essay-snippet blockquote {
+    font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-strong);
+    line-height: 1.45;
+    max-width: 36ch;
+    margin: 0 auto 24px;
+    letter-spacing: -0.01em;
+  }
+  .essay-snippet .essay-cta {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-faint);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    transition: color 200ms ease;
+  }
+  .essay-snippet .essay-cta:hover {
+    color: var(--ink-strong);
+    opacity: 1;
+  }
+  .essay-snippet .essay-cta .arrow {
+    transition: transform 200ms ease;
+    display: inline-block;
+  }
+  .essay-snippet .essay-cta:hover .arrow {
+    transform: translateX(3px);
+  }
+
+  /* ===================== CATALOG GRID ===================== */
+
+  .catalog-label {
+    padding: 28px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--ink-line);
+    background: var(--bg);
+  }
+  .catalog-label-title {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-strong);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .catalog-label-meta {
+    font-family: 'Geist Mono', monospace;
+    font-weight: 400;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+  .catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    padding: 24px;
+    background: var(--bg);
+  }
+  .card {
+    position: relative;
+    overflow: hidden;
+  }
+  .card-img {
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    background: var(--bg-soft);
+  }
+  .card.lead { grid-column: span 2; }
+  .card.lead .card-img { aspect-ratio: 16/9; }
+  .card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 400ms ease;
+  }
+  .card:hover img {
+    opacity: 0.88;
+  }
+  .card-info {
+    padding: 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .card-title {
+    font-family: 'EB Garamond', 'Times New Roman', serif;
+    font-size: 15px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-strong);
+    letter-spacing: 0.01em;
+  }
+  .card-title em { font-weight: 400; font-style: italic; }
+  .card-price {
+    font-size: 12px;
+    font-family: 'Geist Mono', monospace;
+    font-weight: 400;
+    color: var(--ink-faint);
+  }
+  .card-edition {
+    font-size: 11px;
+    font-family: 'Geist Mono', monospace;
+    font-weight: 400;
+    color: var(--ink-faint);
+    padding-top: 2px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ===================== BUY UI (detail panel preview) ===================== */
+
+  .detail-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 80vh;
+    border-top: 1px solid var(--ink-line);
+  }
+  .detail-photo {
+    background: var(--bg-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .detail-photo img {
+    max-width: 100%;
+    max-height: 85vh;
+    object-fit: contain;
+    display: block;
+  }
+  .detail-ref {
+    position: absolute;
+    top: -10px;
+    right: -5px;
+    font-size: 8rem;
+    font-weight: 900;
+    color: var(--ink-strong);
+    opacity: 0.04;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    pointer-events: none;
+    font-family: 'Geist Mono', monospace;
+  }
+  .detail-panel {
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-self: center;
+    max-width: 420px;
+  }
+  .detail-title {
+    font-size: clamp(2rem, 3.2vw, 2.75rem);
+    font-weight: 700;
+    color: var(--ink-strong);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+  }
+  .detail-title em {
+    font-weight: 400;
+    font-style: italic;
+  }
+  .detail-subtitle {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  .edition-box {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid var(--ink);
+    background: var(--bg-soft);
+    padding: 12px 16px;
+  }
+  .edition-label {
+    font-size: 10px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    margin-bottom: 2px;
+  }
+  .edition-value {
+    font-family: 'Geist Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-strong);
+  }
+
+  .controls {
+    border: 1px solid var(--ink-line);
+  }
+  .control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .control-row:last-child { border-bottom: none; }
+  .control-label {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--ink-strong);
+    letter-spacing: 0.03em;
+  }
+  .control-value {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-strong);
+  }
+
+  .price {
+    font-family: 'Geist Mono', monospace;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--ink-strong);
+    letter-spacing: -0.02em;
+  }
+  .price-note {
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--ink-faint);
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+  }
+  .price-nudge {
+    font-family: 'EB Garamond', serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-faint);
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  .btn-add {
+    display: block;
+    width: 100%;
+    padding: 14px 22px;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    background-color: transparent;
+    color: var(--ink-strong);
+    border: 1px solid var(--ink-strong);
+    cursor: pointer;
+    transition: background-color 200ms ease, color 200ms ease;
+    font-family: 'Favorit', -apple-system, sans-serif;
+    text-align: center;
+  }
+  .btn-add:hover {
+    background-color: var(--ink-strong);
+    color: var(--bg);
+    opacity: 1;
+  }
+
+  .shipping-details {
+    border-top: 1px solid var(--ink-line);
+    padding-top: 20px;
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  .shipping-details summary {
+    cursor: pointer;
+    list-style: none;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 4px;
+  }
+  .shipping-details summary::-webkit-details-marker { display: none; }
+
+  /* ===================== DESCRIPTION ===================== */
+
+  .description {
+    padding: 40px;
+    max-width: 520px;
+  }
+  .description p {
+    font-family: 'EB Garamond', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  /* ===================== PAGE DIVIDER ===================== */
+
+  .page-divider {
+    padding: 80px 32px 24px;
+    text-align: center;
+  }
+  .page-divider-label {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    background: var(--bg);
+    padding: 0 16px;
+    position: relative;
+  }
+  .page-divider hr {
+    border: none;
+    border-top: 1px solid var(--ink-line);
+    margin-bottom: -7px;
+  }
+
+  /* ===================== DETAIL PAGE (sticky header) ===================== */
+
+  .header-solid {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: baseline;
+    gap: 24px;
+    padding: 16px 32px;
+    background: var(--bg);
+    color: var(--ink-strong);
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .header-solid a { color: var(--ink-strong); }
+  .header-solid .header-left {
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+  }
+  .header-solid .header-center {
+    display: flex;
+    gap: 24px;
+    align-items: baseline;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+  }
+  .header-solid .header-center .essay-link {
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 0;
+    opacity: 0.5;
+  }
+  .header-solid .header-right {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-align: right;
+  }
+
+  .detail-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 85vh;
+  }
+  .detail-photo {
+    background: var(--bg-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .detail-photo img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    display: block;
+  }
+  .detail-ref {
+    position: absolute;
+    bottom: 20px;
+    right: 24px;
+    font-size: 9rem;
+    font-weight: 300;
+    color: var(--ink-strong);
+    opacity: 0.035;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    pointer-events: none;
+    font-family: 'Geist Mono', monospace;
+  }
+  .detail-panel {
+    padding: 56px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-self: center;
+    max-width: 400px;
+  }
+  .detail-title {
+    font-family: 'EB Garamond', serif;
+    font-size: clamp(2rem, 3vw, 2.75rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-strong);
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+  }
+  .detail-subtitle {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--ink-faint);
+    letter-spacing: 0.03em;
+  }
+
+  /* ===================== FOOTER ===================== */
+
+  .footer {
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--ink);
+    padding: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 48px;
+    align-items: baseline;
+    border-top: 1px solid var(--ink-line);
+    background: var(--bg);
+    letter-spacing: 0.03em;
+  }
+  .footer a { color: inherit; }
+
+  /* ===================== ESSAY PAGE ===================== */
+
+  .essay-page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 80px 32px;
+  }
+  .essay-page h1 {
+    font-family: 'EB Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-strong);
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .essay-page .essay-byline {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+    margin-bottom: 48px;
+  }
+  .essay-page p {
+    font-family: 'EB Garamond', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.75;
+    margin-bottom: 24px;
+    letter-spacing: 0.005em;
+  }
+  .essay-page p:first-of-type::first-letter {
+    float: left;
+    font-size: 3.5em;
+    line-height: 0.85;
+    padding: 0.05em 0.1em 0 0;
+    color: var(--ink-strong);
+    font-weight: 400;
+  }
+  .essay-page .essay-image {
+    margin: 48px -32px;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+  .essay-page .essay-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ===================== CART DRAWER ===================== */
+
+  .cart-demo {
+    position: relative;
+    height: 500px;
+    background: var(--bg-soft);
+    overflow: hidden;
+    border: 1px solid var(--ink-line);
+  }
+  .cart-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(35,30,25,0.25);
+  }
+  .cart-drawer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 380px;
+    background: var(--bg);
+    border-left: 1px solid var(--ink-line);
+    display: flex;
+    flex-direction: column;
+  }
+  .cart-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--ink-line);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .cart-header-title {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: var(--ink-strong);
+  }
+  .cart-header-close {
+    font-size: 12px;
+    color: var(--ink-faint);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .cart-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+  .cart-item {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 16px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .cart-item:last-child { border-bottom: none; margin-bottom: 0; }
+  .cart-item-img {
+    width: 64px;
+    height: 80px;
+    object-fit: cover;
+    background: var(--bg-soft);
+  }
+  .cart-item-title {
+    font-family: 'EB Garamond', serif;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-strong);
+    margin-bottom: 4px;
+  }
+  .cart-item-meta {
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--ink-faint);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+  .cart-item-price {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-strong);
+    margin-top: 6px;
+  }
+  .cart-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--ink-line);
+  }
+  .cart-subtotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 16px;
+  }
+  .cart-subtotal-label {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+  .cart-subtotal-value {
+    font-family: 'Geist Mono', monospace;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--ink-strong);
+  }
+
+  /* ===================== RESPONSIVE ===================== */
+
+  @media (max-width: 768px) {
+    .header-center { display: none; }
+    .detail-section { grid-template-columns: 1fr; }
+    .detail-photo { min-height: 50vh; }
+    .hero { max-height: 70vh; }
+  }
+
+  @media (max-width: 480px) {
+    .catalog-grid { grid-template-columns: 1fr; }
+    .card.lead { grid-column: span 1; aspect-ratio: 3/4; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left"><a href="#">Thalia Bassim</a></div>
+  <div class="header-center">
+    <a href="#" class="arabic" dir="rtl" lang="ar">التمسّك</a>
+    <a href="#">At-Tamassok</a>
+    <a href="#essay" class="essay-link">Essay</a>
+  </div>
+  <div class="header-right"><a href="#">Cart</a></div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <img src="../public/images/catalog/pl-6604-01.jpg" alt="At-Tamassok lead photograph">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-text">
+      At-Tamassok<br><em>التمسّك</em>
+    </div>
+    <div class="hero-bottom">
+      <div class="hero-essay">
+        <p>Twenty-five photographs made over three years in kitchens,
+          stairwells, and borrowed rooms across Brooklyn and Beirut.
+          Small domestic rituals that repeat across distance and never
+          quite translate.</p>
+        <a href="#" class="hero-essay-link">
+          Read the essay <span class="arrow">&rarr;</span>
+        </a>
+      </div>
+      <a href="#prints" class="hero-cta">Shop prints &darr;</a>
+    </div>
+  </div>
+</div>
+
+<!-- CATALOG LABEL -->
+<div class="catalog-label" id="prints">
+  <span class="catalog-label-title">Available Prints</span>
+  <span class="catalog-label-meta">25 photographs &middot; Edition of 10 &middot; Archival pigment on cotton rag</span>
+</div>
+
+<!-- CATALOG GRID — all 25 photos -->
+<div class="catalog-grid">
+  <div class="card lead">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-02.jpg" alt="PL-6604.02" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>02</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-03.jpg" alt="PL-6604.03" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>03</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-04.jpg" alt="PL-6604.04" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>04</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-05.jpg" alt="PL-6604.05" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>05</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-06.jpg" alt="PL-6604.06" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>06</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-07.jpg" alt="PL-6604.07" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>07</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-08.jpg" alt="PL-6604.08" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>08</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-09.jpg" alt="PL-6604.09" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>09</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-10.jpg" alt="PL-6604.10" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>10</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-11.jpg" alt="PL-6604.11" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>11</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-12.jpg" alt="PL-6604.12" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>12</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-13.jpg" alt="PL-6604.13" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>13</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-14.jpg" alt="PL-6604.14" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>14</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-15.jpg" alt="PL-6604.15" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>15</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-16.jpg" alt="PL-6604.16" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>16</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-17.jpg" alt="PL-6604.17" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>17</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-18.jpg" alt="PL-6604.18" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>18</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-19.jpg" alt="PL-6604.19" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>19</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-20.jpg" alt="PL-6604.20" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>20</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-21.jpg" alt="PL-6604.21" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>21</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-22.jpg" alt="PL-6604.22" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>22</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-23.jpg" alt="PL-6604.23" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>23</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-24.jpg" alt="PL-6604.24" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>24</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+  <div class="card">
+    <div class="card-img"><img src="../public/images/catalog/pl-6604-25.jpg" alt="PL-6604.25" loading="lazy"></div>
+    <div class="card-info">
+      <span class="card-title">Untitled, <em>25</em></span>
+      <span class="card-price">From $140</span>
+    </div>
+    <div class="card-edition">Ed. of 10</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <span style="opacity: 0.7">&copy; 2026 Thalia Bassim</span>
+  <a href="#">Contact</a>
+  <a href="#">Instagram &nearr;</a>
+  <a href="#essay">Essay</a>
+  <a href="#">Shipping</a>
+  <a href="#">Returns</a>
+  <a href="#">Terms</a>
+  
+</footer>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 2: PRODUCT DETAIL                                        -->
+<!-- ============================================================ -->
+
+<div class="page-divider">
+  <hr>
+  <span class="page-divider-label">Product Detail Page</span>
+</div>
+
+<header class="header-solid">
+  <div class="header-left"><a href="#">Thalia Bassim</a></div>
+  <div class="header-center">
+    <a href="#">التمسّك</a>
+    <a href="#">At-Tamassok</a>
+    <a href="#" class="essay-link">Essay</a>
+  </div>
+  <div class="header-right"><a href="#">Cart (1)</a></div>
+</header>
+
+<div class="detail-section">
+  <div class="detail-photo">
+    <div class="detail-ref">6604.03</div>
+    <img src="../public/images/catalog/pl-6604-03.jpg" alt="PL-6604.03" loading="lazy">
+  </div>
+  <div class="detail-panel">
+    <div>
+      <div class="detail-title">Untitled, 03</div>
+      <div class="detail-subtitle">From the roll 6604</div>
+    </div>
+
+    <div class="edition-box">
+      <div>
+        <div class="edition-label">Edition</div>
+        <div class="edition-value">3 of 10</div>
+      </div>
+      <div style="text-align: right;">
+        <div class="edition-label">Status</div>
+        <div class="edition-value">7 remaining</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="control-row">
+        <span class="control-label">Size</span>
+        <span class="control-value">8 &times; 10 in</span>
+      </div>
+      <div class="control-row">
+        <span class="control-label">Paper</span>
+        <span class="control-value">Hahnem&uuml;hle Photo Rag</span>
+      </div>
+      <div class="control-row">
+        <span class="control-label">Qty</span>
+        <span class="control-value">1</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="price">$140.00</div>
+      <div class="price-note">+ shipping &middot; Free US on 2+ prints</div>
+      <div class="price-nudge">Add a second print for free shipping</div>
+    </div>
+
+    <button class="btn-add" type="button">Add to cart &rarr;</button>
+
+    <details class="shipping-details">
+      <summary>Shipping &amp; returns</summary>
+      <div style="margin-top: 16px; line-height: 1.7;">
+        <div style="display: grid; grid-template-columns: auto 1fr; gap: 6px 24px; font-size: 12px; letter-spacing: 0.02em;">
+          <span style="color: var(--ink-faint);">Lead time</span>
+          <span style="text-align: right;">2&ndash;3 business days</span>
+          <span style="color: var(--ink-faint);">Shipping</span>
+          <span style="text-align: right;">USPS Priority</span>
+          <span style="color: var(--ink-faint);">Returns</span>
+          <span style="text-align: right;">Damage &amp; defect only</span>
+        </div>
+        <p style="margin-top: 16px; font-size: 12px; color: var(--ink-faint); font-weight: 300; letter-spacing: 0.02em;">
+          Made to order in Brooklyn, NY. We replace prints damaged in transit
+          or with production defects within 14 days of delivery.
+        </p>
+      </div>
+    </details>
+
+    <div class="description">
+      <p>Shot on Kodak Portra 400, late afternoon light through the kitchen window.
+        The curl of steam above the glass catches a frequency of gold that film
+        renders as fact, not memory.</p>
+      <p>Archival pigment print on acid-free cotton rag. Each print is made to order
+        and ships flat in a rigid mailer.</p>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <span style="opacity: 0.7">&copy; 2026 Thalia Bassim</span>
+  <a href="#">Contact</a>
+  <a href="#">Instagram &nearr;</a>
+  <a href="#">Essay</a>
+  <a href="#">Shipping</a>
+  <a href="#">Returns</a>
+  <a href="#">Terms</a>
+  
+</footer>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 3: ESSAY                                                 -->
+<!-- ============================================================ -->
+
+<div class="page-divider">
+  <hr>
+  <span class="page-divider-label">Essay Page</span>
+</div>
+
+<header class="header-solid">
+  <div class="header-left"><a href="#">Thalia Bassim</a></div>
+  <div class="header-center">
+    <a href="#">التمسّك</a>
+    <a href="#">At-Tamassok</a>
+    <a href="#" class="essay-link">Essay</a>
+  </div>
+  <div class="header-right"><a href="#">Cart</a></div>
+</header>
+
+<div class="essay-page">
+  <h1>At-Tamassok</h1>
+  <div class="essay-byline">Thalia Bassim &middot; Brooklyn, 2024</div>
+
+  <p>The kitchen had been someone else's before it was mine, and before that
+    someone else's again. I knew this because the tile behind the stove carried
+    three different layers of grout, each a slightly different shade of white,
+    each applied by a hand I would never meet. The photographs in this series
+    began there, with the grout.</p>
+
+  <div class="essay-image">
+    <img src="../public/images/catalog/pl-6604-05.jpg" alt="Essay photograph" loading="lazy">
+  </div>
+
+  <p>What I was looking for, though I did not know it yet, was the way light
+    behaved in rooms that had been lived in long enough to forget who had lived
+    in them. A glass of tea left on a windowsill. Steam catching gold from an
+    angle that would not exist in twenty minutes. The particular quality of
+    attention that a room demands when you are alone in it and the afternoon
+    is long.</p>
+
+  <p>In Beirut the kitchens were different but the rituals were the same. A
+    stovetop flame adjusted without looking. Bread torn, not cut. The sound
+    of water in a building where the plumbing remembers a different era. I
+    photographed these things not because they were beautiful &mdash; though
+    some of them were &mdash; but because they repeated. The repetition was the
+    point. Domestic gestures that cross continents and never quite translate,
+    that resist the passage of years by refusing to change.</p>
+
+  <div class="essay-image">
+    <img src="../public/images/catalog/pl-6604-12.jpg" alt="Essay photograph" loading="lazy">
+  </div>
+
+  <p>At-Tamassok, in Arabic, means something close to &ldquo;holding on&rdquo;
+    or &ldquo;clinging to.&rdquo; Not in desperation but in dailiness. The way
+    your hand finds the same spot on the countertop each morning. The way a
+    cup is placed, not put down. Twenty-five frames over three years, all shot
+    on Portra 400 because its rendering of gold is the closest I have found to
+    the color of that kitchen light at four in the afternoon.</p>
+</div>
+
+<footer class="footer">
+  <span style="opacity: 0.7">&copy; 2026 Thalia Bassim</span>
+  <a href="#">Contact</a>
+  <a href="#">Instagram &nearr;</a>
+  <a href="#">Essay</a>
+  <a href="#">Shipping</a>
+  <a href="#">Returns</a>
+  <a href="#">Terms</a>
+  
+</footer>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 4: CART DRAWER                                            -->
+<!-- ============================================================ -->
+
+<div class="page-divider">
+  <hr>
+  <span class="page-divider-label">Cart Drawer (overlay)</span>
+</div>
+
+<div class="cart-demo">
+  <div class="cart-backdrop"></div>
+  <div class="cart-drawer">
+    <div class="cart-header">
+      <span class="cart-header-title">Cart (2)</span>
+      <span class="cart-header-close">Close &times;</span>
+    </div>
+    <div class="cart-items">
+      <div class="cart-item">
+        <img class="cart-item-img" src="../public/images/catalog/pl-6604-03.jpg" alt="03" loading="lazy">
+        <div>
+          <div class="cart-item-title">Untitled, 03</div>
+          <div class="cart-item-meta">8 &times; 10 in &middot; Photo Rag<br>Qty: 1</div>
+          <div class="cart-item-price">$140.00</div>
+        </div>
+      </div>
+      <div class="cart-item">
+        <img class="cart-item-img" src="../public/images/catalog/pl-6604-09.jpg" alt="09" loading="lazy">
+        <div>
+          <div class="cart-item-title">Untitled, 09</div>
+          <div class="cart-item-meta">11 &times; 14 in &middot; Canson Baryta<br>Qty: 1</div>
+          <div class="cart-item-price">$230.00</div>
+        </div>
+      </div>
+    </div>
+    <div class="cart-footer">
+      <div class="cart-subtotal">
+        <span class="cart-subtotal-label">Subtotal</span>
+        <span class="cart-subtotal-value">$370.00</span>
+      </div>
+      <button class="btn-add" type="button">Checkout &rarr;</button>
+      <div style="margin-top: 10px; font-size: 11px; font-weight: 300; color: var(--ink-faint); text-align: center; letter-spacing: 0.02em;">
+        Shipping &amp; tax calculated at checkout
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer" style="margin-top: 0;">
+  <span style="opacity: 0.7">&copy; 2026 Thalia Bassim</span>
+  <a href="#">Contact</a>
+  <a href="#">Instagram &nearr;</a>
+  <a href="#">Essay</a>
+  <a href="#">Shipping</a>
+  <a href="#">Returns</a>
+  <a href="#">Terms</a>
+  
+</footer>
+
+</body>
+</html>

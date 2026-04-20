@@ -1,0 +1,212 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "settings": {
+    "color": {
+      "palette": [
+        {
+          "slug": "primary",
+          "color": "#0000ff",
+          "name": "Primary"
+        },
+        {
+          "slug": "neutral-1",
+          "color": "#000000",
+          "name": "Neutral 1"
+        },
+        {
+          "slug": "neutral-2",
+          "color": "#ffffff",
+          "name": "Neutral 2"
+        },
+        {
+          "slug": "neutral-3",
+          "color": "#888888",
+          "name": "Neutral 3"
+        },
+        {
+          "slug": "neutral-4",
+          "color": "#555555",
+          "name": "Neutral 4"
+        },
+        {
+          "slug": "neutral-5",
+          "color": "#bdbdbd",
+          "name": "Neutral 5"
+        },
+        {
+          "slug": "bg-f2f2f2",
+          "color": "#f2f2f2",
+          "name": "Background #f2f2f2"
+        },
+        {
+          "slug": "bg-ffffff",
+          "color": "#ffffff",
+          "name": "Background #ffffff"
+        },
+        {
+          "slug": "bg-000000",
+          "color": "#000000",
+          "name": "Background #000000"
+        }
+      ],
+      "gradients": []
+    },
+    "typography": {
+      "fontFamilies": [
+        {
+          "fontFamily": "ApertureTextRegularWEB",
+          "slug": "aperturetextregularweb",
+          "name": "ApertureTextRegularWEB"
+        },
+        {
+          "fontFamily": "Aperture Sans",
+          "slug": "aperture-sans",
+          "name": "Aperture Sans"
+        },
+        {
+          "fontFamily": "ApertureTextBoldWEB",
+          "slug": "aperturetextboldweb",
+          "name": "ApertureTextBoldWEB"
+        },
+        {
+          "fontFamily": "sans-serif",
+          "slug": "sans-serif",
+          "name": "sans-serif"
+        },
+        {
+          "fontFamily": "originalgaramondbt-italic",
+          "slug": "originalgaramondbt-italic",
+          "name": "originalgaramondbt-italic"
+        },
+        {
+          "fontFamily": "Ultimate-Icons",
+          "slug": "ultimate-icons",
+          "name": "Ultimate-Icons"
+        },
+        {
+          "fontFamily": "Font Awesome 6 Brands",
+          "slug": "font-awesome-6-brands",
+          "name": "Font Awesome 6 Brands"
+        },
+        {
+          "fontFamily": "Font Awesome 6 Free",
+          "slug": "font-awesome-6-free",
+          "name": "Font Awesome 6 Free"
+        },
+        {
+          "fontFamily": "icomoon",
+          "slug": "icomoon",
+          "name": "icomoon"
+        },
+        {
+          "fontFamily": "Aperture Serif",
+          "slug": "aperture-serif",
+          "name": "Aperture Serif"
+        }
+      ],
+      "fontSizes": [
+        {
+          "size": "40px",
+          "slug": "size-40",
+          "name": "40px"
+        },
+        {
+          "size": "32px",
+          "slug": "size-32",
+          "name": "32px"
+        },
+        {
+          "size": "24px",
+          "slug": "size-24",
+          "name": "24px"
+        },
+        {
+          "size": "20px",
+          "slug": "size-20",
+          "name": "20px"
+        },
+        {
+          "size": "18px",
+          "slug": "size-18",
+          "name": "18px"
+        },
+        {
+          "size": "16px",
+          "slug": "size-16",
+          "name": "16px"
+        },
+        {
+          "size": "15px",
+          "slug": "size-15",
+          "name": "15px"
+        },
+        {
+          "size": "14px",
+          "slug": "size-14",
+          "name": "14px"
+        }
+      ]
+    },
+    "spacing": {
+      "spacingSizes": [
+        {
+          "size": "2px",
+          "slug": "spacing-2",
+          "name": "2px"
+        },
+        {
+          "size": "20px",
+          "slug": "spacing-20",
+          "name": "20px"
+        },
+        {
+          "size": "30px",
+          "slug": "spacing-30",
+          "name": "30px"
+        },
+        {
+          "size": "40px",
+          "slug": "spacing-40",
+          "name": "40px"
+        },
+        {
+          "size": "50px",
+          "slug": "spacing-50",
+          "name": "50px"
+        },
+        {
+          "size": "60px",
+          "slug": "spacing-60",
+          "name": "60px"
+        },
+        {
+          "size": "65px",
+          "slug": "spacing-65",
+          "name": "65px"
+        },
+        {
+          "size": "75px",
+          "slug": "spacing-75",
+          "name": "75px"
+        }
+      ]
+    },
+    "layout": {
+      "contentSize": "1110px",
+      "wideSize": "1400px"
+    }
+  },
+  "styles": {
+    "color": {
+      "background": "#f2f2f2",
+      "text": "#000000"
+    },
+    "typography": {
+      "fontSize": "16px",
+      "lineHeight": "20.8px",
+      "fontFamily": "ApertureTextRegularWEB"
+    },
+    "spacing": {}
+  }
+}

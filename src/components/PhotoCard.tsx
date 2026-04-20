@@ -30,23 +30,21 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
           </span>
         ) : null}
       </div>
-      <span
-        className="block font-serif italic"
-        style={{ fontSize: 21, color: "var(--ink)", marginBottom: 8 }}
-      >
-        {photo.title}
-        {photo.titleItalic ? <> {photo.titleItalic}</> : null}
-      </span>
-      {/* Edition count removed from card - every print is an edition of 10,
-          so repeating it across the grid is noise. The edition meta lives on
-          the product detail page (Shipping & returns disclosure) and in the
-          footer strap. */}
-      <span
-        className="block font-mono"
-        style={{ fontSize: 15, fontWeight: 400, color: "var(--ink)" }}
-      >
-        From {formatUsd(photo.basePriceCents)}
-      </span>
+      <div className="flex items-baseline justify-between gap-4">
+        <span
+          className="font-serif overflow-hidden text-ellipsis whitespace-nowrap min-w-0"
+          style={{ fontSize: "clamp(14px, 2.5vw, 21px)", color: "var(--ink)" }}
+        >
+          {photo.title}
+          {photo.titleItalic ? <>, {photo.titleItalic}</> : null}
+        </span>
+        <span
+          className="font-mono opacity-100 lg:opacity-0 transition-opacity duration-300 group-hover:opacity-100 shrink-0"
+          style={{ fontSize: "clamp(12px, 2vw, 15px)", fontWeight: 400, color: "var(--ink)" }}
+        >
+          {formatUsd(photo.basePriceCents)}
+        </span>
+      </div>
     </Link>
   );
 }

@@ -24,13 +24,17 @@
   --rule: rgba(12, 11, 10, 0.22);
 
   --accent: #8b5e3c;
+  --btn-accent: #0072bb;
+  --btn-accent-active: #005a94;
   --heading-weight: 400;
   --body-weight: 400;
   --heading-scale: 1;
   --section-py-scale: 1;
   --header-height: 63px;
   --footer-gap: 48px;
-  --font-serif: var(--font-eb-garamond), "Times New Roman", serif;
+  /* Secondary font (legacy "serif" alias kept for zero-churn class names).
+     Locked to Suisse Intl per client decision (2026-04-20). */
+  --font-serif: var(--font-suisse-intl), "Suisse Intl", -apple-system, sans-serif;
 }
 
 @theme inline {
@@ -41,8 +45,8 @@
   --color-ink-line: var(--ink-line);
   --color-ink-faint: var(--ink-faint);
   --font-sans: var(--font-favorit), -apple-system, "Segoe UI", sans-serif;
-  --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-eb-garamond), "Times New Roman", serif;
+  --font-mono: var(--font-suisse-intl), "Suisse Intl", -apple-system, sans-serif;
+  --font-serif: var(--font-eb-garamond), -apple-system, "Segoe UI", sans-serif;
 }
 
 @font-face {
@@ -198,8 +202,7 @@ em {
 .label-caps {
   color: var(--ink-faint);
   font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   font-weight: 400;
 }
 
@@ -397,13 +400,15 @@ em {
 }
 @media (max-width: 700px) {
   .mat-o {
-    padding: 14px;
+    padding: 10px;
   }
 }
 
 /* ─── Disclosure (Paper / Size / Description / Shipping / Care) ── */
 .disc {
   display: block;
+  margin-top: 8px;
+  border-top: 1px solid var(--i1);
 }
 .disc-trigger {
   appearance: none;
@@ -419,8 +424,7 @@ em {
   font-family: "Favorit", var(--font-sans);
   font-size: 13px;
   font-weight: 400;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--ink);
   text-align: left;
 }
@@ -542,26 +546,88 @@ em {
   text-decoration: line-through;
 }
 
+/* ─── Paper pills (always-visible selector) ───────────────────────
+   Replaces the Paper disclosure on the PDP per the Lemaire-inspired
+   BuyUI pass (2026-04-20). Three options fit comfortably inline;
+   surcharge reads inside the pill so the delta is never hidden.
+   Selected state flips to inked background for strong read; unselected
+   keeps a fine 1px hairline so the group reads as a set, not as a row
+   of ghost buttons. */
+.pp-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pp-opt {
+  appearance: none;
+  flex: 1 1 0;
+  min-width: 96px;
+  padding: 12px 14px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--i3);
+  border-radius: 0;
+  font-family: "Favorit", var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease;
+}
+.pp-opt:hover {
+  border-color: var(--ink);
+}
+.pp-opt[data-active="true"] {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+.pp-opt-name {
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+.pp-opt-delta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--i5);
+}
+.pp-opt[data-active="true"] .pp-opt-delta {
+  color: rgba(255, 255, 255, 0.72);
+}
+
 /* ─── Solid-ink CTA (Add to cart) ─────────────────────────────── */
+/* Primary CTA - "Add to cart".
+   Recolored to Klein blue (#002FA7) per Pastel #9 (2026-04-20). Class name
+   kept as .btn-ink to avoid churn across callsites; rename in a dedicated
+   pass if the blue sticks. */
 .btn-ink {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
   width: 100%;
-  padding: 20px 22px;
-  background: var(--ink);
-  color: var(--bg);
+  padding: 10px 22px;
+  background: var(--btn-accent);
+  color: #ffffff;
   border: 0;
   border-radius: 0;
   font-family: "Favorit", var(--font-sans);
   font-size: 14px;
   font-weight: 400;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   cursor: pointer;
   transition:
     opacity 180ms,
-    transform 180ms;
+    transform 180ms,
+    background 180ms;
 }
 .btn-ink:hover {
   opacity: 0.88;
@@ -585,7 +651,7 @@ em {
    the background just slightly so the state feels alive without shouting. */
 .btn-ink[data-added="true"] {
   grid-template-columns: 1fr;
-  background: #1a1815;
+  background: var(--btn-accent-active);
   animation: btn-ink-pulse 420ms ease-out;
 }
 .btn-ink[data-added="true"] .btn-ink-price {
@@ -608,13 +674,13 @@ em {
 */
 .essay-root {
   color: var(--ink);
-  background: var(--bg);
+  background: #e2e052;
+  min-height: calc(100dvh - var(--header-height, 63px));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' seed='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
 }
 
 .essay-mast {
-  border-top: 1px solid var(--i1);
-  border-bottom: 1px solid var(--i1);
-  padding: clamp(72px, 12vw, 144px) 24px clamp(56px, 9vw, 112px);
+  padding: clamp(40px, 6vw, 72px) 24px clamp(32px, 5vw, 56px);
 }
 .essay-mast-inner {
   max-width: 72rem;
@@ -653,7 +719,6 @@ em {
   max-width: 48rem;
   margin: 0;
   padding-top: clamp(20px, 3vw, 32px);
-  border-top: 1px solid var(--i1);
 }
 .essay-meta > div {
   display: flex;
@@ -753,9 +818,7 @@ em {
 .essay-sep::before,
 .essay-sep::after {
   content: "";
-  height: 1px;
-  background: var(--rule);
-  opacity: 0.55;
+  height: 0;
 }
 
 /* Pull quote - serif italic, larger, offset by a left rule. */
@@ -763,7 +826,6 @@ em {
   max-width: clamp(48ch, 60vw, 58ch);
   margin: clamp(56px, 8vw, 96px) auto;
   padding: 8px 0 8px clamp(22px, 3vw, 36px);
-  border-left: 1px solid var(--rule);
 }
 .essay-pull p {
   margin: 0;
@@ -782,7 +844,6 @@ em {
   max-width: clamp(58ch, 70vw, 65ch);
   margin: clamp(72px, 10vw, 112px) auto 0;
   padding-top: clamp(28px, 3vw, 36px);
-  border-top: 1px solid var(--i1);
 }
 .essay-sig-name {
   margin: 0 0 6px;
@@ -809,8 +870,8 @@ em {
 }
 .essay-cta-link {
   font-size: clamp(17px, 1.5vw, 19px);
-  font-style: italic;
-  color: var(--i8);
+  font-style: normal;
+  color: var(--ink);
   transition: opacity 180ms ease;
 }
 .essay-cta-link:hover {

@@ -29,20 +29,14 @@ export default function EssayPage() {
             </span>
           </h1>
 
-          <dl className="essay-meta">
-            <div>
-              <dt>By</dt>
-              <dd>Thalia Bassim</dd>
-            </div>
-            <div>
-              <dt>Filed</dt>
-              <dd>Late afternoon · 2025</dd>
-            </div>
-            <div>
-              <dt>Frames</dt>
-              <dd>From the At-Tamassok series · 35mm</dd>
-            </div>
-          </dl>
+          <div style={{ marginTop: "clamp(28px, 5vw, 44px)" }}>
+            <p className="font-serif" style={{ fontSize: 14, color: "var(--i5)" }}>
+              Introduction by Thalia Bassim
+            </p>
+            <p className="font-serif" style={{ fontSize: 14, color: "var(--i5)" }}>
+              Essay by Zacarias Gonzalez
+            </p>
+          </div>
         </div>
       </header>
 
@@ -217,14 +211,10 @@ export default function EssayPage() {
         </section>
 
         {/* Signature block */}
-        <footer className="essay-sig">
-          <p className="essay-sig-name font-serif italic">Thalia Bassim</p>
-          <p className="essay-sig-meta">Late afternoon, 2025</p>
-        </footer>
 
         {/* Quiet CTA back to prints */}
         <div className="essay-cta">
-          <Link href="/#prints" className="essay-cta-link font-serif italic">
+          <Link href="/#prints" className="essay-cta-link font-serif">
             View the prints →
           </Link>
         </div>

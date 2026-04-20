@@ -6,13 +6,35 @@
  * Design decisions (per docs-ai/backend-plan.md §"Locked decisions" and the
  * Track B brief):
  * - Hosted Stripe Checkout (ui_mode defaults to `hosted`)
- * - Stripe Tax ON (`automatic_tax.enabled = true`)
+ * - Stripe Tax ON (`automatic_tax.enabled = true`)  ← satisfies Pastel #5 "auto tax"
  * - Guest checkout only - no `customer` param
  * - Currency: USD. Adaptive Pricing is a dashboard-level setting.
- * - Shipping address collected by Stripe (not pre-filled from us)
- * - Free US shipping when 2+ prints and US address; otherwise TODO flat rate
+ * - Shipping address collected by Stripe (not pre-filled from us) ← Pastel #5 "shipping at checkout"
+ * - Free US shipping when 2+ prints and US address; otherwise flat rate
  * - `cart_lines_json` stored on session metadata so the webhook can rebuild
  *   the cart server-side without trusting the Stripe line-item echo.
+ *
+ * Pastel #5 (2026-04-20) - "all prices are $300 + add the stripe fee and
+ * auto tax + shipping at check out":
+ *  - $300 flat base price: applied via fixture (basePriceCents = 30000,
+ *    paper surcharges 0). See src/data/photos.fixture.json.
+ *  - Auto tax: already wired (automatic_tax.enabled = true).
+ *  - Shipping at checkout: already wired (shipping_address_collection +
+ *    shipping_options).
+ *  - Stripe fee pass-through: NOT YET IMPLEMENTED. Two common patterns:
+ *      (a) Add a "Processing fee" line_item computed as
+ *          ceil((subtotal + shipping) * 0.029 + 30) cents. This is legal
+ *          in most US states but check your merchant agreement; some
+ *          jurisdictions (e.g. CA, NY) regulate surcharging.
+ *      (b) Raise the base price to absorb the fee server-side
+ *          (baseCents + ceil(baseCents * 0.029 + 30)) and keep the
+ *          displayed $300 unchanged.
+ *    Decision pending from client. Once chosen, add a `stripeFeeLineItem()`
+ *    helper and push it into lineItems before session create. Do not call
+ *    both `automatic_tax` and a self-computed fee on the SAME line item -
+ *    Stripe Tax would tax the fee, which you almost certainly don't want.
+ *    Attach the fee as its own line_item with `tax_code: 'txcd_00000000'`
+ *    (non-taxable) if going with (a).
  */
 
 import "server-only";

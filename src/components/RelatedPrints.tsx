@@ -42,7 +42,7 @@ export default function RelatedPrints({ current, all }: { current: Photo; all: P
             Recently viewed
           </Tab>
           <Tab active={feed === "similar"} onClick={() => setFeed("similar")}>
-            You may also like
+            التمسّك
           </Tab>
         </nav>
         <div className="related-arrows" aria-hidden>
@@ -163,8 +163,7 @@ function Tab({
         padding: "4px 0",
         fontSize: 13,
         fontWeight: 400,
-        letterSpacing: "0.14em",
-        textTransform: "uppercase",
+        letterSpacing: "0.04em",
         color: active ? "var(--ink)" : "var(--i5)",
         cursor: "pointer",
         whiteSpace: "nowrap",

@@ -1,0 +1,96 @@
+:root {
+  /* Colors — Primary */
+  --color-primary: #0000ff;
+
+  /* Colors — Neutrals */
+  --color-neutral-50: #000000;
+  --color-neutral-100: #ffffff;
+  --color-neutral-200: #888888;
+  --color-neutral-300: #555555;
+  --color-neutral-400: #bdbdbd;
+  --color-neutral-500: #333333;
+  --color-neutral-600: #f2f2f2;
+  --color-neutral-700: #e5e5e5;
+
+  /* Colors — Backgrounds */
+  --color-bg: #f2f2f2;
+  --color-bg-1: #ffffff;
+  --color-bg-2: #000000;
+
+  /* Colors — Text */
+  --color-text: #000000;
+  --color-text-1: #555555;
+  --color-text-2: #888888;
+  --color-text-3: #333333;
+  --color-text-4: #0000ff;
+
+  /* Typography — Families */
+  --font-body: "ApertureTextRegularWEB", sans-serif;
+  --font-heading: "Aperture Sans", sans-serif;
+  --font-font-2: "ApertureTextBoldWEB", sans-serif;
+  --font-font-3: "sans-serif", sans-serif;
+  --font-body: "originalgaramondbt-italic", sans-serif;
+  --font-body: "Ultimate-Icons", sans-serif;
+  --font-body: "Font Awesome 6 Brands", sans-serif;
+  --font-body: "Font Awesome 6 Free", sans-serif;
+  --font-body: "icomoon", sans-serif;
+  --font-heading: "Aperture Serif", sans-serif;
+
+  /* Typography — Scale */
+  --font-size-40: 40px;
+  --font-size-32: 32px;
+  --font-size-24: 24px;
+  --font-size-20: 20px;
+  --font-size-18: 18px;
+  --font-size-16: 16px;
+  --font-size-15: 15px;
+  --font-size-14: 14px;
+  --font-size-13: 13px;
+  --font-size-12: 12px;
+  --font-size-11: 11px;
+  --font-size-10: 10px;
+
+  /* Spacing */
+  --spacing-2: 2px;
+  --spacing-20: 20px;
+  --spacing-30: 30px;
+  --spacing-40: 40px;
+  --spacing-50: 50px;
+  --spacing-60: 60px;
+  --spacing-65: 65px;
+  --spacing-75: 75px;
+  --spacing-80: 80px;
+  --spacing-85: 85px;
+  --spacing-100: 100px;
+
+  /* Border Radius */
+  --radius-xs: 2px;
+  --radius-xl: 20px;
+  --radius-full: 50px;
+  --radius-full: 90px;
+
+  /* Box Shadows */
+  --shadow-sm: rgb(128, 128, 128) 0px 0px 5px 0px;
+  --shadow-lg: rgba(0, 0, 0, 0.1) 0px 1px 20px 0px;
+
+  /* Original Site Variables */
+  /* — spacing — */
+  --wp--preset--font-size--normal: 16px;
+  --wp--preset--font-size--huge: 42px;
+  /* — typography — */
+  --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Free";
+  --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Free";
+  --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands";
+  /* — other — */
+  --drawer-width: 480px;
+  --neg-drawer-width: calc(var(--drawer-width) * -1);
+  --fa-style-family-classic: "Font Awesome 6 Free";
+  --fa-style-family-brands: "Font Awesome 6 Brands";
+  /* — dependencies — */
+  --neg-drawer-width: --drawer-width;
+  /* — semantic — */
+  success: [object Object];
+  warning: [object Object];
+  error: [object Object];
+  info: [object Object];
+}

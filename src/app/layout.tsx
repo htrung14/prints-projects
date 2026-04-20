@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { EB_Garamond, Geist_Mono, Noto_Naskh_Arabic } from "next/font/google";
+import { Noto_Naskh_Arabic } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/Header";
@@ -23,17 +23,16 @@ const favorit = localFont({
   display: "swap",
 });
 
-const ebGaramond = EB_Garamond({
-  variable: "--font-eb-garamond",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  weight: ["400", "700"],
+// Suisse Intl — locked as the secondary/serif font (2026-04-20).
+const suisseIntl = localFont({
+  src: [
+    { path: "../../public/fonts/SuisseIntl-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/SuisseIntl-Medium.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/SuisseIntl-SemiBold.woff2", weight: "600", style: "normal" },
+    { path: "../../public/fonts/SuisseIntl-Bold.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-suisse-intl",
+  display: "swap",
 });
 
 const notoNaskhArabic = Noto_Naskh_Arabic({
@@ -44,14 +43,14 @@ const notoNaskhArabic = Noto_Naskh_Arabic({
 
 export const metadata: Metadata = {
   title: "At-Tamassok - Thalia Bassim",
-  description: "Twenty-five archival pigment prints. Limited editions.",
+  description: "Archival pigment prints. Limited editions of 10.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${favorit.variable} ${ebGaramond.variable} ${geistMono.variable} ${notoNaskhArabic.variable} h-full antialiased`}
+      className={`${favorit.variable} ${suisseIntl.variable} ${notoNaskhArabic.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <CartProvider>

@@ -1,0 +1,274 @@
+{
+  "$metadata": {
+    "generator": "designlang",
+    "version": "7.0.0",
+    "spec": "https://design-tokens.github.io/community-group/format/",
+    "source": "https://www.lemaire.fr/",
+    "generatedAt": "2026-04-19T17:58:10.473Z"
+  },
+  "primitive": {
+    "color": {
+      "brand": {
+        "primary": {
+          "$value": "#100a0d",
+          "$type": "color"
+        },
+        "secondary": {
+          "$value": "#fdfbf9",
+          "$type": "color"
+        }
+      },
+      "neutral": {
+        "n100": {
+          "$value": "#000000",
+          "$type": "color"
+        },
+        "n200": {
+          "$value": "#77716e",
+          "$type": "color"
+        },
+        "n300": {
+          "$value": "#383d41",
+          "$type": "color"
+        },
+        "n400": {
+          "$value": "#333333",
+          "$type": "color"
+        },
+        "n500": {
+          "$value": "#e5e5e5",
+          "$type": "color"
+        },
+        "n600": {
+          "$value": "#242121",
+          "$type": "color"
+        }
+      },
+      "background": {
+        "bg0": {
+          "$value": "#fdfbf9",
+          "$type": "color"
+        },
+        "bg1": {
+          "$value": "#ffffff",
+          "$type": "color"
+        },
+        "bg2": {
+          "$value": "#242121",
+          "$type": "color"
+        }
+      },
+      "text": {
+        "text0": {
+          "$value": "#000000",
+          "$type": "color"
+        },
+        "text1": {
+          "$value": "#100a0d",
+          "$type": "color"
+        },
+        "text2": {
+          "$value": "#ffffff",
+          "$type": "color"
+        },
+        "text3": {
+          "$value": "#77716e",
+          "$type": "color"
+        },
+        "text4": {
+          "$value": "#fdfbf9",
+          "$type": "color"
+        },
+        "text5": {
+          "$value": "#ff4500",
+          "$type": "color"
+        },
+        "text6": {
+          "$value": "#333333",
+          "$type": "color"
+        },
+        "text7": {
+          "$value": "#383d41",
+          "$type": "color"
+        }
+      }
+    },
+    "spacing": {
+      "s0": {
+        "$value": "1px",
+        "$type": "dimension"
+      },
+      "s1": {
+        "$value": "20px",
+        "$type": "dimension"
+      },
+      "s2": {
+        "$value": "24px",
+        "$type": "dimension"
+      },
+      "s3": {
+        "$value": "30px",
+        "$type": "dimension"
+      },
+      "s4": {
+        "$value": "32px",
+        "$type": "dimension"
+      },
+      "s5": {
+        "$value": "34px",
+        "$type": "dimension"
+      },
+      "s6": {
+        "$value": "36px",
+        "$type": "dimension"
+      },
+      "s7": {
+        "$value": "40px",
+        "$type": "dimension"
+      },
+      "s8": {
+        "$value": "45px",
+        "$type": "dimension"
+      },
+      "s9": {
+        "$value": "47px",
+        "$type": "dimension"
+      },
+      "s10": {
+        "$value": "50px",
+        "$type": "dimension"
+      },
+      "s11": {
+        "$value": "80px",
+        "$type": "dimension"
+      },
+      "s12": {
+        "$value": "120px",
+        "$type": "dimension"
+      }
+    },
+    "radius": {
+      "r0": {
+        "$value": "4px",
+        "$type": "dimension"
+      },
+      "r1": {
+        "$value": "8px",
+        "$type": "dimension"
+      },
+      "r2": {
+        "$value": "50px",
+        "$type": "dimension"
+      },
+      "r3": {
+        "$value": "100px",
+        "$type": "dimension"
+      }
+    },
+    "shadow": {
+      "sh0": {
+        "$value": "rgba(0, 0, 0, 0.13) 1px 0px 0px 0px inset, rgba(0, 0, 0, 0.13) -1px 0px 0px 0px inset, rgba(0, 0, 0, 0.17) 0px -1px 0px 0px inset, rgba(204, 204, 204, 0.5) 0px 1px 0px 0px inset, rgba(26, 26, 26, 0.24) 0px 12px 20px -8px",
+        "$type": "shadow"
+      },
+      "sh1": {
+        "$value": "rgba(0, 0, 0, 0.2) 1px 1px 1px 1px",
+        "$type": "shadow"
+      },
+      "sh2": {
+        "$value": "rgba(0, 0, 0, 0.2) 0px 2px 6px 0px",
+        "$type": "shadow"
+      },
+      "sh3": {
+        "$value": "rgba(0, 0, 0, 0.2) 0px 2px 8px 0px",
+        "$type": "shadow"
+      },
+      "sh4": {
+        "$value": "rgba(0, 0, 0, 0.2) 0px 0px 25px 0px",
+        "$type": "shadow"
+      },
+      "sh5": {
+        "$value": "rgba(0, 0, 0, 0.2) 0px 26px 80px 0px",
+        "$type": "shadow"
+      }
+    },
+    "fontFamily": {
+      "f0": {
+        "$value": "BrownStd",
+        "$type": "fontFamily"
+      },
+      "f1": {
+        "$value": "EBGaramond",
+        "$type": "fontFamily"
+      },
+      "f2": {
+        "$value": "Arial",
+        "$type": "fontFamily"
+      },
+      "f3": {
+        "$value": "Times",
+        "$type": "fontFamily"
+      },
+      "f4": {
+        "$value": "GaramondPremrPro",
+        "$type": "fontFamily"
+      },
+      "f5": {
+        "$value": "swym-font",
+        "$type": "fontFamily"
+      },
+      "f6": {
+        "$value": "GTStandard-M",
+        "$type": "fontFamily"
+      }
+    }
+  },
+  "semantic": {
+    "color": {
+      "action": {
+        "primary": {
+          "$value": "{primitive.color.brand.primary}",
+          "$type": "color"
+        },
+        "secondary": {
+          "$value": "{primitive.color.brand.secondary}",
+          "$type": "color"
+        }
+      },
+      "surface": {
+        "default": {
+          "$value": "{primitive.color.background.bg0}",
+          "$type": "color"
+        }
+      },
+      "text": {
+        "body": {
+          "$value": "{primitive.color.text.text0}",
+          "$type": "color"
+        }
+      }
+    },
+    "typography": {
+      "body": {
+        "$value": {
+          "fontFamily": "BrownStd",
+          "fontSize": "32px",
+          "fontWeight": "400",
+          "lineHeight": "41.6px"
+        },
+        "$type": "typography"
+      }
+    },
+    "radius": {
+      "control": {
+        "$value": "{primitive.radius.r0}",
+        "$type": "dimension"
+      }
+    },
+    "shadow": {
+      "elevated": {
+        "$value": "{primitive.shadow.sh0}",
+        "$type": "shadow"
+      }
+    }
+  }
+}

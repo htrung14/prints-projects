@@ -1,0 +1,214 @@
+{
+  "$metadata": {
+    "generator": "designlang",
+    "version": "7.0.0",
+    "spec": "https://design-tokens.github.io/community-group/format/",
+    "source": "https://ssense.com",
+    "generatedAt": "2026-04-18T22:45:57.487Z"
+  },
+  "primitive": {
+    "color": {
+      "brand": {
+        "primary": {
+          "$value": "#333333",
+          "$type": "color"
+        }
+      },
+      "neutral": {
+        "n100": {
+          "$value": "#333333",
+          "$type": "color"
+        },
+        "n200": {
+          "$value": "#000000",
+          "$type": "color"
+        },
+        "n300": {
+          "$value": "#f4f4f4",
+          "$type": "color"
+        },
+        "n400": {
+          "$value": "#888888",
+          "$type": "color"
+        },
+        "n500": {
+          "$value": "#979797",
+          "$type": "color"
+        },
+        "n600": {
+          "$value": "#ffffff",
+          "$type": "color"
+        },
+        "n700": {
+          "$value": "#777777",
+          "$type": "color"
+        },
+        "n800": {
+          "$value": "#cccccc",
+          "$type": "color"
+        }
+      },
+      "background": {
+        "bg0": {
+          "$value": "#ffffff",
+          "$type": "color"
+        },
+        "bg1": {
+          "$value": "#f4f4f4",
+          "$type": "color"
+        }
+      },
+      "text": {
+        "text0": {
+          "$value": "#000000",
+          "$type": "color"
+        },
+        "text1": {
+          "$value": "#333333",
+          "$type": "color"
+        },
+        "text2": {
+          "$value": "#888888",
+          "$type": "color"
+        }
+      }
+    },
+    "spacing": {
+      "s0": {
+        "$value": "2px",
+        "$type": "dimension"
+      },
+      "s1": {
+        "$value": "30px",
+        "$type": "dimension"
+      },
+      "s2": {
+        "$value": "40px",
+        "$type": "dimension"
+      },
+      "s3": {
+        "$value": "50px",
+        "$type": "dimension"
+      },
+      "s4": {
+        "$value": "55px",
+        "$type": "dimension"
+      },
+      "s5": {
+        "$value": "60px",
+        "$type": "dimension"
+      },
+      "s6": {
+        "$value": "68px",
+        "$type": "dimension"
+      },
+      "s7": {
+        "$value": "98px",
+        "$type": "dimension"
+      },
+      "s8": {
+        "$value": "109px",
+        "$type": "dimension"
+      },
+      "s9": {
+        "$value": "133px",
+        "$type": "dimension"
+      },
+      "s10": {
+        "$value": "234px",
+        "$type": "dimension"
+      },
+      "s11": {
+        "$value": "290px",
+        "$type": "dimension"
+      },
+      "s12": {
+        "$value": "397px",
+        "$type": "dimension"
+      },
+      "s13": {
+        "$value": "498px",
+        "$type": "dimension"
+      }
+    },
+    "radius": {
+      "r0": {
+        "$value": "3px",
+        "$type": "dimension"
+      },
+      "r1": {
+        "$value": "10px",
+        "$type": "dimension"
+      }
+    },
+    "shadow": {
+      "sh0": {
+        "$value": "rgb(0, 0, 0) 0px 0px 0px 1px inset",
+        "$type": "shadow"
+      }
+    },
+    "fontFamily": {
+      "f0": {
+        "$value": "JHA Times Now",
+        "$type": "fontFamily"
+      },
+      "f1": {
+        "$value": "Favorit SSENSE Inter",
+        "$type": "fontFamily"
+      },
+      "f2": {
+        "$value": "sans-serif",
+        "$type": "fontFamily"
+      },
+      "f3": {
+        "$value": "Favorit SSENSE Inter1",
+        "$type": "fontFamily"
+      }
+    }
+  },
+  "semantic": {
+    "color": {
+      "action": {
+        "primary": {
+          "$value": "{primitive.color.brand.primary}",
+          "$type": "color"
+        }
+      },
+      "surface": {
+        "default": {
+          "$value": "{primitive.color.background.bg0}",
+          "$type": "color"
+        }
+      },
+      "text": {
+        "body": {
+          "$value": "{primitive.color.text.text0}",
+          "$type": "color"
+        }
+      }
+    },
+    "typography": {
+      "body": {
+        "$value": {
+          "fontFamily": "JHA Times Now",
+          "fontSize": "71.25px",
+          "fontWeight": "400",
+          "lineHeight": "76px"
+        },
+        "$type": "typography"
+      }
+    },
+    "radius": {
+      "control": {
+        "$value": "{primitive.radius.r0}",
+        "$type": "dimension"
+      }
+    },
+    "shadow": {
+      "elevated": {
+        "$value": "{primitive.shadow.sh0}",
+        "$type": "shadow"
+      }
+    }
+  }
+}

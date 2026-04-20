@@ -4,7 +4,7 @@ import { getAllPhotos } from "@/lib/photos";
 
 export default function Home() {
   const photos = getAllPhotos();
-  const lead = photos[0];
+  const lead = photos.find((p) => p.slug === "north-lebanon-oct-2020") ?? photos[0];
 
   return (
     <div>
@@ -20,7 +20,6 @@ export default function Home() {
             fontSize: 14,
             fontWeight: 500,
             letterSpacing: "0.14em",
-            textTransform: "uppercase",
             color: "var(--ink)",
           }}
         >

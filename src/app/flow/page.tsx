@@ -49,12 +49,12 @@ const MOCK_ITEM = {
   id: "item-001",
   photoTitle: "Mount Lebanon, February 2025",
   photoSlug: "mount-lebanon-feb-2025",
-  sizeLabel: "16 x 20 in",
+  sizeLabel: "8 x 10 in",
   paperName: "Hahnemuhle Photo Rag",
   editionNumber: 3,
   editionTotal: 10,
   quantity: 1,
-  unitPriceCents: 22000,
+  unitPriceCents: 30000,
   printFileKey: "masters/mount-lebanon-feb-2025.tif",
 };
 

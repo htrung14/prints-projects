@@ -1,0 +1,5 @@
+wing: personal
+rooms:
+- name: workflow
+  description: User preferences and workflow rules
+  keywords: [workflow, preference, rule, frontend, design, responsive, sweep, desktop, mobile]
