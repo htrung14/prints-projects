@@ -1,28 +1,22 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
 import type { Photo } from "@/lib/types";
+import { ScrollLink } from "./ScrollLink";
 
 export default function LandingHero({ lead }: { lead: Photo }) {
-  const scrollToPrints = (e: React.MouseEvent) => {
-    const target = document.getElementById("prints");
-    if (!target) return;
-    e.preventDefault();
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const top = target.getBoundingClientRect().top + window.scrollY - 16;
-    window.scrollTo({ top, behavior: reduceMotion ? "auto" : "smooth" });
-    history.replaceState(null, "", "#prints");
-  };
-
   return (
     <section id="hero">
       <div className="hfb">
         <figure className="hfb-fig">
-          <img
+          <Image
             src={lead.imageUrl}
             alt={lead.imageAlt}
-            className="img-protected"
+            fill
+            priority
+            sizes="100vw"
+            className="img-protected object-cover"
             draggable={false}
+            style={{ objectPosition: "center 30%" }}
           />
         </figure>
         <h1 className="hfb-center" style={{ margin: 0, fontWeight: "normal" }}>
@@ -42,9 +36,9 @@ export default function LandingHero({ lead }: { lead: Photo }) {
           </div>
         </div>
         <div className="hfb-rail">
-          <Link href="#prints" onClick={scrollToPrints} className="h-vp">
+          <ScrollLink href="#prints" target="prints" className="h-vp">
             View prints <span aria-hidden="true">↓</span>
-          </Link>
+          </ScrollLink>
         </div>
       </div>
 

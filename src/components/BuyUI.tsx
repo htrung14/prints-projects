@@ -189,8 +189,27 @@ export default function BuyUI({ photo }: { photo: Photo }) {
             textAlign: "center",
           }}
         >
-          Made to order · archival packaging, fully insured · ships within 14 business days
+          Made to order · Archival packaging, fully insured · Ships within 14 business days
         </p>
+        <ul
+          style={{
+            listStyle: "none",
+            padding: 0,
+            margin: "14px 0 0",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "6px 16px",
+            fontSize: 11,
+            color: "var(--i5)",
+            letterSpacing: "0.02em",
+          }}
+        >
+          <li>Numbered edition</li>
+          <li>Certificate of authenticity</li>
+          <li>Hahnemühle archival paper</li>
+          <li>Free US shipping on 2+</li>
+        </ul>
       </div>
 
       {/* Description - always open. Pulled out of an accordion because

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Photo } from "@/lib/types";
 import { formatUsd, isSoldOut, editionRemaining } from "@/lib/pricing";
@@ -18,12 +19,13 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
         }}
       >
         <SaveButton slug={photo.slug} />
-        <img
+        <Image
           src={photo.imageUrl}
           alt={photo.imageAlt}
-          className="img-protected absolute inset-0 h-full w-full object-cover transition-transform duration-[640ms] group-hover:scale-[1.015]"
+          fill
+          sizes="(max-width: 768px) 50vw, 33vw"
+          className="img-protected object-cover transition-transform duration-[640ms] group-hover:scale-[1.015]"
           style={{ transitionTimingFunction: "cubic-bezier(.2,.6,.2,1)" }}
-          loading="lazy"
         />
         {soldOut ? (
           <span
@@ -57,7 +59,7 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
       {!soldOut && remaining <= 5 && (
         <span
           className="font-mono"
-          style={{ fontSize: 11, color: "var(--i4)", marginTop: 4, display: "block" }}
+          style={{ fontSize: 11, color: "var(--i5)", marginTop: 4, display: "block" }}
         >
           {remaining} of {photo.editionTotal} available
         </span>
