@@ -20,10 +20,14 @@ export async function alertAfterOrder(order: Order, items: OrderItem[]): Promise
 
   for (const item of items) {
     if (item.editionNumber >= item.editionTotal) {
-      await Promise.all([
-        dispatcher.send(editionSoldOutAlert(item.photoTitle, item.photoSlug)),
-        db.from("photos").update({ is_published: false }).eq("slug", item.photoSlug),
-      ]);
+      const { error } = await db
+        .from("photos")
+        .update({ is_published: false })
+        .eq("slug", item.photoSlug);
+      if (error) {
+        console.error(`[alerting] Failed to unpublish ${item.photoSlug}:`, error.message);
+      }
+      await dispatcher.send(editionSoldOutAlert(item.photoTitle, item.photoSlug));
       continue;
     }
 

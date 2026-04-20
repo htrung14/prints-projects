@@ -16,8 +16,10 @@
  */
 
 import type { NextRequest } from "next/server";
+import { after } from "next/server";
 import { stripeClient, webhookSecret } from "@/lib/stripe/client";
-import { dispatchWebhookEvent } from "@/lib/stripe/webhook";
+import { dispatchWebhookEvent, runPostOrderSideEffects } from "@/lib/stripe/webhook";
+import type Stripe from "stripe";
 
 // Node runtime only - the Stripe SDK's signature verification uses the
 // Node `crypto` module, not the Web Crypto subset available on Edge.
@@ -50,13 +52,17 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   try {
-    await dispatchWebhookEvent(event);
+    const result = await dispatchWebhookEvent(event);
+
+    // Side-effects (emails, alerts, audit) run after we return 200 to Stripe.
+    if (result && "order" in result) {
+      const session = event.data.object as Stripe.Checkout.Session;
+      after(() => runPostOrderSideEffects(result.order, result.items, session, result.dispatchUrl));
+    }
+
     return new Response(null, { status: 200 });
   } catch (err) {
     console.error(`Stripe webhook handler failed for event ${event.id} (${event.type}):`, err);
-    // 500 → Stripe retries with exponential backoff. Don't include the
-    // error message in the body (it might leak internal detail); Stripe's
-    // dashboard shows the status code and we log server-side.
     return new Response("Internal error", { status: 500 });
   }
 }

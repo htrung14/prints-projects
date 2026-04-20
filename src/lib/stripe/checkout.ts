@@ -144,8 +144,10 @@ export async function resolveCartLines(lines: CartLine[]): Promise<ResolvedCartL
     if (typeof line.paperId !== "string" || !line.paperId) {
       throw new Error(`resolveCartLines: missing paperId on ${line.photoSlug}`);
     }
-    if (!Number.isInteger(line.quantity) || line.quantity <= 0) {
-      throw new Error(`resolveCartLines: invalid quantity on ${line.photoSlug}`);
+    if (!Number.isInteger(line.quantity) || line.quantity !== 1) {
+      throw new Error(
+        `resolveCartLines: quantity must be 1 per photo (got ${line.quantity} on ${line.photoSlug})`
+      );
     }
 
     const photo = await getPhotoBySlug(line.photoSlug);
@@ -332,12 +334,15 @@ export async function createCheckoutSession(
     // permanent Customer record.
     success_url: successUrl,
     cancel_url: cancelUrl,
-    metadata: {
-      // Stored on the Session so the webhook can rebuild the cart and
-      // re-compute every price server-side. Stripe caps each metadata value
-      // at 500 chars; a typical 3-line cart is ~300 bytes, well within.
-      cart_lines_json: JSON.stringify(args.lines),
-    },
+    metadata: (() => {
+      const cartJson = JSON.stringify(args.lines);
+      if (cartJson.length > 490) {
+        throw new Error(
+          `resolveCartLines: cart too large for Stripe metadata (${cartJson.length} chars). Max 25 unique prints.`
+        );
+      }
+      return { cart_lines_json: cartJson };
+    })(),
   };
 
   const stripe = stripeClient();

@@ -188,13 +188,13 @@ describe("resolveCartLines", () => {
 
   it("throws on zero quantity", async () => {
     await expect(resolveCartLines([{ ...VALID_CART_LINE, quantity: 0 }])).rejects.toThrow(
-      "invalid quantity"
+      "quantity must be 1"
     );
   });
 
   it("throws on negative quantity", async () => {
     await expect(resolveCartLines([{ ...VALID_CART_LINE, quantity: -1 }])).rejects.toThrow(
-      "invalid quantity"
+      "quantity must be 1"
     );
   });
 
@@ -232,9 +232,10 @@ describe("createCheckoutSession", () => {
     expect(session.url).toBe("https://checkout.stripe.com/test");
   });
 
-  it("includes free US shipping when 2+ units", async () => {
+  it("includes free US shipping when 2+ prints", async () => {
+    mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
-      lines: [{ ...VALID_CART_LINE, quantity: 2 }],
+      lines: [VALID_CART_LINE, { ...VALID_CART_LINE, photoSlug: "tyre-feb-2022" }],
       origin: "http://localhost:3000",
     });
 
@@ -325,15 +326,14 @@ describe("handleCheckoutSessionCompleted (webhook)", () => {
 
     expect(result).toHaveProperty("order");
     expect(result).toHaveProperty("items");
+    expect(result).toHaveProperty("dispatchUrl");
     if ("order" in result) {
       expect(result.order.id).toBe("order-001");
       expect(result.items).toHaveLength(1);
     }
 
     expect(mockInsertOrderWithItems).toHaveBeenCalledOnce();
-    expect(mockSendOrderConfirmation).toHaveBeenCalledOnce();
-    expect(mockSendPrintJobEmail).toHaveBeenCalledOnce();
-    expect(mockAudit).toHaveBeenCalledOnce();
+    // Emails/alerts/audit are now deferred via after() — not called in handleCheckoutSessionCompleted
   });
 
   it("handles duplicate session idempotently", async () => {
@@ -390,7 +390,7 @@ describe("handleCheckoutSessionCompleted (webhook)", () => {
     ).rejects.toThrow("no shipping or billing address");
   });
 
-  it("continues if email dispatch fails (non-blocking)", async () => {
+  it("returns order even when side-effects would fail (deferred)", async () => {
     mockSendOrderConfirmation.mockRejectedValue(new Error("Resend down"));
 
     const session = makeStripeSession();
@@ -398,8 +398,9 @@ describe("handleCheckoutSessionCompleted (webhook)", () => {
       session as unknown as Stripe.Checkout.Session
     );
 
+    // Side-effects are deferred — handleCheckoutSessionCompleted only does DB insert
     expect(result).toHaveProperty("order");
-    expect(mockSendPrintJobEmail).toHaveBeenCalled();
+    expect(result).toHaveProperty("dispatchUrl");
   });
 });
 
@@ -418,12 +419,14 @@ describe("dispatchWebhookEvent", () => {
       type: "checkout.session.completed",
       data: { object: makeStripeSession() },
     };
-    await expect(dispatchWebhookEvent(event as unknown as Stripe.Event)).resolves.toBeUndefined();
+    const result = await dispatchWebhookEvent(event as unknown as Stripe.Event);
+    expect(result).toHaveProperty("order");
   });
 
   it("ignores unknown event types gracefully", async () => {
     const event = { type: "invoice.payment_failed", data: { object: {} } };
-    await expect(dispatchWebhookEvent(event as unknown as Stripe.Event)).resolves.toBeUndefined();
+    const result = await dispatchWebhookEvent(event as unknown as Stripe.Event);
+    expect(result).toBeNull();
   });
 });
 

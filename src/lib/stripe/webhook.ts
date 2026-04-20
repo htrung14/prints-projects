@@ -160,7 +160,9 @@ function extractPaymentIntentId(session: Stripe.Checkout.Session): string | null
  */
 export async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session
-): Promise<{ order: Order; items: OrderItem[] } | { idempotent: true }> {
+): Promise<
+  { order: Order; items: OrderItem[]; dispatchUrl: string | null } | { idempotent: true }
+> {
   // ---- 1. Rebuild cart + re-price defensively ----
   const cartLines = parseCartLinesFromMetadata(session.metadata);
   const resolved = await resolveCartLines(cartLines);
@@ -242,29 +244,35 @@ export async function handleCheckoutSessionCompleted(
     console.error(`webhook(${order.id}): buildDispatchUrl failed: ${(err as Error).message}`);
   }
 
-  // ---- 5. Emails + scheduled sequence ----
-  //
-  // "If sending email fails, log, but return 200 to Stripe." Each call is
-  // isolated in its own try/catch so one failure doesn't skip the rest.
+  return { order, items, dispatchUrl };
+}
+
+/**
+ * Non-critical side-effects to run AFTER the webhook returns 200.
+ * Called via waitUntil in the route handler so Stripe gets a fast response.
+ */
+export async function runPostOrderSideEffects(
+  order: Order,
+  items: OrderItem[],
+  session: { id: string },
+  dispatchUrl: string | null
+): Promise<void> {
+  const totalCents = order.totalCents;
+  const taxCents = order.taxCents;
+  const shippingCents = order.shippingCents;
+  const currency = order.currency;
+
   await runSafely("sendOrderConfirmation", () => sendOrderConfirmation(order, items), order.id);
-  // Only send the print-job email if the dispatch URL was built successfully - // Track C's signature requires a non-null URL. If we don't have one, log
-  // and skip; admin can resend once DISPATCH_SIGNING_SECRET is configured.
   if (dispatchUrl) {
     const url = dispatchUrl;
     await runSafely("sendPrintJobEmail", () => sendPrintJobEmail(order, items, url), order.id);
-  } else {
-    console.error(`webhook(${order.id}): skipping print-job email; dispatch URL unavailable`);
   }
   await runSafely(
     "schedulePostPurchaseSequence",
     () => schedulePostPurchaseSequence(order),
     order.id
   );
-
-  // ---- 5b. Alerting (stock checks, notifications) ----
   await runSafely("alertAfterOrder", () => alertAfterOrder(order, items), order.id);
-
-  // ---- 6. Audit log ----
   await runSafely(
     "audit(paid)",
     () =>
@@ -284,8 +292,6 @@ export async function handleCheckoutSessionCompleted(
       }),
     order.id
   );
-
-  return { order, items };
 }
 
 /**
@@ -303,18 +309,19 @@ async function runSafely(label: string, fn: () => Promise<void>, orderId: string
 // Top-level dispatcher - route calls this after signature verification.
 // ---------------------------------------------------------------------------
 
-export async function dispatchWebhookEvent(event: Stripe.Event): Promise<void> {
+type DispatchResult =
+  | { order: Order; items: OrderItem[]; dispatchUrl: string | null }
+  | { idempotent: true }
+  | null;
+
+export async function dispatchWebhookEvent(event: Stripe.Event): Promise<DispatchResult> {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      await handleCheckoutSessionCompleted(session);
-      return;
+      return await handleCheckoutSessionCompleted(session);
     }
-    // Intentionally a no-op for everything else. Returning 200 for unknown
-    // types is the Stripe-recommended pattern (docs: "Return a 200 response
-    // to acknowledge receipt of the event").
     default:
       console.info(`webhook: ignoring event type ${event.type}`);
-      return;
+      return null;
   }
 }
