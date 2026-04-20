@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 const labelStyle: React.CSSProperties = {
-  fontSize: 10,
+  fontSize: 13,
   letterSpacing: "0.1em",
   color: "rgba(255,255,255,0.7)",
   fontWeight: 600,
@@ -19,7 +19,7 @@ const listStyle: React.CSSProperties = {
   padding: 0,
   margin: 0,
   fontFamily: "var(--font-serif)",
-  fontSize: "clamp(14px, 1.4vw, 16px)" as string,
+  fontSize: "clamp(16px, 1.6vw, 19px)" as string,
   fontWeight: 500,
   lineHeight: 1.65,
   color: "#fff",
@@ -71,7 +71,7 @@ export default function InfoPage() {
             <p
               className="font-serif"
               style={{
-                fontSize: "clamp(14px, 1.4vw, 16px)",
+                fontSize: "clamp(16px, 1.6vw, 19px)",
                 lineHeight: 1.65,
                 color: "#fff",
                 fontWeight: 500,
@@ -96,7 +96,7 @@ export default function InfoPage() {
         <div style={{ paddingLeft: "clamp(0px, 24vw, 320px)" }}>
           <p
             style={{
-              fontSize: 10,
+              fontSize: 13,
               letterSpacing: "0.1em",
               color: "rgba(255,255,255,0.7)",
               fontWeight: 600,
@@ -108,7 +108,7 @@ export default function InfoPage() {
           <p
             className="font-serif"
             style={{
-              fontSize: "clamp(14px, 1.4vw, 16px)",
+              fontSize: "clamp(16px, 1.6vw, 19px)",
               lineHeight: 1.65,
               color: "#fff",
               fontWeight: 500,
@@ -200,7 +200,7 @@ export default function InfoPage() {
                   display: "grid",
                   gridTemplateColumns: "auto auto",
                   gap: "4px 20px",
-                  fontSize: 11,
+                  fontSize: 14,
                   color: "rgba(255,255,255,0.45)",
                   lineHeight: 1.5,
                 }}
