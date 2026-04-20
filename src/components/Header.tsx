@@ -17,7 +17,7 @@ export default function Header() {
 
   return (
     <header
-      className="grid grid-cols-[1fr_auto] items-baseline px-5 py-4 md:px-11 md:py-[17px]"
+      className="relative z-50 grid grid-cols-[1fr_auto] items-baseline px-5 py-4 md:px-11 md:py-[17px]"
       style={{
         background: bg,
         borderBottom: "none",
