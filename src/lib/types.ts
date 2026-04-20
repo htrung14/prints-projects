@@ -77,6 +77,7 @@ export type CartLine = {
  */
 export type OrderStatus =
   | "paid"
+  | "queued_for_print"
   | "sent_to_print"
   | "printed"
   | "shipped"

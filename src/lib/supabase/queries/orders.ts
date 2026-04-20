@@ -102,6 +102,7 @@ function parseAddress(raw: unknown): Address {
 function narrowStatus(status: string): OrderStatus {
   switch (status) {
     case "paid":
+    case "queued_for_print":
     case "sent_to_print":
     case "printed":
     case "shipped":

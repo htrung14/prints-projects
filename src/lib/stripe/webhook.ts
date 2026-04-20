@@ -27,6 +27,7 @@ import {
   schedulePostPurchaseSequence,
 } from "@/lib/email/send";
 import { buildDispatchUrl } from "@/lib/dispatch/url";
+import { alertAfterOrder } from "@/lib/alerting/webhook-alerts";
 
 // ---------------------------------------------------------------------------
 // Metadata shape
@@ -259,6 +260,9 @@ export async function handleCheckoutSessionCompleted(
     () => schedulePostPurchaseSequence(order),
     order.id
   );
+
+  // ---- 5b. Alerting (stock checks, notifications) ----
+  await runSafely("alertAfterOrder", () => alertAfterOrder(order, items), order.id);
 
   // ---- 6. Audit log ----
   await runSafely(

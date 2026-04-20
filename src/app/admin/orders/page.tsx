@@ -9,12 +9,14 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { listOrders } from "@/lib/supabase/queries/orders";
 import type { OrderStatus } from "@/lib/types";
+import { BatchButton } from "./BatchButton";
 
 export const dynamic = "force-dynamic";
 
 const STATUS_FILTERS: Array<OrderStatus | "all"> = [
   "all",
   "paid",
+  "queued_for_print",
   "sent_to_print",
   "printed",
   "shipped",
@@ -27,6 +29,7 @@ function parseStatus(raw: string | string[] | undefined): OrderStatus | null {
   if (typeof raw !== "string") return null;
   const allowed: OrderStatus[] = [
     "paid",
+    "queued_for_print",
     "sent_to_print",
     "printed",
     "shipped",
@@ -56,7 +59,10 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
   await requireAdmin("/admin/orders");
   const q = await searchParams;
   const status = parseStatus(q.status);
-  const orders = await listOrders(status ? { status } : {});
+  const [orders, paidOrders] = await Promise.all([
+    listOrders(status ? { status } : {}),
+    listOrders({ status: "paid" }),
+  ]);
 
   return (
     <section className="flex flex-col gap-6">
@@ -64,6 +70,15 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
         <h1 className="h-display">Orders</h1>
         <span className="text-sm text-ink-faint">{orders.length} total</span>
       </header>
+
+      {paidOrders.length > 0 && (
+        <div className="flex items-center gap-4">
+          <span className="text-sm">
+            {paidOrders.length} paid {paidOrders.length === 1 ? "order" : "orders"} ready to batch
+          </span>
+          <BatchButton paidOrdersCount={paidOrders.length} />
+        </div>
+      )}
 
       <nav className="flex flex-wrap gap-4 text-sm">
         {STATUS_FILTERS.map((f) => {
