@@ -10,7 +10,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const client = Sentry.getClient();
+  let client = Sentry.getClient();
+  const wasClientReady = !!client;
+
+  if (!client) {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN ?? process.env.NEXT_PUBLIC_SENTRY_DSN,
+      sendDefaultPii: false,
+      tracesSampleRate: 0,
+    });
+    client = Sentry.getClient();
+  }
+
   const dsnOptions = client?.getOptions?.();
   const dsn = dsnOptions?.dsn || "(no dsn)";
   const dsnHead = typeof dsn === "string" ? dsn.slice(0, 60) + "..." : "(non-string dsn)";
@@ -32,6 +43,7 @@ export async function POST(req: Request) {
     eventId,
     flushed,
     clientReady: !!client,
+    wasClientReady,
     dsnHead,
     env: {
       hasServerDsn: !!process.env.SENTRY_DSN,
