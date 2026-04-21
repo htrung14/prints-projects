@@ -26,10 +26,11 @@ export async function POST(req: Request) {
   const dsn = dsnOptions?.dsn || "(no dsn)";
   const dsnHead = typeof dsn === "string" ? dsn.slice(0, 60) + "..." : "(non-string dsn)";
 
+  const suffix = Date.now().toString(36);
   const err = new Error(
-    "TEST — verifying Sentry → /api/alerts/sentry → dispatcher path. No action needed."
+    `TEST-${suffix} — verifying Sentry → /api/alerts/sentry → dispatcher path. No action needed.`
   );
-  err.name = "TestPipelineError";
+  err.name = `TestPipelineError_${suffix}`;
 
   const eventId = Sentry.captureException(err, {
     tags: { test: "true", source: "admin/test-sentry" },
