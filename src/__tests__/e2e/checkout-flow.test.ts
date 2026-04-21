@@ -183,8 +183,8 @@ describe("resolveCartLines", () => {
 
   it("throws on unknown paperId", async () => {
     await expect(
-      resolveCartLines([{ ...VALID_CART_LINE, paperId: "bamboo" as CartLine["paperId"] }])
-    ).rejects.toThrow("unknown paperId bamboo");
+      resolveCartLines([{ ...VALID_CART_LINE, paperId: "canvas" as CartLine["paperId"] }])
+    ).rejects.toThrow("unknown paperId canvas");
   });
 
   it("throws on zero quantity", async () => {

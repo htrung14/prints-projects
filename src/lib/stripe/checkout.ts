@@ -41,7 +41,7 @@ import "server-only";
 import type Stripe from "stripe";
 import type { CartLine, Photo } from "@/lib/types";
 import { priceCents } from "@/lib/pricing";
-import { getPhotoBySlug } from "@/lib/supabase/queries/photos";
+import { getPhotoBySlug as getPhotoFromFixture } from "@/lib/photos";
 import { stripeClient } from "./client";
 
 // ---------------------------------------------------------------------------
@@ -150,7 +150,7 @@ export async function resolveCartLines(lines: CartLine[]): Promise<ResolvedCartL
       );
     }
 
-    const photo = await getPhotoBySlug(line.photoSlug);
+    const photo = getPhotoFromFixture(line.photoSlug) ?? null;
     if (!photo) {
       throw new Error(`resolveCartLines: unknown photo ${line.photoSlug}`);
     }
