@@ -268,7 +268,7 @@ describe("createCheckoutSession", () => {
     expect(session.url).toBe("https://checkout.stripe.com/test");
   });
 
-  it("US country: free shipping, allowed_countries narrowed to [US]", async () => {
+  it("US country: $10 shipping, allowed_countries narrowed to [US]", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE, { ...VALID_CART_LINE, photoSlug: "tyre-feb-2022" }],
@@ -278,7 +278,7 @@ describe("createCheckoutSession", () => {
 
     const params = mockStripeCreate.mock.calls[0][0];
     expect(params.shipping_options).toHaveLength(1);
-    expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(0);
+    expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(1000);
     expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("United States");
     expect(params.shipping_address_collection.allowed_countries).toEqual(["US"]);
   });

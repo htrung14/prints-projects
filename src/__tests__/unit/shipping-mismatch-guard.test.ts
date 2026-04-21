@@ -212,8 +212,8 @@ describe("shipping mismatch guard", () => {
 
   // --- Happy paths: buyer paid the correct tier for their country. ---
 
-  it("US address + free shipping (0¢): no mismatch alert", async () => {
-    const session = makeStripeSession({ country: "US", shippingCents: 0 });
+  it("US address + $10 shipping (1000¢): no mismatch alert", async () => {
+    const session = makeStripeSession({ country: "US", shippingCents: 1000 });
     await handleCheckoutSessionCompleted(session as unknown as Stripe.Checkout.Session);
     expect(wasShippingMismatchAlerted()).toBe(false);
   });
@@ -238,8 +238,8 @@ describe("shipping mismatch guard", () => {
 
   // --- Under-payment cases: guard must fire. ---
 
-  it("CA address but free shipping (0¢): alert fires (picked US, shipped CA)", async () => {
-    const session = makeStripeSession({ country: "CA", shippingCents: 0 });
+  it("CA address but $10 US-tier shipping (1000¢): alert fires (picked US, shipped CA)", async () => {
+    const session = makeStripeSession({ country: "CA", shippingCents: 1000 });
     await handleCheckoutSessionCompleted(session as unknown as Stripe.Checkout.Session);
 
     expect(wasShippingMismatchAlerted()).toBe(true);
@@ -252,7 +252,7 @@ describe("shipping mismatch guard", () => {
     //    paid only <M>¢."). Bare .toContain("CA") / .toContain("3500") would
     // false-pass on the static tier legend, so we anchor to the dynamic slice.
     expect(mismatchCall?.[1]).toMatch(/shipping country CA expects 3500¢/);
-    expect(mismatchCall?.[1]).toMatch(/paid only 0¢/);
+    expect(mismatchCall?.[1]).toMatch(/paid only 1000¢/);
   });
 
   it("EU_UK address (DE) but paid CA tier (3500¢): alert fires (-$15)", async () => {

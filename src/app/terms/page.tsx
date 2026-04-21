@@ -46,9 +46,9 @@ export default function TermsPage() {
             the destination country on delivery; these fees are not collected at checkout.
           </p>
           <p>
-            <strong>Shipping rates.</strong> Shipping within the United States is free.
-            International shipping is charged at a flat rate by region: $35 to Canada, $50 to the
-            United Kingdom and EU, and $65 to Australia and the rest of world.
+            <strong>Shipping rates.</strong> Shipping is charged at a flat rate by region: $10
+            within the United States, $35 to Canada, $50 to the United Kingdom and EU, and $65 to
+            Australia and the rest of world.
           </p>
           <p>
             <strong>Authentication.</strong> Every print ships with a numbered Certificate of

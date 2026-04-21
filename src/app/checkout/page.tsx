@@ -14,7 +14,8 @@
  */
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { track } from "@vercel/analytics";
 import { useCart } from "@/lib/cart";
 import { getAllPhotos } from "@/lib/photos";
 import { formatUsd, priceCents } from "@/lib/pricing";
@@ -24,7 +25,7 @@ import { COUNTRY_OPTIONS } from "@/lib/countries";
 // Per-tier rate in cents, inlined for the UI summary line. Kept in sync with
 // src/lib/stripe/checkout.ts's SHIPPING_CENTS_* constants and tierForCountry().
 const TIER_CENTS: Record<"US" | "CA" | "EU_UK" | "AU_ROW", number> = {
-  US: 0,
+  US: 1000,
   CA: 3500,
   EU_UK: 5000,
   AU_ROW: 6500,
@@ -81,6 +82,16 @@ export default function CheckoutPage() {
 
   const shippingCents = useMemo(() => shippingCentsFor(country), [country]);
 
+  // Fire one funnel event per checkout-page view, with cart snapshot so
+  // the Vercel Analytics funnel can compare "entered checkout" to "paid".
+  useEffect(() => {
+    if (lines.length === 0) return;
+    track("checkout_view", { item_count: lines.length, subtotal_cents: subtotalCents });
+    // Empty dep array is intentional: we want one event per visit to the
+    // page, not one per cart mutation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function proceed() {
     if (pending || lines.length === 0) return;
     setPending(true);
@@ -131,7 +142,7 @@ export default function CheckoutPage() {
 
   const processingFeeCents = Math.ceil(subtotalCents * 0.03);
   const totalCents = subtotalCents + processingFeeCents + shippingCents;
-  const shippingLabel = shippingCents === 0 ? "Free" : `${formatUsd(shippingCents)} (${country})`;
+  const shippingLabel = `${formatUsd(shippingCents)} (${country})`;
 
   return (
     <div className="border-t border-ink-line px-6 py-16 md:px-8">

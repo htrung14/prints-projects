@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { track } from "@vercel/analytics";
 import { useCart } from "@/lib/cart";
 import { formatUsd, isSoldOut, priceCents } from "@/lib/pricing";
 import type { PaperType, Photo } from "@/lib/types";
@@ -85,6 +86,11 @@ export default function BuyUI({ photo }: { photo: Photo }) {
     if (soldOut) return;
     add({ photoSlug: photo.slug, sizeId, paperId, quantity: qty });
     setJustAdded(true);
+    track("add_to_cart", {
+      slug: photo.slug,
+      ref: photo.referenceNumber,
+      price_cents: currentPrice,
+    });
   };
 
   // Clear the "Added ✓" state after a short delay so the CTA returns to its

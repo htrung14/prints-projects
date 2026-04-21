@@ -154,7 +154,7 @@ export type ShippingDestination = "US" | "CA" | "EU_UK" | "AU_ROW";
 const TAX_CODE_FALLBACK = "txcd_99999999";
 
 // Per-tier shipping rates in USD cents.
-const SHIPPING_CENTS_US = 0; // Free US shipping
+const SHIPPING_CENTS_US = 1000; // $10 US
 const SHIPPING_CENTS_CA = 3500; // $35 Canada
 const SHIPPING_CENTS_EU_UK = 5000; // $50 UK + EU
 const SHIPPING_CENTS_AU_ROW = 6500; // $65 Australia + rest of world
@@ -349,7 +349,7 @@ function buildShippingOptions(destination: ShippingDestination): ShippingOptionP
           shipping_rate_data: {
             type: "fixed_amount",
             fixed_amount: { amount: SHIPPING_CENTS_US, currency: "usd" },
-            display_name: "United States — free",
+            display_name: "United States — $10",
             tax_behavior: "exclusive",
           },
         },

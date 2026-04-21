@@ -196,7 +196,7 @@ export async function handleCheckoutSessionCompleted(
   // creation time, but Stripe still lets the buyer edit the shipping country
   // on the hosted page in some edge cases. Re-derive the expected rate from
   // the *actual* shipping country and alert if the buyer under-paid
-  // (e.g. picked "United States — free" then shipped to Canada, or picked
+  // (e.g. picked "United States — $10" then shipped to Canada, or picked
   // "EU — $50" then shipped to Australia). Advisory only — the order still
   // persists; ops holds the shipment and collects the difference.
   const expected = expectedShippingCentsFor(address.country);
@@ -204,7 +204,7 @@ export async function handleCheckoutSessionCompleted(
     const shortfall = expected - shippingCents;
     const msg =
       `Order ${session.id}: shipping country ${address.country} expects ${expected}¢ ` +
-      `(US=0, CA=3500, EU/UK=5000, AU/ROW=6500) but buyer paid only ${shippingCents}¢. ` +
+      `(US=1000, CA=3500, EU/UK=5000, AU/ROW=6500) but buyer paid only ${shippingCents}¢. ` +
       `Likely picked a cheaper tier at checkout. Hold shipment and collect the ` +
       `$${(shortfall / 100).toFixed(2)} shortfall before dispatch.`;
     Sentry.captureMessage("shipping/country mismatch at checkout", {

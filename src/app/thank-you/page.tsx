@@ -10,6 +10,7 @@ import Link from "next/link";
 import { stripeClient } from "@/lib/stripe/client";
 import { getOrderBySessionId } from "@/lib/supabase/queries/orders";
 import ClearCart from "./ClearCart";
+import TrackPurchase from "./TrackPurchase";
 
 type SearchParams = Promise<{
   session_id?: string | string[];
@@ -176,6 +177,7 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Sea
   return (
     <div className="px-6 py-20 md:px-8">
       <ClearCart />
+      <TrackPurchase orderRef={orderRef} totalCents={order?.totalCents ?? 0} currency={currency} />
       <div className="mx-auto max-w-xl space-y-8">
         <div className="space-y-3">
           <span className="label-caps">Order confirmation</span>
