@@ -196,37 +196,6 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         </p>
       </div>
 
-      {/* Description - always open. Pulled out of an accordion because
-          this is the emotional hook of the product page; Lemaire leaves
-          it visible below the CTA for the same reason. */}
-      <section
-        aria-label="Description"
-        style={{
-          marginTop: 16,
-          paddingTop: 16,
-          borderTop: "1px solid var(--i1)",
-        }}
-      >
-        <h2
-          className="font-mono"
-          style={{
-            fontSize: 13,
-            letterSpacing: "0.04em",
-            color: "var(--ink)",
-            marginBottom: 14,
-          }}
-        >
-          Description
-        </h2>
-        <div style={{ fontSize: 16, lineHeight: 1.65, color: "var(--ink)", maxWidth: "58ch" }}>
-          {photo.description.map((para, i) => (
-            <p key={i} style={{ marginTop: i === 0 ? 0 : 10 }}>
-              {para}
-            </p>
-          ))}
-        </div>
-      </section>
-
       {/* Shipping & returns - kept collapsed. Reference detail; the
           essential "ships in 14 business days" line already sits under
           the CTA, so this accordion is for the longer policy copy. */}
