@@ -1,9 +1,9 @@
 import LandingHero from "@/components/LandingHero";
 import CatalogGrid from "@/components/CatalogGrid";
-import { getAllPhotos } from "@/lib/photos";
+import { getCatalogPhotos } from "@/lib/photos";
 
 export default function Home() {
-  const photos = getAllPhotos();
+  const photos = getCatalogPhotos();
   const lead = photos.find((p) => p.slug === "north-lebanon-oct-2020") ?? photos[0];
 
   return (

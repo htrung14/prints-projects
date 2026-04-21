@@ -998,5 +998,34 @@
     ],
     "editionTotal": 10,
     "editionSold": 3
+  },
+  {
+    "slug": "test-1-dollar",
+    "referenceNumber": "TEST-001",
+    "title": "Test Print",
+    "titleItalic": "$1",
+    "subtitle": "Internal test item",
+    "year": 2026,
+    "description": ["Test item for end-to-end checkout verification. Not for sale to the public."],
+    "imageUrl": "/images/catalog/bekaa-feb-2025.jpg",
+    "imageAlt": "Internal test placeholder image.",
+    "basePriceCents": 100,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 999,
+    "editionSold": 0,
+    "isPublished": false
   }
 ]

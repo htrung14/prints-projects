@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import DetailPanel from "@/components/DetailPanel";
 import RelatedPrints from "@/components/RelatedPrints";
-import { getAllPhotos, getPhotoBySlug } from "@/lib/photos";
+import { getAllPhotos, getCatalogPhotos, getPhotoBySlug } from "@/lib/photos";
 
 export function generateStaticParams() {
   return getAllPhotos().map((p) => ({ slug: p.slug }));
@@ -11,7 +11,8 @@ export default async function PhotoPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const photo = getPhotoBySlug(slug);
   if (!photo) notFound();
-  const all = getAllPhotos();
+  // Related-prints rail only shows publicly listed photos, never the test item.
+  const all = getCatalogPhotos();
   return (
     <>
       <DetailPanel photo={photo} />
