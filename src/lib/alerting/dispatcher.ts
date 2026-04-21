@@ -2,7 +2,9 @@ import { createAlertDispatcher } from "./dispatch";
 import { createTelegramChannel } from "./channels/telegram";
 import { createEmailChannel } from "./channels/email";
 import { createTriagedDispatcher } from "./triage";
-import { getResend, fromAddress } from "@/lib/email/client";
+import { getResend } from "@/lib/email/client";
+
+const ALERT_FROM = "alerts@thaliabassim.com";
 
 export function getDispatcher() {
   const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, ADMIN_EMAILS } = process.env;
@@ -18,10 +20,11 @@ export function getDispatcher() {
       createEmailChannel(async (opts) => {
         const resend = getResend();
         await resend.emails.send({
-          from: fromAddress(),
+          from: ALERT_FROM,
           to: opts.to,
           subject: opts.subject,
           text: opts.text,
+          html: opts.html,
         });
       }, ADMIN_EMAILS)
     );

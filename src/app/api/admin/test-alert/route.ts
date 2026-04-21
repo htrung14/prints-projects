@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { triageAlert } from "@/lib/alerting/triage";
 import { createTelegramChannel } from "@/lib/alerting/channels/telegram";
 import { createEmailChannel } from "@/lib/alerting/channels/email";
-import { getResend, fromAddress } from "@/lib/email/client";
+import { getResend } from "@/lib/email/client";
+
+const ALERT_FROM = "alerts@thaliabassim.com";
 
 export async function POST(req: Request) {
   const secret = req.headers.get("x-admin-secret");
@@ -52,10 +54,11 @@ export async function POST(req: Request) {
       const resend = getResend();
       const email = createEmailChannel(async (opts) => {
         await resend.emails.send({
-          from: fromAddress(),
+          from: ALERT_FROM,
           to: opts.to,
           subject: opts.subject,
           text: opts.text,
+          html: opts.html,
         });
       }, ADMIN_EMAILS);
       await email.send(alert);
