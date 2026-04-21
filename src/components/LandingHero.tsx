@@ -201,6 +201,13 @@ export default function LandingHero({ lead }: { lead: Photo }) {
             right: 0;
             padding: 16px 20px calc(80px + env(safe-area-inset-bottom, 0px));
           }
+          .h-pull {
+            font-size: 15px;
+            line-height: 1.5;
+          }
+          .h-essay {
+            font-size: 14px;
+          }
           .hfb-rail {
             display: none;
           }
