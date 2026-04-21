@@ -506,3 +506,37 @@ Realistic cold start: $0 to $25 per month.
 ## Next step
 
 Sit with the stakeholder and answer Section 1. Once those are settled, I'll fill in the schema and flows with concrete values and we can scaffold Phase 1.
+
+---
+
+## 15. 2026-04-15 / 16 session update
+
+Design decisions locked, stakeholder-preview branch cut, backend design finalized. Details live in the plan file and MemPalace drawer; this section is the quick index.
+
+### Design lockdown (on `main`)
+- Pastel comment triage complete — all 23 resolved
+- Accent color locked at `#1529DB`
+- Footer = F2 layout, 80px gap (exposed as CSS var `--footer-gap` in `globals.css`)
+- Product detail page = P3 layout: photo left 60%, buy panel right 40%, description below, no sticky
+- CTAs use `.btn-ghost` class in variant B style
+- Vercel Analytics installed and wired in `layout.tsx` (not yet active on the Vercel dashboard)
+- 25 PL-6604 photos in `src/data/photos.fixture.json`, interleaved for visual variety
+
+### Work on `stakeholder-preview` branch (not yet merged)
+Kept on a separate branch because the preview deployment should be gate-able. To be merged to `main` after stakeholder review.
+- Dispatch mock (`/dispatch-mock`), batch dispatch mock (`/dispatch-batch-mock`), COA mock (`/coa-mock`) — printer-facing flow
+- `PreviewBanner` component on all mock pages
+- Archival spec block added to `BuyUI` (paper, ink, lifespan, authenticity)
+- Remaining "Brooklyn, NY" references stripped from photo descriptions, layout, terms, footer
+- "Signed" language removed in favor of COA-based authentication
+- `/preview` landing page with links to every mock
+- NODE_ENV gates removed from lab/mock routes so they render on the preview deployment
+
+### Backend design (locked)
+Full architecture, schema, order flow, print-shop hand-off, and fulfillment token design live in the plan file:
+
+- Plan: `/Users/haivotrung/.claude/plans/adaptive-hopping-snowglobe.md`
+- MemPalace drawer: `mempalace search "prints-projects master state"`
+
+### Stakeholder decision poll
+Notion: https://www.notion.so/344d02ec20c080e79873eafdb2459a23
