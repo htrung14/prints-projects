@@ -52,8 +52,9 @@ export async function POST(req: Request) {
   if (ADMIN_EMAILS) {
     try {
       const resend = getResend();
+      let resendResult: unknown = null;
       const email = createEmailChannel(async (opts) => {
-        await resend.emails.send({
+        resendResult = await resend.emails.send({
           from: ALERT_FROM,
           to: opts.to,
           subject: opts.subject,
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
         });
       }, ADMIN_EMAILS);
       await email.send(alert);
-      channelResults.email = "ok";
+      channelResults.email = JSON.stringify({ from: ALERT_FROM, to: ADMIN_EMAILS, resendResult });
     } catch (e) {
       channelResults.email = `error: ${(e as Error).message}`;
     }
