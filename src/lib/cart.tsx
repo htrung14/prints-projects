@@ -57,7 +57,24 @@ function readLines(): CartLine[] {
     return cachedLines;
   }
   try {
-    cachedLines = JSON.parse(raw) as CartLine[];
+    const parsed = JSON.parse(raw) as CartLine[];
+    if (!Array.isArray(parsed)) {
+      cachedLines = SERVER_SNAPSHOT;
+      return cachedLines;
+    }
+    // Self-heal: drop any lines whose photoSlug no longer exists in the
+    // catalog (fixture changed, photo unpublished, legacy bookmark, etc.).
+    // Without this, a stale cart crashes checkout with "unknown photo …".
+    const validSlugs = new Set(getAllPhotos().map((p) => p.slug));
+    const filtered = parsed.filter(
+      (l) => l && typeof l.photoSlug === "string" && validSlugs.has(l.photoSlug)
+    );
+    if (filtered.length !== parsed.length) {
+      const cleaned = JSON.stringify(filtered);
+      window.localStorage.setItem(STORAGE_KEY, cleaned);
+      cachedRaw = cleaned;
+    }
+    cachedLines = filtered;
   } catch {
     cachedLines = SERVER_SNAPSHOT;
   }

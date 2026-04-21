@@ -229,7 +229,7 @@ describe("createCheckoutSession", () => {
     expect(params.line_items[0].price_data.unit_amount).toBe(30000);
     expect(params.line_items[0].price_data.currency).toBe("usd");
     expect(params.line_items[1].price_data.product_data.name).toBe("Processing fee (3%)");
-    expect(params.automatic_tax.enabled).toBe(true);
+    expect(params.automatic_tax.enabled).toBe(false);
     expect(params.metadata.cart_lines_json).toBe(JSON.stringify([VALID_CART_LINE]));
     expect(session.url).toBe("https://checkout.stripe.com/test");
   });

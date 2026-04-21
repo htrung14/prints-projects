@@ -314,7 +314,10 @@ export async function createCheckoutSession(
   const params: SessionCreateParams = {
     mode: "payment",
     line_items: lineItems,
-    automatic_tax: { enabled: true },
+    // Tax: off for launch — no NY Certificate of Authority yet, and this
+    // limited edition stays well under NY's economic-nexus thresholds.
+    // Re-enable once the studio registers with NY state.
+    automatic_tax: { enabled: false },
     tax_id_collection: { enabled: false },
     billing_address_collection: "required",
     phone_number_collection: { enabled: true },

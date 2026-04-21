@@ -115,10 +115,6 @@ export default function CheckoutPage() {
             <dt>Shipping</dt>
             <dd className="text-ink-faint">$20 US / $45 international</dd>
           </div>
-          <div className="flex justify-between">
-            <dt>Tax</dt>
-            <dd className="text-ink-faint">calculated at checkout</dd>
-          </div>
         </dl>
 
         <div className="space-y-3">
