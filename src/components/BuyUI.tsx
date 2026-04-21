@@ -158,23 +158,12 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         <p
           className="font-mono"
           style={{
-            fontSize: 12,
+            fontSize: 13,
             color: "var(--i5)",
             letterSpacing: "0.04em",
           }}
         >
           {FIXED_SIZE_LABEL} · Archival pigment · Ed. of {photo.editionTotal}
-        </p>
-        <p
-          className="font-mono"
-          style={{
-            fontSize: 12,
-            color: "var(--i5)",
-            letterSpacing: "0.04em",
-            marginTop: 4,
-          }}
-        >
-          Hahnemühle Photo Rag 308 gsm · 100+ year archival lightfastness
         </p>
       </div>
 
@@ -196,7 +185,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         <p
           className="font-mono"
           style={{
-            fontSize: 11,
+            fontSize: 12,
             letterSpacing: "0.04em",
             color: "var(--i5)",
             marginTop: 14,
