@@ -8,6 +8,7 @@ import CartDrawer from "@/components/CartDrawer";
 import Toast from "@/components/Toast";
 import ImageProtect from "@/components/ImageProtect";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CartProvider } from "@/lib/cart";
 
 const favorit = localFont({
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ImageProtect />
         </CartProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
