@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions — Thalia Bassim",
+  title: "Terms & Conditions - Thalia Bassim",
   description: "Shipping, returns, terms of sale, privacy, and legal information.",
 };
 
@@ -31,48 +31,42 @@ export default function TermsPage() {
         <Section id="shipping" n={1} heading="Shipping &amp; Delivery">
           <p>
             <strong>Production lead time.</strong> Prints are made to order. Expected turnaround
-            from order to dispatch:{" "}
-            <Tbd label="print-shop lead time, typically 2 to 3 business days" />. An order
-            confirmation email is sent at purchase; a second email is sent when the order
-            dispatches.
+            from order to dispatch: 7 business days. An order confirmation email is sent at
+            purchase; a second email is sent when the order dispatches.
           </p>
           <p>
             <strong>Domestic shipping (United States).</strong> Flat rate per size class, shipped by
-            USPS Ground Advantage or Priority Mail with carrier insurance. Free US shipping when the
-            cart contains two or more prints of any sizes.
+            USPS Ground Advantage or Priority Mail with carrier insurance.
           </p>
           <p>
-            <strong>International shipping.</strong> Worldwide dispatch from Brooklyn, NY via USPS
-            International or DHL. Customs declarations use HS code 4911.91 (printed pictures,
-            designs, photographs). International customers are responsible for any VAT, GST, or
-            import duties collected by the destination country on delivery; these fees are not
-            collected at checkout.
+            <strong>International shipping.</strong> Worldwide dispatch via USPS International or
+            DHL. Customs declarations use HS code 4911.91 (printed pictures, designs, photographs).
+            International customers are responsible for any VAT, GST, or import duties collected by
+            the destination country on delivery; these fees are not collected at checkout.
           </p>
           <p>
-            <strong>Local pickup (Brooklyn, NY only).</strong> Customers in Brooklyn may select
-            local pickup at checkout. The pickup address and window are provided in the order
-            confirmation email and on the order status page after payment.
-          </p>
-          <p>
-            <strong>Free shipping thresholds and flat rates.</strong>{" "}
-            <Tbd label="free shipping threshold and per-zone flat rates once finalized" />
+            <strong>Shipping rates.</strong> Domestic (US) shipping is charged at a flat rate of
+            $20. International shipping is charged at a flat rate of $45. There is no free shipping
+            threshold.
           </p>
           <p>
             <strong>Reporting a shipping issue.</strong> If your order arrives damaged or does not
-            arrive within a reasonable window, contact <Tbd label="support email" /> within seven
-            business days of the expected delivery date.
+            arrive within a reasonable window, contact info@thaliabassim.com within seven business
+            days of the expected delivery date.
           </p>
         </Section>
 
         <Section id="returns" n={2} heading="Refunds &amp; Returns">
           <p>
-            Each print is made to order. We replace prints damaged in transit or with production
-            defects within 14 days of delivery. Otherwise, all sales are final.
+            Each print is made to order and all sales are final. If your print arrives damaged,
+            contact us within 7 days with a clear photo showing the damage alongside the sealed,
+            unopened shipping packaging. We verify all claims against our shipping records before
+            issuing replacements at no cost.
           </p>
           <p>
-            <strong>How to request a replacement.</strong> Contact <Tbd label="support email" />{" "}
-            with your order number and photographs of the damage or defect, including the packaging
-            if possible. Replacements ship at no additional cost once the issue has been confirmed.
+            <strong>How to request a replacement.</strong> Contact info@thaliabassim.com with your
+            order number and photographs of the damage or defect, including the packaging if
+            possible. Replacements ship at no additional cost once the issue has been confirmed.
           </p>
           <p>
             Refunds, when approved, are issued to the original payment method via Stripe. Refund
@@ -97,8 +91,7 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>Cancellations.</strong> Orders may be cancelled before production begins by
-            contacting <Tbd label="support email" />. Once production has begun, orders cannot be
-            cancelled.
+            contacting info@thaliabassim.com. Once production has begun, orders cannot be cancelled.
           </p>
           <p>
             <strong>Intellectual property.</strong> All photographs remain the copyright of the
@@ -111,8 +104,8 @@ export default function TermsPage() {
             the purchase price of that order.
           </p>
           <p>
-            <strong>Governing law.</strong>{" "}
-            <Tbd label="jurisdiction, tied to the country of incorporation" />
+            <strong>Governing law.</strong> These terms are governed by the laws of the State of New
+            York, United States.
           </p>
         </Section>
 
@@ -133,23 +126,20 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>Your rights.</strong> You can request a copy or deletion of your order data by
-            contacting <Tbd label="support email" />.
+            contacting info@thaliabassim.com.
           </p>
         </Section>
 
         <Section id="imprint" n={5} heading="Legal Notice">
           <p>
-            Studio legal name: <Tbd label="studio legal name" />
+            Legal name: Thalia Bassim
             <br />
-            Registered address: <Tbd label="registered studio address" />
-            <br />
-            Contact email: <Tbd label="support email" />
+            Contact email: info@thaliabassim.com
           </p>
         </Section>
 
         <p className="mt-12 text-ink-faint">
-          Last updated <time dateTime="2026-04-15">April 15, 2026</time>. This page is a demo draft
-          and has not yet been reviewed by counsel.
+          Last updated <time dateTime="2026-04-20">April 20, 2026</time>.
         </p>
       </div>
     </div>
@@ -180,13 +170,5 @@ function Section({
         <div className="space-y-4 text-sm leading-relaxed">{children}</div>
       </div>
     </section>
-  );
-}
-
-function Tbd({ label }: { label?: string }) {
-  return (
-    <span className="inline-block border border-ink-line bg-bg-soft px-1.5 py-0.5 text-[11px] text-ink-faint">
-      TBD{label ? `: ${label}` : ""}
-    </span>
   );
 }

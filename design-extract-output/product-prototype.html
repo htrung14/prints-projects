@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Untitled, 01 — At-Tamassok — Thalia Bassim</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Geist+Mono:wght@300;400&display=swap');
+@font-face { font-family:'Favorit'; src:url('fonts/FavoritLightC.woff2') format('woff2'); font-weight:300; font-style:normal; font-display:swap; }
+@font-face { font-family:'Favorit'; src:url('fonts/FavoritBookC.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; }
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  --bg:   #faf9f6;
+  --ink:  rgba(12,11,10,1);
+  --i8:   rgba(12,11,10,.92);
+  --i5:   rgba(12,11,10,.70);
+  --i3:   rgba(12,11,10,.52);
+  --i1:   rgba(12,11,10,.12);
+  --rule: rgba(12,11,10,.22);
+  --ff:  'Favorit','Helvetica Neue',sans-serif;
+  --fs:  'EB Garamond',Georgia,serif;
+  --fm:  'Geist Mono',monospace;
+  --mat: 14px;
+  --rail-w: 38vw;
+  --rail-max: 520px;
+}
+
+html { scroll-behavior:smooth; }
+
+/* Default: page fits in viewport, no scroll. Scroll is only enabled
+   when the user expands a disclosure — Lemaire-style restraint. */
+html, body { height: 100%; }
+body {
+  font-family: var(--ff);
+  background: var(--bg);
+  color: var(--i8);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+/* (Scroll gating removed — the related prints row needs to be
+   reachable by scroll on every page load.) */
+
+a { color:inherit; text-decoration:none; }
+
+/* ─── NAV */
+.nav {
+  position: sticky; top: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  padding: 17px 44px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--i1);
+}
+.nav-l  { font-size: 15px; letter-spacing: .04em; color: var(--ink); font-weight: 400; }
+.nav-r  { display: flex; justify-content: flex-end; gap: 28px; align-items: baseline; }
+.nav-r a{ font-size: 15px; letter-spacing: .04em; color: var(--ink); font-weight: 400; }
+.nav-r .nav-essay { font-family: var(--fs); font-style: italic; font-size: 18px; font-weight: 500; }
+.nav-r .nav-cart { font-family: var(--ff); font-size: 15px; letter-spacing: .04em; color: var(--ink); font-weight: 400; }
+.nav-r .nav-cart .cart-count { color: var(--i5); margin-left: 4px; }
+
+/* ─── PAGE LAYOUT — fit the viewport by default */
+.page {
+  display: grid;
+  grid-template-columns: 1fr var(--rail-w);
+  gap: 0;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: calc(100vh - 63px);
+}
+
+.gallery {
+  padding: 32px 20px 32px 44px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.rail {
+  align-self: center;
+  justify-self: center;
+  padding: 48px 28px;
+  max-width: 420px;
+  width: 100%;
+}
+
+/* ─── RAIL: HEADER */
+.crumb {
+  font-family: var(--fm);
+  font-size: 12px;
+  letter-spacing: .12em;
+  color: var(--i5);
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.crumb a       { color: var(--i5); }
+.crumb a:hover { color: var(--ink); }
+.crumb .sep    { margin: 0 .6em; opacity: .55; }
+
+.r-title-ar {
+  display: block;
+  font-family: var(--fs);
+  font-weight: 500;
+  font-size: 42px;
+  color: var(--ink);
+  line-height: 1.05;
+  margin-bottom: 8px;
+  letter-spacing: .01em;
+}
+.r-title-en {
+  display: block;
+  font-family: var(--fs);
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--i8);
+  line-height: 1.15;
+  margin-bottom: 24px;
+}
+
+.r-price {
+  font-family: var(--ff);
+  font-size: 17px;
+  color: var(--ink);
+  letter-spacing: .02em;
+  margin-bottom: 40px;
+}
+
+/* ─── DISCLOSURES — the Lemaire primitive, reused for every option.
+       Divs + ARIA (not <details>) so we can animate open/close cleanly
+       on both desktop and mobile. */
+.disc { /* no borders — rely on vertical rhythm alone */ }
+.disc-trigger {
+  appearance: none; border: 0; background: transparent;
+  width: 100%;
+  list-style: none;
+  padding: 14px 0;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--ff);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-align: left;
+}
+.disc-trigger .d-val {
+  justify-self: end;
+  font-size: 13px;
+  letter-spacing: .02em;
+  text-transform: none;
+  color: var(--i5);
+  transition: color 220ms;
+}
+.disc[data-open="true"] .disc-trigger .d-val { color: var(--ink); }
+.disc-trigger .d-chev {
+  width: 10px;
+  height: 10px;
+  position: relative;
+  transition: transform 260ms cubic-bezier(.2,.6,.2,1);
+}
+.disc-trigger .d-chev::before,
+.disc-trigger .d-chev::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 7px;
+  height: 1px;
+  background: var(--ink);
+}
+.disc-trigger .d-chev::before { left: 0;  transform: rotate(45deg); }
+.disc-trigger .d-chev::after  { right: 0; transform: rotate(-45deg); }
+.disc[data-open="true"] .disc-trigger .d-chev { transform: rotate(180deg); }
+
+/* Animated body: grid-template-rows 0fr → 1fr with hidden overflow */
+.d-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 340ms cubic-bezier(.2,.6,.2,1);
+}
+.disc[data-open="true"] .d-body { grid-template-rows: 1fr; }
+.d-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+.d-inner-pad { padding: 2px 0 22px; }
+
+/* Option rows — no pills, no rounded buttons, just clickable lines */
+.opt-list { display: block; }
+.opt {
+  appearance: none; border: 0; background: transparent;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 18px;
+  padding: 14px 0;
+  font-family: var(--ff);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: .01em;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px solid var(--i1);
+  transition: padding-left 200ms, color 180ms;
+}
+.opt:last-child { border-bottom: 0; }
+.opt:hover { padding-left: 4px; }
+.opt .opt-meta {
+  font-family: var(--fm);
+  font-size: 13px;
+  color: var(--i5);
+  letter-spacing: .01em;
+}
+.opt[aria-pressed="true"] { color: var(--ink); }
+.opt[aria-pressed="true"]::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--ink);
+  border-radius: 50%;
+  margin-right: 10px;
+  transform: translateY(-2px);
+}
+.opt[disabled] { color: var(--i3); cursor: not-allowed; }
+.opt[disabled]:hover { padding-left: 0; }
+.opt[disabled] .opt-meta { text-decoration: line-through; }
+
+/* Accordion-style body (plain prose) */
+.prose {
+  font-family: var(--ff);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink);
+  max-width: 58ch;
+}
+.prose p + p { margin-top: 10px; }
+
+/* ─── ADD TO CART — solid ink bar, full width, price inline */
+.cta-wrap { margin: 28px 0 14px; }
+.cta {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  width: 100%;
+  padding: 20px 22px;
+  background: var(--ink);
+  color: var(--bg);
+  border: 0;
+  border-radius: 0;
+  font-family: var(--ff);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 180ms, transform 180ms;
+}
+.cta:hover       { opacity: .88; }
+.cta:active      { transform: translateY(1px); }
+.cta:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.cta[disabled]   { opacity: .55; cursor: not-allowed; }
+.cta .cta-price {
+  font-family: var(--fm);
+  letter-spacing: .04em;
+  font-size: 13px;
+  text-transform: none;
+}
+
+.delivery {
+  font-family: var(--fm);
+  font-size: 12px;
+  color: var(--i5);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+/* ─── STICKY BUY CARD — slides up when main CTA scrolls out */
+.stickybar {
+  display: grid;
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 80;
+  padding: 14px 24px calc(14px + env(safe-area-inset-bottom, 0));
+  background: var(--bg);
+  border-top: 1px solid var(--i1);
+  grid-template-columns: 1fr auto;
+  gap: 18px;
+  align-items: center;
+  transform: translateY(110%);
+  transition: transform 380ms cubic-bezier(.2,.6,.2,1);
+  box-shadow: 0 -10px 32px rgba(12,11,10,.06);
+  pointer-events: none;
+  will-change: transform;
+}
+.stickybar.show { transform: translateY(0); pointer-events: auto; }
+.stickybar .sb-info { min-width: 0; }
+.stickybar .sb-title {
+  display: block;
+  font-family: var(--fs);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 5px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.stickybar .sb-price {
+  display: block;
+  font-family: var(--fm);
+  font-size: 13px;
+  color: var(--ink);
+}
+.stickybar .cta { width: auto; padding: 16px 22px; grid-template-columns: auto; }
+
+/* ─── CROSS-SELL — horizontal carousel at the bottom of the page.
+       Gallery-label pattern: small uppercase heading + inline link
+       aligned right, then a single horizontal row of prints. */
+.related {
+  padding: 72px 44px 96px;
+}
+.related-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+.related-tabs { display: flex; gap: 28px; flex-wrap: nowrap; }
+.rel-tab {
+  appearance: none; background: transparent; border: 0; padding: 4px 0;
+  font-family: var(--ff);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--i5);
+  cursor: pointer;
+  transition: color 200ms;
+  position: relative;
+  white-space: nowrap;
+}
+.rel-tab:hover { color: var(--ink); }
+.rel-tab[aria-selected="true"] {
+  color: var(--ink);
+}
+.rel-tab[aria-selected="true"]::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 1px;
+  background: var(--ink);
+}
+
+.related-nav { display: flex; gap: 6px; }
+.rel-arr {
+  appearance: none; background: transparent; border: 0;
+  width: 32px; height: 32px;
+  font-family: var(--fs);
+  font-size: 24px;
+  line-height: 1;
+  color: var(--i5);
+  cursor: pointer;
+  transition: color 180ms, transform 200ms;
+}
+.rel-arr:hover { color: var(--ink); }
+.rel-arr:active { transform: translateX(0) scale(.92); }
+
+.related-grid {
+  display: flex;
+  gap: 28px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+  margin: 0 -8px;
+}
+.related-grid::-webkit-scrollbar { display: none; }
+
+.rel-cell {
+  flex: 0 0 auto;
+  width: 260px;
+  scroll-snap-align: start;
+  display: block;
+  color: inherit;
+  padding: 0 8px;
+}
+.rel-img-wrap {
+  background: #ebe9e4;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+  margin-bottom: 14px;
+  position: relative;
+}
+.rel-img-wrap img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform 640ms cubic-bezier(.2,.6,.2,1);
+}
+.rel-cell:hover .rel-img-wrap img { transform: scale(1.02); }
+
+.rel-title {
+  display: block;
+  font-family: var(--fs);
+  font-style: italic;
+  font-size: 19px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.rel-meta {
+  display: block;
+  font-family: var(--fm);
+  font-size: 13px;
+  color: var(--i5);
+  letter-spacing: .02em;
+}
+
+/* ─── FOOTER — copyright on top row, navigation links on second row */
+.footer {
+  padding: 36px 44px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border-top: 1px solid var(--i1);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--i5);
+}
+.footer-cr { letter-spacing: .03em; text-transform: none; }
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px 36px;          /* row-gap · column-gap — keeps items from reading as one sentence */
+  align-items: baseline;
+}
+.footer-links a { color: var(--i5); transition: color 200ms; }
+.footer-links a:hover { color: var(--ink); }
+
+/* ─── GALLERY PLATE — image sized to fit viewport height */
+.plate-o {
+  border: 1px solid var(--rule);
+  padding: var(--mat);
+  background: var(--bg);
+  max-height: calc(100vh - 63px - 64px);
+  display: inline-flex;
+}
+.plate-i {
+  border: 1px solid var(--rule);
+  overflow: hidden;
+  line-height: 0;
+  display: flex;
+}
+.plate-i img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: calc(100vh - 63px - 64px - 2 * var(--mat) - 4px);
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* ─── MOBILE */
+@media (max-width: 900px) {
+  .page { grid-template-columns: 1fr; }
+
+  .gallery { padding: 20px 20px 32px; }
+  .plate-o { padding: 10px; }
+
+  .rail {
+    position: static; max-width: none;
+    padding: 32px 20px 48px;
+  }
+
+  .related { padding: 48px 20px 48px; }
+  .related-head {
+    margin-bottom: 22px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .related-tabs { gap: 22px; }
+  .rel-cell { width: 220px; }
+
+  .footer {
+    padding: 24px 20px 40px;
+    gap: 16px 22px;
+    font-size: 12px;
+  }
+
+  .r-title-ar { font-size: 36px; }
+  .r-title-en { font-size: 20px; }
+
+  .nav { grid-template-columns: 1fr auto; padding: 16px 20px; }
+  .nav-l { font-size: 15px; }
+  .nav-r { gap: 22px; }
+  .nav-r a,
+  .nav-r .nav-essay {
+    font-family: var(--ff);
+    font-style: normal;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: .04em;
+    color: var(--ink);
+  }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="frame-prototype.html" class="nav-l">← Thalia Bassim</a>
+  <div class="nav-r">
+    <a href="frame-prototype.html#prints">All prints</a>
+    <a href="#cart" class="nav-cart" id="navCart">Cart<span class="cart-count" id="cartCount">(0)</span></a>
+  </div>
+</nav>
+
+<main class="page">
+  <section class="gallery" id="gallery">
+    <!-- gallery image injected below -->
+  </section>
+
+  <aside class="rail" id="rail">
+    <p class="crumb">
+      <a href="frame-prototype.html#prints">Prints</a>
+      <span class="sep">/</span>
+      <span>Untitled, 01</span>
+    </p>
+
+    <h1>
+      <span class="r-title-ar" lang="ar">التمسّك ٠١</span>
+      <span class="r-title-en">Untitled, 01</span>
+    </h1>
+
+    <p class="r-price" id="rPrice">From $380 USD</p>
+
+    <!-- PAPER disclosure -->
+    <div class="disc" id="discPaper" data-open="false">
+      <button class="disc-trigger" type="button" aria-expanded="false" aria-controls="discPaperBody">
+        <span>Paper</span>
+        <span class="d-val" id="paperVal">Photo Rag 308</span>
+        <span class="d-chev" aria-hidden="true"></span>
+      </button>
+      <div class="d-body" id="discPaperBody">
+        <div class="d-inner"><div class="d-inner-pad">
+          <div class="opt-list" id="papers" role="group" aria-label="Paper stock">
+            <button class="opt" type="button" aria-pressed="true"  data-paper="rag"    data-delta="0"  data-label="Photo Rag 308">
+              Photo Rag 308 <span class="opt-meta">Matte cotton</span>
+            </button>
+            <button class="opt" type="button" aria-pressed="false" data-paper="baryta" data-delta="40" data-label="Baryta 315">
+              Baryta 315 <span class="opt-meta">Semi-gloss · +$40</span>
+            </button>
+          </div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- SIZE disclosure -->
+    <div class="disc" id="discSize" data-open="false">
+      <button class="disc-trigger" type="button" aria-expanded="false" aria-controls="discSizeBody">
+        <span>Size</span>
+        <span class="d-val" id="sizeVal">Select a size</span>
+        <span class="d-chev" aria-hidden="true"></span>
+      </button>
+      <div class="d-body" id="discSizeBody">
+        <div class="d-inner"><div class="d-inner-pad">
+          <div class="opt-list" id="sizes" role="group" aria-label="Print size">
+            <button class="opt" type="button" aria-pressed="false" data-price="380" data-label="16 × 20 in">
+              16 × 20 in <span class="opt-meta">$380</span>
+            </button>
+            <button class="opt" type="button" aria-pressed="false" data-price="650" data-label="20 × 30 in">
+              20 × 30 in <span class="opt-meta">$650</span>
+            </button>
+            <button class="opt" type="button" disabled aria-pressed="false" data-label="30 × 40 in">
+              30 × 40 in <span class="opt-meta">Sold out</span>
+            </button>
+          </div>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="cta-wrap">
+      <p class="delivery">Ships within 7 days · Worldwide</p>
+      <button class="cta" type="button" id="addCta" disabled>
+        <span id="ctaLabel">Select a size</span>
+        <span class="cta-price" id="ctaPrice">From $380</span>
+      </button>
+    </div>
+
+    <!-- Secondary info: same disclosure primitive -->
+    <div class="disc" data-open="false">
+      <button class="disc-trigger" type="button" aria-expanded="false">
+        <span>Description</span>
+        <span class="d-val"></span>
+        <span class="d-chev" aria-hidden="true"></span>
+      </button>
+      <div class="d-body"><div class="d-inner"><div class="d-inner-pad">
+        <div class="prose">
+          <p>Archival pigment print from the <em>At-Tamassok</em> series, 2024. Each print is individually inspected and numbered verso in graphite within an edition of ten, plus two artist proofs. Sold unframed.</p>
+        </div>
+      </div></div></div>
+    </div>
+
+    <div class="disc" data-open="false">
+      <button class="disc-trigger" type="button" aria-expanded="false">
+        <span>Shipping &amp; returns</span>
+        <span class="d-val"></span>
+        <span class="d-chev" aria-hidden="true"></span>
+      </button>
+      <div class="d-body"><div class="d-inner"><div class="d-inner-pad">
+        <div class="prose">
+          <p>Ships flat in an archival tube within 7 working days via insured courier, worldwide. No returns — a replacement can be arranged if the package arrives damaged or unsealed.</p>
+        </div>
+      </div></div></div>
+    </div>
+
+    <div class="disc" data-open="false">
+      <button class="disc-trigger" type="button" aria-expanded="false">
+        <span>Care</span>
+        <span class="d-val"></span>
+        <span class="d-chev" aria-hidden="true"></span>
+      </button>
+      <div class="d-body"><div class="d-inner"><div class="d-inner-pad">
+        <div class="prose">
+          <p>Handle by the edges only. Avoid direct sunlight and humidity above 60%. Store flat or in the supplied sleeve until framed.</p>
+        </div>
+      </div></div></div>
+    </div>
+
+  </aside>
+</main>
+
+<!-- ─── Cross-sell: Recently viewed + You may also like (tabbed) ─── -->
+<section class="related" aria-label="Related prints">
+  <header class="related-head">
+    <nav class="related-tabs" role="tablist">
+      <button class="rel-tab" role="tab" aria-selected="true"  data-feed="recent">Recently viewed</button>
+      <button class="rel-tab" role="tab" aria-selected="false" data-feed="similar">You may also like</button>
+    </nav>
+    <div class="related-nav">
+      <button class="rel-arr" type="button" data-dir="-1" aria-label="Scroll left">‹</button>
+      <button class="rel-arr" type="button" data-dir="1"  aria-label="Scroll right">›</button>
+    </div>
+  </header>
+  <div class="related-grid" id="relatedGrid" role="tabpanel"></div>
+</section>
+
+<footer class="footer">
+  <span class="footer-cr">© 2026 Thalia Bassim</span>
+  <div class="footer-links">
+    <a href="#">Contact</a>
+    <a href="#">Instagram ↗</a>
+    <a href="#">Shipping</a>
+    <a href="#">Terms</a>
+  </div>
+</footer>
+
+<div class="stickybar" role="region" aria-label="Buy bar">
+  <div class="sb-info">
+    <span class="sb-title">Untitled, 01</span>
+    <span class="sb-price" id="sbPrice">From $380</span>
+  </div>
+  <button class="cta" type="button" id="addCtaSb" disabled>Select size</button>
+</div>
+
+<script>
+/* ─── Related prints carousel — same edition, same series ─── */
+(function () {
+  const grid = document.getElementById('relatedGrid');
+  if (!grid) return;
+  /* Four prints from the same series, skipping the current one (01). */
+  const related = [
+    { n: '07', title: 'Untitled, 07', price: 520 },
+    { n: '12', title: 'Untitled, 12', price: 480 },
+    { n: '18', title: 'Untitled, 18', price: 620 },
+    { n: '22', title: 'Untitled, 22', price: 540 },
+    { n: '05', title: 'Untitled, 05', price: 480 },
+    { n: '14', title: 'Untitled, 14', price: 480 },
+  ];
+  related.forEach(r => {
+    grid.insertAdjacentHTML('beforeend',
+      `<a class="rel-cell" href="product-prototype.html">
+        <div class="rel-img-wrap">
+          <img src="../public/images/catalog/pl-6604-${r.n}.jpg"
+               alt="${r.title}" loading="lazy">
+        </div>
+        <span class="rel-title">${r.title}</span>
+        <span class="rel-meta">From $${r.price} · Edition of 10</span>
+      </a>`
+    );
+  });
+}());
+
+/* ─── GALLERY — one image per print ─── */
+(function () {
+  const gallery = document.getElementById('gallery');
+  gallery.insertAdjacentHTML('beforeend',
+    `<figure class="plate-o">
+      <div class="plate-i">
+        <img src="../public/images/catalog/pl-6604-01.jpg"
+             alt="Untitled, 01" loading="eager">
+      </div>
+    </figure>`
+  );
+}());
+
+/* ─── Disclosure toggles — data-open drives the grid-rows animation ─── */
+function setDiscOpen(disc, open) {
+  if (!disc) return;
+  disc.setAttribute('data-open', open ? 'true' : 'false');
+  const trig = disc.querySelector('.disc-trigger');
+  if (trig) trig.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+(function () {
+  document.querySelectorAll('.disc').forEach(disc => {
+    const trig = disc.querySelector('.disc-trigger');
+    if (!trig) return;
+    trig.addEventListener('click', () => {
+      const next = disc.getAttribute('data-open') !== 'true';
+      setDiscOpen(disc, next);
+      document.dispatchEvent(new CustomEvent('disc:toggle'));
+    });
+  });
+}());
+
+/* ─── Paper + Size — disclosure triggers reflect current selection ─── */
+(function () {
+  const papers    = document.querySelectorAll('#papers .opt');
+  const sizes     = document.querySelectorAll('#sizes .opt');
+  const paperVal  = document.getElementById('paperVal');
+  const sizeVal   = document.getElementById('sizeVal');
+  const price     = document.getElementById('rPrice');
+  const cta       = document.getElementById('addCta');
+  const ctaLabel  = document.getElementById('ctaLabel');
+  const ctaPrice  = document.getElementById('ctaPrice');
+  const ctaSb     = document.getElementById('addCtaSb');
+  const sbPrice   = document.getElementById('sbPrice');
+  const discSize  = document.getElementById('discSize');
+  const discPaper = document.getElementById('discPaper');
+
+  const MIN_PRICE = 380;
+
+  const state = {
+    paper: { delta: 0,   label: 'Photo Rag 308' },
+    size:  { price: null, label: null }
+  };
+
+  function render() {
+    const { paper, size } = state;
+    paperVal.textContent = paper.label;
+
+    if (size.price == null) {
+      const fromTotal = MIN_PRICE + paper.delta;
+      price.textContent    = 'From $' + fromTotal + ' USD';
+      sizeVal.textContent  = 'Select a size';
+      ctaLabel.textContent = 'Select a size';
+      ctaPrice.textContent = 'From $' + fromTotal;
+      cta.setAttribute('disabled', '');
+      if (sbPrice) sbPrice.textContent = 'From $' + fromTotal;
+      if (ctaSb)   { ctaSb.textContent = 'Select size'; ctaSb.setAttribute('disabled', ''); }
+    } else {
+      const total = size.price + paper.delta;
+      price.textContent    = '$' + total + ' USD';
+      sizeVal.textContent  = size.label;
+      ctaLabel.textContent = 'Add to cart';
+      ctaPrice.textContent = '$' + total;
+      cta.removeAttribute('disabled');
+      if (sbPrice) sbPrice.textContent = '$' + total;
+      if (ctaSb)   { ctaSb.textContent = 'Add to cart'; ctaSb.removeAttribute('disabled'); }
+    }
+  }
+
+  function bind(group, onSelect, closeDisc) {
+    group.forEach(p => {
+      p.addEventListener('click', () => {
+        if (p.hasAttribute('disabled')) return;
+        group.forEach(x => x.setAttribute('aria-pressed', 'false'));
+        p.setAttribute('aria-pressed', 'true');
+        onSelect(p);
+        render();
+        if (closeDisc) { setDiscOpen(closeDisc, false); document.dispatchEvent(new CustomEvent('disc:toggle')); }
+      });
+    });
+  }
+
+  bind(papers, p => {
+    state.paper.delta = parseInt(p.getAttribute('data-delta'), 10) || 0;
+    state.paper.label = p.getAttribute('data-label') || '';
+  }, discPaper);
+
+  bind(sizes, p => {
+    state.size.price = parseInt(p.getAttribute('data-price'), 10);
+    state.size.label = p.getAttribute('data-label') || '';
+  }, discSize);
+
+  render();
+}());
+
+/* ─── Sticky buy card — pulls up when main CTA is out of view,
+       hides again once the related carousel comes into view so the
+       page can breathe into the footer without a pinned bar. ─── */
+(function () {
+  const sb      = document.querySelector('.stickybar');
+  const cta     = document.getElementById('addCta');
+  const related = document.querySelector('.related');
+  if (!sb || !cta || !('IntersectionObserver' in window)) return;
+
+  let ctaOut     = false;
+  let nearBottom = false;
+
+  function sync() {
+    sb.classList.toggle('show', ctaOut && !nearBottom);
+  }
+
+  new IntersectionObserver(([entry]) => {
+    ctaOut = !entry.isIntersecting;
+    sync();
+  }, { rootMargin: '-8px 0px 0px 0px', threshold: 0 }).observe(cta);
+
+  if (related) {
+    /* Fire as soon as the related section touches the bottom of the
+       viewport — stickybar retreats, footer takes over. */
+    new IntersectionObserver(([entry]) => {
+      nearBottom = entry.isIntersecting;
+      sync();
+    }, { rootMargin: '0px 0px 0px 0px', threshold: 0 }).observe(related);
+  }
+}());
+
+/* ─── Scroll gating (desktop only) — body scroll is off until a
+       disclosure expands. Closing all disclosures restores no-scroll. ─── */
+(function () {
+  const mq    = window.matchMedia('(min-width: 901px)');
+  const discs = document.querySelectorAll('.disc');
+  function syncScroll() {
+    if (!mq.matches) { document.body.classList.remove('scroll-on'); return; }
+    const anyOpen = Array.from(discs).some(d => d.getAttribute('data-open') === 'true');
+    document.body.classList.toggle('scroll-on', anyOpen);
+    if (!anyOpen) window.scrollTo({ top: 0 });
+  }
+  document.addEventListener('disc:toggle', syncScroll);
+  mq.addEventListener('change', syncScroll);
+  syncScroll();
+}());
+
+/* ─── Cart counter — bumps on add-to-cart ─── */
+(function () {
+  const cta   = document.getElementById('addCta');
+  const ctaSb = document.getElementById('addCtaSb');
+  const count = document.getElementById('cartCount');
+  let n = 0;
+  function bump() {
+    if (this.hasAttribute('disabled')) return;
+    n += 1;
+    count.textContent = '(' + n + ')';
+  }
+  if (cta)   cta.addEventListener('click', bump);
+  if (ctaSb) ctaSb.addEventListener('click', bump);
+}());
+</script>
+</body>
+</html>

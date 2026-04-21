@@ -7,12 +7,7 @@ export function priceCents(photo: Photo, sizeId: string, paperId: PaperType): nu
 }
 
 export function formatUsd(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
+  return `$${Math.round(cents / 100)}`;
 }
 
 export function editionRemaining(photo: Photo): number {

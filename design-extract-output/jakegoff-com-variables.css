@@ -1,0 +1,51 @@
+:root {
+  /* Colors — Primary */
+  --color-primary: #0000ee;
+
+  /* Colors — Neutrals */
+  --color-neutral-50: #000000;
+  --color-neutral-100: #808080;
+  --color-neutral-200: #ffffff;
+
+  /* Colors — Backgrounds */
+  --color-bg: #ffffff;
+
+  /* Colors — Text */
+  --color-text: #000000;
+  --color-text-1: #808080;
+  --color-text-2: #0000ee;
+
+  /* Typography — Families */
+  --font-body: "Diatype Variable", sans-serif;
+  --font-body: "-apple-system", sans-serif;
+  --font-body: "Times", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Typography — Scale */
+  --font-size-14.5: 14.5px;
+  --font-size-11.52: 11.52px;
+  --font-size-9.216: 9.216px;
+  --font-size-5.76: 5.76px;
+
+  /* Spacing */
+  --spacing-6: 6px;
+  --spacing-20: 20px;
+  --spacing-190: 190px;
+  --spacing-328: 328px;
+  --spacing-415: 415px;
+
+  /* Original Site Variables */
+  /* — spacing — */
+  --base-size: 11.52px;
+  --mobile-padding-offset: 1;
+  /* — other — */
+  --replace-ui-fadein: 0;
+  --min-viewport-height: 800px;
+  --mobile-scale: 1.5;
+  --viewport-height: 800px;
+  /* — semantic — */
+  success: [object Object];
+  warning: [object Object];
+  error: [object Object];
+  info: [object Object];
+}

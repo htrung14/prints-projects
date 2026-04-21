@@ -1,0 +1,13 @@
+/* shadcn/ui Theme — extracted from https://ssense.com */
+/* Paste into your globals.css */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --muted: 0 0% 80%;
+    --muted-foreground: 0 0% 20%;
+    --border: 0 0% 59%;
+    --radius: 10px;
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "settings": {
+    "color": {
+      "palette": [
+        {
+          "slug": "primary",
+          "color": "#100a0d",
+          "name": "Primary"
+        },
+        {
+          "slug": "secondary",
+          "color": "#fdfbf9",
+          "name": "Secondary"
+        },
+        {
+          "slug": "accent",
+          "color": "#fdfbf9",
+          "name": "Accent"
+        },
+        {
+          "slug": "neutral-1",
+          "color": "#000000",
+          "name": "Neutral 1"
+        },
+        {
+          "slug": "neutral-2",
+          "color": "#77716e",
+          "name": "Neutral 2"
+        },
+        {
+          "slug": "neutral-3",
+          "color": "#383d41",
+          "name": "Neutral 3"
+        },
+        {
+          "slug": "neutral-4",
+          "color": "#333333",
+          "name": "Neutral 4"
+        },
+        {
+          "slug": "neutral-5",
+          "color": "#e5e5e5",
+          "name": "Neutral 5"
+        },
+        {
+          "slug": "bg-fdfbf9",
+          "color": "#fdfbf9",
+          "name": "Background #fdfbf9"
+        },
+        {
+          "slug": "bg-ffffff",
+          "color": "#ffffff",
+          "name": "Background #ffffff"
+        },
+        {
+          "slug": "bg-242121",
+          "color": "#242121",
+          "name": "Background #242121"
+        }
+      ],
+      "gradients": []
+    },
+    "typography": {
+      "fontFamilies": [
+        {
+          "fontFamily": "BrownStd",
+          "slug": "brownstd",
+          "name": "BrownStd"
+        },
+        {
+          "fontFamily": "EBGaramond",
+          "slug": "ebgaramond",
+          "name": "EBGaramond"
+        },
+        {
+          "fontFamily": "Arial",
+          "slug": "arial",
+          "name": "Arial"
+        },
+        {
+          "fontFamily": "Times",
+          "slug": "times",
+          "name": "Times"
+        },
+        {
+          "fontFamily": "GaramondPremrPro",
+          "slug": "garamondpremrpro",
+          "name": "GaramondPremrPro"
+        },
+        {
+          "fontFamily": "swym-font",
+          "slug": "swym-font",
+          "name": "swym-font"
+        },
+        {
+          "fontFamily": "GTStandard-M",
+          "slug": "gtstandard-m",
+          "name": "GTStandard-M"
+        }
+      ],
+      "fontSizes": [
+        {
+          "size": "32px",
+          "slug": "size-32",
+          "name": "32px"
+        },
+        {
+          "size": "24px",
+          "slug": "size-24",
+          "name": "24px"
+        },
+        {
+          "size": "20px",
+          "slug": "size-20",
+          "name": "20px"
+        },
+        {
+          "size": "18px",
+          "slug": "size-18",
+          "name": "18px"
+        },
+        {
+          "size": "16px",
+          "slug": "size-16",
+          "name": "16px"
+        },
+        {
+          "size": "15px",
+          "slug": "size-15",
+          "name": "15px"
+        },
+        {
+          "size": "14px",
+          "slug": "size-14",
+          "name": "14px"
+        },
+        {
+          "size": "13.3333px",
+          "slug": "size-13.3333",
+          "name": "13.3333px"
+        }
+      ]
+    },
+    "spacing": {
+      "spacingSizes": [
+        {
+          "size": "1px",
+          "slug": "spacing-1",
+          "name": "1px"
+        },
+        {
+          "size": "20px",
+          "slug": "spacing-20",
+          "name": "20px"
+        },
+        {
+          "size": "24px",
+          "slug": "spacing-24",
+          "name": "24px"
+        },
+        {
+          "size": "30px",
+          "slug": "spacing-30",
+          "name": "30px"
+        },
+        {
+          "size": "32px",
+          "slug": "spacing-32",
+          "name": "32px"
+        },
+        {
+          "size": "34px",
+          "slug": "spacing-34",
+          "name": "34px"
+        },
+        {
+          "size": "36px",
+          "slug": "spacing-36",
+          "name": "36px"
+        },
+        {
+          "size": "40px",
+          "slug": "spacing-40",
+          "name": "40px"
+        }
+      ]
+    },
+    "layout": {
+      "contentSize": "1280px",
+      "wideSize": "1400px"
+    }
+  },
+  "styles": {
+    "color": {
+      "background": "#fdfbf9",
+      "text": "#000000"
+    },
+    "typography": {
+      "fontSize": "14px",
+      "lineHeight": "normal",
+      "fontFamily": "BrownStd"
+    },
+    "spacing": {}
+  }
+}

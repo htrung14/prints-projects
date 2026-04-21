@@ -1,0 +1,780 @@
+{
+  "colors": {
+    "all": [
+      {
+        "hex": "#000000",
+        "rgb": {
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 0
+        },
+        "count": 6658,
+        "contexts": ["text", "border", "background"]
+      },
+      {
+        "hex": "#ffffff",
+        "rgb": {
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 100
+        },
+        "count": 622,
+        "contexts": ["background", "text", "border"]
+      },
+      {
+        "hex": "#888888",
+        "rgb": {
+          "r": 136,
+          "g": 136,
+          "b": 136,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 53
+        },
+        "count": 62,
+        "contexts": ["text", "border"]
+      },
+      {
+        "hex": "#555555",
+        "rgb": {
+          "r": 85,
+          "g": 85,
+          "b": 85,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 33
+        },
+        "count": 32,
+        "contexts": ["text", "border"]
+      },
+      {
+        "hex": "#bdbdbd",
+        "rgb": {
+          "r": 189,
+          "g": 189,
+          "b": 189,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 74
+        },
+        "count": 29,
+        "contexts": ["border", "text"]
+      },
+      {
+        "hex": "#333333",
+        "rgb": {
+          "r": 51,
+          "g": 51,
+          "b": 51,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 20
+        },
+        "count": 12,
+        "contexts": ["text", "border"]
+      },
+      {
+        "hex": "#f2f2f2",
+        "rgb": {
+          "r": 242,
+          "g": 242,
+          "b": 242,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 95
+        },
+        "count": 5,
+        "contexts": ["background"]
+      },
+      {
+        "hex": "#0000ff",
+        "rgb": {
+          "r": 0,
+          "g": 0,
+          "b": 255,
+          "a": 1
+        },
+        "hsl": {
+          "h": 240,
+          "s": 100,
+          "l": 50
+        },
+        "count": 5,
+        "contexts": ["text", "border"]
+      },
+      {
+        "hex": "#e5e5e5",
+        "rgb": {
+          "r": 229,
+          "g": 229,
+          "b": 229,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 90
+        },
+        "count": 3,
+        "contexts": ["border"]
+      }
+    ]
+  },
+  "regions": [
+    {
+      "role": "nav",
+      "tag": "header",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1280,
+        "h": 427
+      },
+      "heading": null,
+      "buttonCount": 18,
+      "cardCount": 240,
+      "className": "fl-builder-content fl-builder-content-230009 fl-builder-global-templates-locked"
+    },
+    {
+      "role": "nav",
+      "tag": "nav",
+      "bounds": {
+        "x": 75,
+        "y": 322,
+        "w": 1130,
+        "h": 28
+      },
+      "heading": null,
+      "buttonCount": 0,
+      "cardCount": 13,
+      "className": null
+    },
+    {
+      "role": "nav",
+      "tag": "nav",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0
+      },
+      "heading": null,
+      "buttonCount": 4,
+      "cardCount": 77,
+      "className": null
+    },
+    {
+      "role": "footer",
+      "tag": "footer",
+      "bounds": {
+        "x": 0,
+        "y": 4002.484375,
+        "w": 1280,
+        "h": 396.453125
+      },
+      "heading": null,
+      "buttonCount": 16,
+      "cardCount": 3,
+      "className": "fl-builder-content fl-builder-content-7337 fl-builder-global-templates-locked"
+    }
+  ],
+  "componentClusters": [
+    {
+      "kind": "button",
+      "structuralHash": "li>a",
+      "instanceCount": 4,
+      "variants": [
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "fontSize": "16px",
+            "fontWeight": "300"
+          },
+          "instanceCount": 4
+        }
+      ]
+    },
+    {
+      "kind": "button",
+      "structuralHash": "div>div",
+      "instanceCount": 4,
+      "variants": [
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "fontSize": "16px",
+            "fontWeight": "300"
+          },
+          "instanceCount": 3
+        },
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(255, 255, 255)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(255, 255, 255)",
+            "fontSize": "16px",
+            "fontWeight": "300"
+          },
+          "instanceCount": 1
+        }
+      ]
+    },
+    {
+      "kind": "button",
+      "structuralHash": "div>a",
+      "instanceCount": 3,
+      "variants": [
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "fontSize": "16px",
+            "fontWeight": "300"
+          },
+          "instanceCount": 2
+        },
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(255, 255, 255)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(255, 255, 255)",
+            "fontSize": "16px",
+            "fontWeight": "300"
+          },
+          "instanceCount": 1
+        }
+      ]
+    },
+    {
+      "kind": "button",
+      "structuralHash": "a>span",
+      "instanceCount": 3,
+      "variants": [
+        {
+          "css": {
+            "background": "rgba(255, 255, 255, 0)",
+            "color": "rgb(0, 0, 255)",
+            "padding": "12px 24px 12px 24px",
+            "borderRadius": "90px",
+            "border": "1px solid rgb(0, 0, 255)",
+            "fontSize": "16px",
+            "fontWeight": "700"
+          },
+          "instanceCount": 1
+        },
+        {
+          "css": {
+            "background": "rgba(255, 0, 0, 0)",
+            "color": "rgb(2, 0, 0)",
+            "padding": "12px 24px 12px 24px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(0, 0, 255)",
+            "fontSize": "16px",
+            "fontWeight": "700"
+          },
+          "instanceCount": 1
+        },
+        {
+          "css": {
+            "background": "rgba(255, 0, 0, 0)",
+            "color": "rgb(255, 255, 255)",
+            "padding": "12px 24px 12px 24px",
+            "borderRadius": "20px",
+            "border": "1px solid rgb(255, 255, 255)",
+            "fontSize": "16px",
+            "fontWeight": "700"
+          },
+          "instanceCount": 1
+        }
+      ]
+    },
+    {
+      "kind": "button",
+      "structuralHash": "span",
+      "instanceCount": 3,
+      "variants": [
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 255)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(0, 0, 255)",
+            "fontSize": "16px",
+            "fontWeight": "700"
+          },
+          "instanceCount": 1
+        },
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(2, 0, 0)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(2, 0, 0)",
+            "fontSize": "16px",
+            "fontWeight": "700"
+          },
+          "instanceCount": 1
+        },
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(255, 255, 255)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(255, 255, 255)",
+            "fontSize": "16px",
+            "fontWeight": "700"
+          },
+          "instanceCount": 1
+        }
+      ]
+    },
+    {
+      "kind": "button",
+      "structuralHash": "div>form",
+      "instanceCount": 1,
+      "variants": [
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "fontSize": "16px",
+            "fontWeight": "300"
+          },
+          "instanceCount": 1
+        }
+      ]
+    },
+    {
+      "kind": "button",
+      "structuralHash": "button>i>span",
+      "instanceCount": 1,
+      "variants": [
+        {
+          "css": {
+            "background": "rgba(255, 255, 255, 0)",
+            "color": "rgb(0, 0, 0)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "fontSize": "24px",
+            "fontWeight": "400"
+          },
+          "instanceCount": 1
+        }
+      ]
+    },
+    {
+      "kind": "button",
+      "structuralHash": "button>svg",
+      "instanceCount": 4,
+      "variants": [
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "3px",
+            "border": "0px none rgb(0, 0, 0)",
+            "fontSize": "20px",
+            "fontWeight": "300"
+          },
+          "instanceCount": 4
+        }
+      ]
+    }
+  ],
+  "accessibility": {
+    "remediation": [
+      {
+        "fg": "#b5b5b5",
+        "bg": "#f0f0f0",
+        "ratio": 1.8,
+        "rule": "AA-large",
+        "suggestion": {
+          "replace": "fg",
+          "color": "#000000",
+          "newRatio": 18.43
+        }
+      }
+    ]
+  },
+  "cssHealth": {
+    "sheets": [
+      {
+        "url": "https://aperture.org/wp-content/themes/bb-theme-child/dx/build/css/bundle.css?ver=1776205403",
+        "totalBytes": 295902,
+        "usedBytes": 18714,
+        "unusedBytes": 277188,
+        "unusedPercent": 94
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 71295,
+        "usedBytes": 9092,
+        "unusedBytes": 62203,
+        "unusedPercent": 87
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/woocommerce/packages/woocommerce-blocks/build/wc-blocks-vendors-style.css?ver=1689697384",
+        "totalBytes": 10435,
+        "usedBytes": 0,
+        "unusedBytes": 10435,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/bbpowerpack/assets/css/owl.carousel.css?ver=1689697344",
+        "totalBytes": 4744,
+        "usedBytes": 2452,
+        "unusedBytes": 2292,
+        "unusedPercent": 48
+      },
+      {
+        "url": "https://aperture.org/wp-includes/css/dist/block-library/style.min.css?ver=1709045303",
+        "totalBytes": 113378,
+        "usedBytes": 222,
+        "unusedBytes": 113156,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 58,
+        "usedBytes": 0,
+        "unusedBytes": 58,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 146,
+        "usedBytes": 0,
+        "unusedBytes": 146,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/woopack/assets/css/frontend.css?ver=1729654136",
+        "totalBytes": 2266,
+        "usedBytes": 0,
+        "unusedBytes": 2266,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css?ver=6.5.8",
+        "totalBytes": 15823,
+        "usedBytes": 0,
+        "unusedBytes": 15823,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 159,
+        "usedBytes": 0,
+        "unusedBytes": 159,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-includes/css/dashicons.min.css?ver=1614806182",
+        "totalBytes": 59016,
+        "usedBytes": 0,
+        "unusedBytes": 59016,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 27,
+        "usedBytes": 0,
+        "unusedBytes": 27,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/woocommerce/packages/woocommerce-blocks/build/wc-blocks-style.css?ver=1689697384",
+        "totalBytes": 268740,
+        "usedBytes": 75,
+        "unusedBytes": 268665,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/wc-dynamic-pricing-and-discounts/extensions/promotion-countdown-timer/assets/styles.css?ver=1687378909",
+        "totalBytes": 1236,
+        "usedBytes": 0,
+        "unusedBytes": 1236,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/genesis-page-builder/vendor/genesis/blocks/dist/style-blocks.build.css?ver=1687187362",
+        "totalBytes": 45480,
+        "usedBytes": 0,
+        "unusedBytes": 45480,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://use.fontawesome.com/releases/v6.5.1/css/all.css",
+        "totalBytes": 102641,
+        "usedBytes": 970,
+        "unusedBytes": 101671,
+        "unusedPercent": 99
+      },
+      {
+        "url": "https://aperture.org/wp-content/themes/bb-theme-child/style.css?ver=1776205403",
+        "totalBytes": 327,
+        "usedBytes": 0,
+        "unusedBytes": 327,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/developer-experience/build/css/bundle.css?ver=1776105485",
+        "totalBytes": 10758,
+        "usedBytes": 0,
+        "unusedBytes": 10758,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/genesis-page-builder/build/style-blocks.css?ver=1687187362",
+        "totalBytes": 14100,
+        "usedBytes": 0,
+        "unusedBytes": 14100,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/themes/bb-theme/css/base.min.css?ver=1776205365",
+        "totalBytes": 48426,
+        "usedBytes": 4347,
+        "unusedBytes": 44079,
+        "unusedPercent": 91
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/bbpowerpack/assets/css/owl.theme.css?ver=1689697344",
+        "totalBytes": 1380,
+        "usedBytes": 412,
+        "unusedBytes": 968,
+        "unusedPercent": 70
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css?ver=6.5.8",
+        "totalBytes": 15598,
+        "usedBytes": 0,
+        "unusedBytes": 15598,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/bbpowerpack/assets/css/animate.min.css?ver=1689697344",
+        "totalBytes": 52789,
+        "usedBytes": 0,
+        "unusedBytes": 52789,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 37196,
+        "usedBytes": 0,
+        "unusedBytes": 37196,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 90211,
+        "usedBytes": 3951,
+        "unusedBytes": 86260,
+        "unusedPercent": 96
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/developer-experience/build/blocks/extensions/bundle.css?ver=1776105485",
+        "totalBytes": 1163,
+        "usedBytes": 0,
+        "unusedBytes": 1163,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://use.fontawesome.com/releases/v6.5.1/css/v4-shims.css",
+        "totalBytes": 27593,
+        "usedBytes": 0,
+        "unusedBytes": 27593,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 2548,
+        "usedBytes": 0,
+        "unusedBytes": 2548,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/bb-plugin/css/jquery.magnificpopup.min.css?ver=1688675104",
+        "totalBytes": 5788,
+        "usedBytes": 0,
+        "unusedBytes": 5788,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 64,
+        "usedBytes": 0,
+        "unusedBytes": 64,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/uploads/bb-plugin/icons/icon-1591763423/style.css?ver=1601523274",
+        "totalBytes": 856,
+        "usedBytes": 0,
+        "unusedBytes": 856,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/wp-content/uploads/bb-plugin/icons/ultimate-icons/style.css?ver=1601523274",
+        "totalBytes": 20480,
+        "usedBytes": 533,
+        "unusedBytes": 19947,
+        "unusedPercent": 97
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 101228,
+        "usedBytes": 18289,
+        "unusedBytes": 82939,
+        "unusedPercent": 82
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/menu-image/includes/css/menu-image.css?ver=1689697302",
+        "totalBytes": 3343,
+        "usedBytes": 483,
+        "unusedBytes": 2860,
+        "unusedPercent": 86
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/woocommerce-memberships/assets/css/frontend/wc-memberships-frontend.min.css?ver=1601523390",
+        "totalBytes": 3691,
+        "usedBytes": 0,
+        "unusedBytes": 3691,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 13479,
+        "usedBytes": 4814,
+        "unusedBytes": 8665,
+        "unusedPercent": 64
+      },
+      {
+        "url": "https://aperture.org/wp-content/themes/bb-theme-child/assets/css/jquery-ui.min.css?ver=1776205403",
+        "totalBytes": 30163,
+        "usedBytes": 0,
+        "unusedBytes": 30163,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 170154,
+        "usedBytes": 19760,
+        "unusedBytes": 150394,
+        "unusedPercent": 88
+      },
+      {
+        "url": "https://aperture.org/wp-content/plugins/portfolio-slideshow/src/resources/css/public.css",
+        "totalBytes": 2057,
+        "usedBytes": 119,
+        "unusedBytes": 1938,
+        "unusedPercent": 94
+      },
+      {
+        "url": "https://aperture.org/",
+        "totalBytes": 3144,
+        "usedBytes": 1197,
+        "unusedBytes": 1947,
+        "unusedPercent": 62
+      },
+      {
+        "url": "https://www.google.com/cse/static/element/b33cba5881f68fbf/default_v6+en.css",
+        "totalBytes": 44242,
+        "usedBytes": 0,
+        "unusedBytes": 44242,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://www.google.com/cse/static/style/look/v6/default.css",
+        "totalBytes": 5578,
+        "usedBytes": 0,
+        "unusedBytes": 5578,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://www.gstatic.com/recaptcha/releases/gTpTIWhbKpxADzTzkcabhXN4/styles__ltr.css",
+        "totalBytes": 83366,
+        "usedBytes": 3372,
+        "unusedBytes": 79994,
+        "unusedPercent": 96
+      },
+      {
+        "url": "https://www.google.com/recaptcha/api2/anchor?ar=1&k=6Ld0FtYUAAAAAFxpHyD7oIS6Wq7QyIV6JzuRA9fx&co=aHR0cHM6Ly9hcGVydHVyZS5vcmc6NDQz&hl=en&v=gTpTIWhbKpxADzTzkcabhXN4&size=invisible&anchor-ms=20000&execute-ms=30000&cb=9l5zgy5kyuhm",
+        "totalBytes": 16160,
+        "usedBytes": 0,
+        "unusedBytes": 16160,
+        "unusedPercent": 100
+      }
+    ],
+    "totalBytes": 1797228,
+    "usedBytes": 88802,
+    "unusedBytes": 1708426,
+    "unusedPercent": 95,
+    "importantCount": 1827,
+    "duplicates": 21418,
+    "vendorPrefixes": {
+      "webkit": 1595,
+      "moz": 409,
+      "ms": 439,
+      "o": 140
+    },
+    "keyframes": [],
+    "specificity": {
+      "max": [3, 14, 43],
+      "average": [0.03, 2.38, 0.45],
+      "count": 19276
+    },
+    "issues": ["1827 !important rules", "21418 duplicate declarations", "95% unused CSS"]
+  }
+}

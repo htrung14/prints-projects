@@ -1,190 +1,332 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
-import { editionRemaining, formatUsd, isSoldOut, priceCents } from "@/lib/pricing";
+import { formatUsd, isSoldOut, priceCents } from "@/lib/pricing";
 import type { PaperType, Photo } from "@/lib/types";
 
-export default function BuyUI({ photo, showPhoto = true }: { photo: Photo; showPhoto?: boolean }) {
-  const { add, itemCount } = useCart();
-  const [sizeId, setSizeId] = useState(photo.sizes[0].id);
-  const [paperId, setPaperId] = useState<PaperType>(photo.papers[0].id);
-  const [qty, setQty] = useState(1);
+type DiscKey = "shipping" | "care";
 
-  const remaining = editionRemaining(photo);
+const FIXED_SIZE_ID = "8x10";
+const FIXED_SIZE_LABEL = "8 × 10 in";
+const FIXED_PAPER_ID: PaperType = "photo-rag";
+
+export default function BuyUI({ photo }: { photo: Photo }) {
+  const { add, drawerOpen } = useCart();
+  const paperId = FIXED_PAPER_ID;
+  const qty = 1;
+
+  // Post-Lemaire restructure (2026-04-20): two of the previous four accordions
+  // (Paper, Description) flattened into always-visible blocks so the page
+  // scans at a glance the way lemaire.fr's PDP does. Shipping & Care stay
+  // collapsed because that content is reference detail - users who want it
+  // will open it, but it shouldn't compete with the photograph for attention.
+  const [open, setOpen] = useState<Record<DiscKey, boolean>>({
+    shipping: false,
+    care: false,
+  });
+
+  const ctaRef = useRef<HTMLButtonElement>(null);
+  const [showSticky, setShowSticky] = useState(false);
+  // In-place add acknowledgement - flips true for ~1.6s after click so both
+  // the main CTA and the mobile sticky bar briefly render as "Added ✓".
+  // The bottom Toast still fires via cart.addedAt; this is the direct-contact
+  // confirmation for users whose eyes are on the button, not the viewport.
+  const [justAdded, setJustAdded] = useState(false);
+
+  // Resolve the locked size - the fixture may not have 16x20 for every
+  // photo, so fall back to the first declared size rather than erroring.
+  const lockedSize = photo.sizes.find((s) => s.id === FIXED_SIZE_ID) ?? photo.sizes[0];
+  const sizeId = lockedSize.id;
+
   const soldOut = isSoldOut(photo);
-  const unitPrice = priceCents(photo, sizeId, paperId);
-  // Nudge only fires for empty cart + single-qty selection: adding this
-  // would leave them at one print, i.e. one short of the free-shipping pair.
-  const showFreeShipNudge = itemCount === 0 && qty === 1 && !soldOut;
+  const currentPrice = priceCents(photo, sizeId, paperId);
+
+  const toggleDisc = (key: DiscKey) => setOpen((o) => ({ ...o, [key]: !o[key] }));
+
+  // Sticky bar - show when the main CTA is out of viewport AND the related
+  // section is NOT yet in viewport. Same dual IntersectionObserver as prototype.
+  useEffect(() => {
+    const cta = ctaRef.current;
+    if (!cta || !("IntersectionObserver" in window)) return;
+
+    let ctaOut = false;
+    let nearBottom = false;
+    const sync = () => setShowSticky(ctaOut && !nearBottom);
+
+    const ctaObs = new IntersectionObserver(
+      ([e]) => {
+        ctaOut = !e.isIntersecting;
+        sync();
+      },
+      { rootMargin: "-8px 0px 0px 0px", threshold: 0 }
+    );
+    ctaObs.observe(cta);
+
+    const related = document.querySelector("[data-related-sentinel]");
+    const relObs = related
+      ? new IntersectionObserver(
+          ([e]) => {
+            nearBottom = e.isIntersecting;
+            sync();
+          },
+          { rootMargin: "0px 0px 0px 0px", threshold: 0 }
+        )
+      : null;
+    if (related && relObs) relObs.observe(related);
+
+    return () => {
+      ctaObs.disconnect();
+      relObs?.disconnect();
+    };
+  }, []);
+
+  const handleAdd = () => {
+    if (soldOut) return;
+    add({ photoSlug: photo.slug, sizeId, paperId, quantity: qty });
+    setJustAdded(true);
+  };
+
+  // Clear the "Added ✓" state after a short delay so the CTA returns to its
+  // normal label. Keyed on justAdded so repeated clicks restart the timer.
+  useEffect(() => {
+    if (!justAdded) return;
+    const t = window.setTimeout(() => setJustAdded(false), 1600);
+    return () => window.clearTimeout(t);
+  }, [justAdded]);
 
   return (
-    <section className="flex flex-col gap-5 self-start">
-      {/* BLOCK 1: Photo on soft gray surface (mobile only when hidden on desktop) */}
-      {showPhoto ? (
-        <div className="flex items-center justify-center bg-bg-soft p-6">
-          <img
-            src={photo.imageUrl}
-            alt={photo.imageAlt}
-            className="w-full object-contain"
-            style={{ maxHeight: "42vh" }}
-          />
-        </div>
-      ) : null}
-
-      {/* BLOCK 2: Title block */}
-      <header className="flex flex-col gap-3">
-        <h2
-          className="text-ink-strong"
+    <section className="flex flex-col self-start">
+      {/* Title: Arabic above English */}
+      <h1 className="flex flex-col">
+        <span
+          className="font-serif"
+          lang="ar"
           style={{
-            fontSize: "clamp(2rem, 3.2vw, 2.75rem)",
+            fontWeight: 700,
+            fontSize: 42,
+            color: "var(--ink)",
             lineHeight: 1.05,
-            letterSpacing: "-0.015em",
-            margin: 0,
+            letterSpacing: "0.01em",
+            marginBottom: 8,
+          }}
+        >
+          التمسّك
+        </span>
+        <span
+          className="font-serif"
+          style={{
+            fontSize: 22,
+            fontWeight: 400,
+            color: "var(--i8)",
+            lineHeight: 1.15,
+            marginBottom: 18,
           }}
         >
           {photo.title}
-          {photo.titleItalic ? (
-            <>
-              {" "}
-              <em>{photo.titleItalic}</em>
-            </>
-          ) : null}
+          {photo.titleItalic ? <>, {photo.titleItalic}</> : null}
+        </span>
+      </h1>
+
+      {/* Price block - per Lemaire pattern: tiny caps label above, prominent
+          numeral below, subtle rule under. Keeps the price legible without
+          waiting for the CTA to reveal it. */}
+      <div style={{ marginBottom: 20 }}>
+        <p
+          className="font-sans"
+          style={{
+            fontSize: 30,
+            fontWeight: 400,
+            color: "var(--ink)",
+            letterSpacing: "-0.01em",
+            lineHeight: 1,
+          }}
+        >
+          {formatUsd(currentPrice)}
+        </p>
+      </div>
+
+      {/* Fixed size + edition meta. Archival context now lives with the paper
+          picker (below) so this line is tight. */}
+      <p
+        className="font-mono"
+        style={{
+          fontSize: 12,
+          color: "var(--i5)",
+          letterSpacing: "0.04em",
+          marginBottom: 26,
+          paddingBottom: 18,
+          borderBottom: "1px solid var(--i1)",
+        }}
+      >
+        {FIXED_SIZE_LABEL} · Archival pigment · Ed. of {photo.editionTotal}
+      </p>
+
+      {/* CTA + micro-meta below. The button keeps the headline price on its
+          right edge as a redundancy check right before commit. */}
+      <div style={{ marginBottom: 10 }}>
+        <button
+          ref={ctaRef}
+          type="button"
+          className="btn-ink"
+          data-added={justAdded ? "true" : "false"}
+          disabled={soldOut}
+          onClick={handleAdd}
+          aria-live="polite"
+        >
+          <span>{soldOut ? "Edition closed" : justAdded ? "Added to cart ✓" : "Add to cart"}</span>
+          <span className="btn-ink-price">{justAdded ? "" : formatUsd(currentPrice)}</span>
+        </button>
+        <p
+          className="font-mono"
+          style={{
+            fontSize: 11,
+            letterSpacing: "0.04em",
+            color: "var(--i5)",
+            marginTop: 14,
+            textAlign: "center",
+            lineHeight: 1.7,
+          }}
+        >
+          Signed and numbered by the artist. Limited edition of 10.
+          <br />
+          Certificate of authenticity included.
+          <br />
+          Ships within 7 business days.
+        </p>
+      </div>
+
+      {/* Description - always open. Pulled out of an accordion because
+          this is the emotional hook of the product page; Lemaire leaves
+          it visible below the CTA for the same reason. */}
+      <section
+        aria-label="Description"
+        style={{
+          marginTop: 16,
+          paddingTop: 16,
+          borderTop: "1px solid var(--i1)",
+        }}
+      >
+        <h2
+          className="font-mono"
+          style={{
+            fontSize: 13,
+            letterSpacing: "0.04em",
+            color: "var(--ink)",
+            marginBottom: 14,
+          }}
+        >
+          Description
         </h2>
-      </header>
-
-      {/* BLOCK 3: Edition state */}
-      <div className="flex items-center justify-between border border-ink bg-bg-soft px-4 py-3">
-        <div>
-          <div className="label-caps mb-0.5 text-ink-faint">Edition</div>
-          <div className="text-ink-strong" style={{ fontSize: "0.9rem" }}>
-            of {photo.editionTotal}
-          </div>
+        <div style={{ fontSize: 16, lineHeight: 1.65, color: "var(--ink)", maxWidth: "58ch" }}>
+          {photo.description.map((para, i) => (
+            <p key={i} style={{ marginTop: i === 0 ? 0 : 10 }}>
+              {para}
+            </p>
+          ))}
         </div>
-        <div className="text-right">
-          <div className="label-caps mb-0.5 text-ink-faint">Status</div>
-          <div className="text-ink-strong" style={{ fontSize: "0.9rem" }}>
-            {soldOut ? "Sold out" : `${remaining} remaining`}
-          </div>
+      </section>
+
+      {/* Shipping & returns - kept collapsed. Reference detail; the
+          essential "ships in 14 business days" line already sits under
+          the CTA, so this accordion is for the longer policy copy. */}
+      <Disclosure
+        label="Shipping & Returns"
+        value=""
+        open={open.shipping}
+        onToggle={() => toggleDisc("shipping")}
+      >
+        <div style={{ fontSize: 16, lineHeight: 1.65, color: "var(--ink)", maxWidth: "58ch" }}>
+          <p style={{ marginBottom: 12 }}>
+            Ships in a flat waterproof package within 7 business days.
+          </p>
+          <p>
+            Dispatched worldwide via insured courier. A replacement can be arranged if the package
+            arrives damaged or with the seal broken - just email a photo of the outer package and
+            the print within 48 hours of delivery.
+          </p>
         </div>
-      </div>
+      </Disclosure>
 
-      {/* BLOCK 4: Controls */}
-      <div className="border-2 border-ink-strong">
-        <label className="grid grid-cols-[auto_1fr] items-center gap-6 border-b border-ink-line px-4 py-3">
-          <span className="text-ink-strong" style={{ fontSize: "0.875rem" }}>
-            Size
-          </span>
-          <select
-            value={sizeId}
-            onChange={(e) => setSizeId(e.target.value)}
-            className="bg-transparent text-right text-ink-strong"
-            style={{ fontSize: "0.875rem" }}
-            disabled={soldOut}
-          >
-            {photo.sizes.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-        </label>
+      {/* Care - kept collapsed. Post-purchase reference, not a purchase driver. */}
+      <Disclosure label="Care" value="" open={open.care} onToggle={() => toggleDisc("care")}>
+        <div style={{ fontSize: 16, lineHeight: 1.65, color: "var(--ink)", maxWidth: "58ch" }}>
+          <p>
+            Handle by the edges only. Avoid direct sunlight and humidity above 60%. Store flat or in
+            the supplied sleeve until framed.
+          </p>
+        </div>
+      </Disclosure>
 
-        <label className="grid grid-cols-[auto_1fr] items-center gap-6 border-b border-ink-line px-4 py-3">
-          <span className="text-ink-strong" style={{ fontSize: "0.875rem" }}>
-            Paper
-          </span>
-          <select
-            value={paperId}
-            onChange={(e) => setPaperId(e.target.value as PaperType)}
-            className="bg-transparent text-right text-ink-strong"
-            style={{ fontSize: "0.875rem" }}
-            disabled={soldOut}
-          >
-            {photo.papers.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-                {p.surchargeCents ? ` +${formatUsd(p.surchargeCents)}` : ""}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="grid grid-cols-[auto_1fr] items-center gap-6 px-4 py-3">
-          <span className="text-ink-strong" style={{ fontSize: "0.875rem" }}>
-            Qty
-          </span>
-          <select
-            value={qty}
-            onChange={(e) => setQty(Number(e.target.value))}
-            className="bg-transparent text-right text-ink-strong"
-            style={{ fontSize: "0.875rem" }}
-            disabled={soldOut}
-          >
-            {[1, 2, 3].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      {/* BLOCK 5: Price + CTA */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
+      {/* Mobile sticky bar - hides when cart drawer is open so it doesn't
+          sit on top of the drawer's primary CTA. */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-[80] grid grid-cols-[1fr_auto] items-center gap-[18px] border-t border-ink-line bg-bg lg:hidden"
+        style={{
+          padding: "14px 24px calc(14px + env(safe-area-inset-bottom, 0px))",
+          transform: showSticky && !drawerOpen ? "translateY(0)" : "translateY(110%)",
+          transition: "transform 380ms cubic-bezier(.2,.6,.2,1)",
+          boxShadow: showSticky && !drawerOpen ? "0 -10px 32px rgba(12,11,10,.06)" : "none",
+          pointerEvents: showSticky && !drawerOpen ? "auto" : "none",
+          willChange: "transform",
+        }}
+        role="region"
+        aria-label="Buy bar"
+        aria-hidden={!showSticky || drawerOpen}
+      >
+        <div className="min-w-0">
           <span
-            className="text-ink-strong"
-            style={{ fontSize: "1.75rem", lineHeight: 1, letterSpacing: "-0.02em" }}
+            className="block font-serif italic overflow-hidden text-ellipsis whitespace-nowrap"
+            style={{ fontSize: 17, color: "var(--ink)", lineHeight: 1, marginBottom: 5 }}
           >
-            {formatUsd(unitPrice * qty)}
+            {photo.title}
+            {photo.titleItalic ? `, ${photo.titleItalic}` : ""}
           </span>
-          <span className="text-xs text-ink-faint">+ shipping. Free US on 2 prints or more.</span>
-          {showFreeShipNudge ? (
-            <span className="text-xs" style={{ color: "var(--accent)" }}>
-              Add a second print for free shipping.
-            </span>
-          ) : null}
+          <span className="block font-mono" style={{ fontSize: 13, color: "var(--ink)" }}>
+            {formatUsd(currentPrice)}
+          </span>
         </div>
-
         <button
           type="button"
+          className="btn-ink"
+          style={{ width: "auto", padding: "16px 22px", gridTemplateColumns: "auto" }}
+          data-added={justAdded ? "true" : "false"}
           disabled={soldOut}
-          onClick={() =>
-            add({
-              photoSlug: photo.slug,
-              sizeId,
-              paperId,
-              quantity: qty,
-            })
-          }
-          className="btn-ghost w-full text-center"
+          onClick={handleAdd}
+          aria-live="polite"
         >
-          {soldOut ? "Edition closed" : "Add to cart →"}
+          {soldOut ? "Sold out" : justAdded ? "Added ✓" : "Add to cart"}
         </button>
       </div>
-
-      {/* BLOCK 6: Shipping & returns (collapsed). Default <summary> marker
-          hidden; underline on the label itself signals clickability. */}
-      <details className="border-t border-ink-line pt-5 text-sm">
-        <summary className="cursor-pointer list-none text-ink-faint [&::-webkit-details-marker]:hidden">
-          <span className="underline decoration-dotted underline-offset-4">
-            Shipping &amp; returns
-          </span>
-        </summary>
-        <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-3">
-          <dt className="text-ink-faint">Lead time</dt>
-          <dd className="text-right text-ink-strong">2 to 3 business days</dd>
-          <dt className="text-ink-faint">Shipping</dt>
-          <dd className="text-right text-ink-strong">USPS Priority, calc at checkout</dd>
-          <dt className="text-ink-faint">Returns</dt>
-          <dd className="text-right text-ink-strong">Damage and defect only</dd>
-        </dl>
-        <p className="mt-5 text-ink-faint" style={{ fontSize: "0.875rem" }}>
-          Made to order in Brooklyn, NY. We replace prints damaged in transit or with production
-          defects within 14 days of delivery.
-        </p>
-      </details>
     </section>
+  );
+}
+
+function Disclosure({
+  label,
+  value,
+  open,
+  onToggle,
+  children,
+}: {
+  label: string;
+  value: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="disc" data-open={open ? "true" : "false"}>
+      <button type="button" className="disc-trigger" aria-expanded={open} onClick={onToggle}>
+        <span>{label}</span>
+        <span className="d-val">{value}</span>
+        <span className="d-chev" aria-hidden="true" />
+      </button>
+      <div className="d-body">
+        <div className="d-inner">
+          <div className="d-inner-pad">{children}</div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,178 @@
+{
+  "colors": {
+    "all": [
+      {
+        "hex": "#000000",
+        "rgb": {
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 0
+        },
+        "count": 274,
+        "contexts": ["text", "border"]
+      },
+      {
+        "hex": "#161616",
+        "rgb": {
+          "r": 22,
+          "g": 22,
+          "b": 22,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 9
+        },
+        "count": 3,
+        "contexts": ["background", "border"]
+      },
+      {
+        "hex": "#faf8ed",
+        "rgb": {
+          "r": 250,
+          "g": 248,
+          "b": 237,
+          "a": 0.94
+        },
+        "hsl": {
+          "h": 51,
+          "s": 57,
+          "l": 95
+        },
+        "count": 1,
+        "contexts": ["background"]
+      }
+    ]
+  },
+  "regions": [],
+  "componentClusters": [],
+  "accessibility": {
+    "remediation": [
+      {
+        "fg": "#000000",
+        "bg": "#161616",
+        "ratio": 1.16,
+        "rule": "AA-normal",
+        "suggestion": {
+          "replace": "fg",
+          "color": "#faf8ed",
+          "newRatio": 16.99
+        }
+      }
+    ]
+  },
+  "cssHealth": {
+    "sheets": [
+      {
+        "url": "https://cultpictures.com/",
+        "totalBytes": 166,
+        "usedBytes": 162,
+        "unusedBytes": 4,
+        "unusedPercent": 2
+      },
+      {
+        "url": "https://cultpictures.com/",
+        "totalBytes": 5486,
+        "usedBytes": 0,
+        "unusedBytes": 5486,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://cultpictures.com/",
+        "totalBytes": 0,
+        "usedBytes": 0,
+        "unusedBytes": 0,
+        "unusedPercent": 0
+      },
+      {
+        "url": "https://cultpictures.com/",
+        "totalBytes": 0,
+        "usedBytes": 0,
+        "unusedBytes": 0,
+        "unusedPercent": 0
+      },
+      {
+        "url": "https://cultpictures.com/",
+        "totalBytes": 37242,
+        "usedBytes": 3802,
+        "unusedBytes": 33440,
+        "unusedPercent": 90
+      },
+      {
+        "url": "https://build.cargo.site/frontend/a788b8/index.css",
+        "totalBytes": 50487,
+        "usedBytes": 6538,
+        "unusedBytes": 43949,
+        "unusedPercent": 87
+      },
+      {
+        "url": "https://cultpictures.com/",
+        "totalBytes": 0,
+        "usedBytes": 0,
+        "unusedBytes": 0,
+        "unusedPercent": 0
+      },
+      {
+        "url": "https://cultpictures.com/",
+        "totalBytes": 0,
+        "usedBytes": 0,
+        "unusedBytes": 0,
+        "unusedPercent": 0
+      },
+      {
+        "url": "https://cultpictures.com/",
+        "totalBytes": 0,
+        "usedBytes": 0,
+        "unusedBytes": 0,
+        "unusedPercent": 0
+      },
+      {
+        "url": "https://cultpictures.com/",
+        "totalBytes": 8113,
+        "usedBytes": 1420,
+        "unusedBytes": 6693,
+        "unusedPercent": 82
+      },
+      {
+        "url": "https://cultpictures.com/",
+        "totalBytes": 483,
+        "usedBytes": 113,
+        "unusedBytes": 370,
+        "unusedPercent": 77
+      },
+      {
+        "url": "https://cultpictures.com/",
+        "totalBytes": 1431,
+        "usedBytes": 200,
+        "unusedBytes": 1231,
+        "unusedPercent": 86
+      }
+    ],
+    "totalBytes": 103408,
+    "usedBytes": 12235,
+    "unusedBytes": 91173,
+    "unusedPercent": 88,
+    "importantCount": 38,
+    "duplicates": 1360,
+    "vendorPrefixes": {
+      "webkit": 84,
+      "moz": 33,
+      "ms": 24,
+      "o": 1
+    },
+    "keyframes": [],
+    "specificity": {
+      "max": [1, 8, 47],
+      "average": [0.06, 1.68, 0.57],
+      "count": 976
+    },
+    "issues": ["38 !important rules", "1360 duplicate declarations", "88% unused CSS"]
+  }
+}

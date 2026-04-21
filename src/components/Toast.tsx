@@ -16,7 +16,7 @@ export default function Toast() {
   const [visible, setVisible] = useState(false);
 
   // Fires when the cart emits an add event. Sync setState below is the
-  // point — we're reacting to an external signal to trigger a one-shot
+  // point - we're reacting to an external signal to trigger a one-shot
   // enter animation. See CartDrawer for the same pattern.
   useEffect(() => {
     if (!addedAt) return;

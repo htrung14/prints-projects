@@ -1,50 +1,64 @@
 import BuyUI from "./BuyUI";
-import DetailCloseLink from "./DetailCloseLink";
 import type { Photo } from "@/lib/types";
 
-export default function DetailPanel({ photo, modal = false }: { photo: Photo; modal?: boolean }) {
+export default function DetailPanel({ photo }: { photo: Photo }) {
   return (
     <article>
-      {!modal ? (
-        <div className="flex items-center justify-end gap-6 border-b border-ink-line px-6 py-3 md:px-8">
-          <DetailCloseLink modal={modal} />
-        </div>
-      ) : null}
+      <div
+        className="grid min-h-[calc(100vh-63px)] grid-cols-1 gap-0 lg:grid-cols-[1fr_38vw]"
+        style={{ maxWidth: 1600, margin: "0 auto" }}
+      >
+        {/* Gallery - framed image, fit to viewport.
+            min-width:0 is essential: without it a 1fr grid column will auto-
+            expand to accommodate the image's intrinsic width, pushing the page
+            sideways. With it, the image shrinks to the column and the frame
+            stays neatly inside. */}
+        <section
+          className="flex items-center justify-center lg:py-8"
+          style={{ padding: "32px 20px 32px 44px", minWidth: 0 }}
+        >
+          <img
+            src={photo.imageUrl}
+            alt={photo.imageAlt}
+            className="img-protected block object-contain"
+            draggable={false}
+            style={{
+              width: "auto",
+              height: "auto",
+              maxWidth: "100%",
+              maxHeight: "calc(100dvh - 63px - 64px)",
+            }}
+          />
+        </section>
 
-      <div className="px-6 py-8 pb-16 md:px-10">
-        {/* Mobile: single-column stack. Photo + BuyUI, then description. */}
-        <div className="lg:hidden">
+        {/* Rail */}
+        <aside
+          className="self-center justify-self-center w-full"
+          style={{ padding: "48px 28px", maxWidth: 420 }}
+        >
           <BuyUI photo={photo} />
-          <div className="mt-10 space-y-4 text-sm leading-relaxed">
-            {photo.description.map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
-          </div>
-        </div>
-
-        {/* Desktop P3: 2-col — photo left (60%), buy+description right (40%).
-            Buy is sticky ONLY within its own block. Description is a sibling
-            that flows normally below it. Keeping sticky scoped prevents the
-            description from pinning or dragging when the page scrolls. */}
-        <div className="hidden lg:grid lg:grid-cols-[3fr_2fr] lg:gap-16">
-          <div className="bg-bg-soft p-6">
-            <img
-              src={photo.imageUrl}
-              alt={photo.imageAlt}
-              className="w-full object-contain"
-              style={{ maxHeight: "85vh" }}
-            />
-          </div>
-          <div>
-            <BuyUI photo={photo} showPhoto={false} />
-            <div className="mt-6 space-y-4 text-sm leading-relaxed">
-              {photo.description.map((para, i) => (
-                <p key={i}>{para}</p>
-              ))}
-            </div>
-          </div>
-        </div>
+        </aside>
       </div>
+
+      <style>{`
+        @media (max-width: 900px) {
+          article > .grid {
+            grid-template-columns: 1fr;
+          }
+          article > .grid > section {
+            padding: 20px !important;
+            min-width: 0;
+          }
+          article > .grid > section img {
+            max-width: 100%;
+            height: auto !important;
+          }
+          article > .grid > aside {
+            padding: 32px 20px 48px !important;
+            max-width: none !important;
+          }
+        }
+      `}</style>
     </article>
   );
 }

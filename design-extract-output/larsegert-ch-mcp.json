@@ -1,0 +1,218 @@
+{
+  "colors": {
+    "all": [
+      {
+        "hex": "#323232",
+        "rgb": {
+          "r": 50,
+          "g": 50,
+          "b": 50,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 20
+        },
+        "count": 1038,
+        "contexts": ["text", "border"]
+      },
+      {
+        "hex": "#000000",
+        "rgb": {
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 0
+        },
+        "count": 678,
+        "contexts": ["text", "border"]
+      },
+      {
+        "hex": "#ff0000",
+        "rgb": {
+          "r": 255,
+          "g": 0,
+          "b": 0,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 100,
+          "l": 50
+        },
+        "count": 66,
+        "contexts": ["text", "border"]
+      },
+      {
+        "hex": "#ffffff",
+        "rgb": {
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 100
+        },
+        "count": 2,
+        "contexts": ["background"]
+      },
+      {
+        "hex": "#1a1a1a",
+        "rgb": {
+          "r": 26,
+          "g": 26,
+          "b": 26,
+          "a": 1
+        },
+        "hsl": {
+          "h": 0,
+          "s": 0,
+          "l": 10
+        },
+        "count": 1,
+        "contexts": ["background"]
+      }
+    ]
+  },
+  "regions": [],
+  "componentClusters": [
+    {
+      "kind": "card",
+      "structuralHash": "div>div>div",
+      "instanceCount": 150,
+      "variants": [
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(50, 50, 50)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(50, 50, 50)",
+            "fontSize": "128px",
+            "fontWeight": "500"
+          },
+          "instanceCount": 150
+        }
+      ]
+    },
+    {
+      "kind": "card",
+      "structuralHash": "div>img",
+      "instanceCount": 150,
+      "variants": [
+        {
+          "css": {
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(50, 50, 50)",
+            "padding": "0px 0px 0px 0px",
+            "borderRadius": "0px",
+            "border": "0px none rgb(50, 50, 50)",
+            "fontSize": "128px",
+            "fontWeight": "500"
+          },
+          "instanceCount": 150
+        }
+      ]
+    }
+  ],
+  "accessibility": {
+    "remediation": [
+      {
+        "fg": "#ff0000",
+        "bg": "#ffffff",
+        "ratio": 4,
+        "rule": "AA-normal",
+        "suggestion": {
+          "replace": "fg",
+          "color": "#000000",
+          "newRatio": 21
+        }
+      },
+      {
+        "fg": "#000000",
+        "bg": "#1a1a1a",
+        "ratio": 1.21,
+        "rule": "AA-normal",
+        "suggestion": {
+          "replace": "fg",
+          "color": "#ffffff",
+          "newRatio": 17.4
+        }
+      }
+    ]
+  },
+  "cssHealth": {
+    "sheets": [
+      {
+        "url": "https://www.larsegert.ch/stylesheet?c=2110285747&1765268031",
+        "totalBytes": 17096,
+        "usedBytes": 3627,
+        "unusedBytes": 13469,
+        "unusedPercent": 79
+      },
+      {
+        "url": "https://www.larsegert.ch/",
+        "totalBytes": 45634,
+        "usedBytes": 6301,
+        "unusedBytes": 39333,
+        "unusedPercent": 86
+      },
+      {
+        "url": "https://www.larsegert.ch/",
+        "totalBytes": 1613,
+        "usedBytes": 739,
+        "unusedBytes": 874,
+        "unusedPercent": 54
+      },
+      {
+        "url": "https://www.larsegert.ch/",
+        "totalBytes": 97,
+        "usedBytes": 0,
+        "unusedBytes": 97,
+        "unusedPercent": 100
+      },
+      {
+        "url": "https://www.larsegert.ch/",
+        "totalBytes": 1435,
+        "usedBytes": 692,
+        "unusedBytes": 743,
+        "unusedPercent": 52
+      },
+      {
+        "url": "https://www.larsegert.ch/followingframe/larsegert?c=2110285747",
+        "totalBytes": 5882,
+        "usedBytes": 0,
+        "unusedBytes": 5882,
+        "unusedPercent": 100
+      }
+    ],
+    "totalBytes": 71757,
+    "usedBytes": 11359,
+    "unusedBytes": 60398,
+    "unusedPercent": 84,
+    "importantCount": 31,
+    "duplicates": 1065,
+    "vendorPrefixes": {
+      "webkit": 96,
+      "moz": 35,
+      "ms": 24,
+      "o": 0
+    },
+    "keyframes": [],
+    "specificity": {
+      "max": [2, 6, 10],
+      "average": [0.1, 1.64, 0.44],
+      "count": 925
+    },
+    "issues": ["31 !important rules", "1065 duplicate declarations", "84% unused CSS"]
+  }
+}

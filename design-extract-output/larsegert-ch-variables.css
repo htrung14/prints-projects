@@ -1,0 +1,50 @@
+:root {
+  /* Colors — Primary */
+  --color-primary: #ff0000;
+
+  /* Colors — Neutrals */
+  --color-neutral-50: #323232;
+  --color-neutral-100: #000000;
+  --color-neutral-200: #ffffff;
+  --color-neutral-300: #1a1a1a;
+
+  /* Colors — Backgrounds */
+  --color-bg: #ffffff;
+
+  /* Colors — Text */
+  --color-text: #000000;
+  --color-text-1: #ff0000;
+  --color-text-2: #323232;
+
+  /* Typography — Families */
+  --font-sans: "Helvetica Neue", sans-serif;
+  --font-body: "Times", sans-serif;
+  --font-body: "Icons", sans-serif;
+  --font-body: "-apple-system", sans-serif;
+
+  /* Typography — Scale */
+  --font-size-128: 128px;
+  --font-size-28: 28px;
+  --font-size-23.04: 23.04px;
+  --font-size-14.976: 14.976px;
+  --font-size-11.52: 11.52px;
+  --font-size-9.216: 9.216px;
+
+  /* Spacing */
+  --spacing-1: 1px;
+  --spacing-64: 64px;
+  --spacing-115: 115px;
+
+  /* Border Radius */
+  --radius-full: 100px;
+
+  /* Original Site Variables */
+  /* — other — */
+  --following-width: -400px;
+  --following-animation-duration: 450ms;
+  /* — semantic — */
+  success: [object Object];
+  warning: [object Object];
+  error: [object Object];
+  info: [object Object];
+}
