@@ -126,6 +126,12 @@ export default function OrderActions({
     });
   }
 
+  function handleResendConfirmation() {
+    startTransition(async () => {
+      await post(`/api/email/retry/${orderId}?kind=confirmation`);
+    });
+  }
+
   const isTerminal = TERMINAL.includes(currentStatus);
 
   return (
@@ -217,6 +223,14 @@ export default function OrderActions({
       <section className="flex flex-col gap-3">
         <h2 className="label-caps">Email</h2>
         <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={handleResendConfirmation}
+            className="border border-ink-line px-3 py-1.5 text-sm hover:bg-bg-soft disabled:opacity-50"
+          >
+            Resend confirmation
+          </button>
           <button
             type="button"
             disabled={isPending}

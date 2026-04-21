@@ -286,6 +286,19 @@ export async function createCheckoutSession(
 ): Promise<Stripe.Checkout.Session> {
   const resolved = await resolveCartLines(args.lines);
 
+  // Guard: unpublished photos (test item, hidden sold-out items) must not be
+  // mixed with regular prints in a single cart. The test-cart branch below
+  // grants a flat $1 price + no shipping collection, so a mixed cart would
+  // effectively smuggle a real print through that branch. We only permit
+  // unpublished items when the *entire* cart is unpublished.
+  const hasUnpublished = resolved.some((r) => r.photo.isPublished === false);
+  const allUnpublished = resolved.every((r) => r.photo.isPublished === false);
+  if (hasUnpublished && !allUnpublished) {
+    throw new Error(
+      "resolveCartLines: cart mixes unpublished items with regular items. Split into separate carts."
+    );
+  }
+
   const lineItems = resolved.map(buildLineItem);
 
   // Test-mode cart: only the hidden `test-1-dollar` item is present.

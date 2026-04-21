@@ -251,6 +251,36 @@ describe("createCheckoutSession", () => {
     expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(2000);
     expect(params.shipping_options[1].shipping_rate_data.fixed_amount.amount).toBe(4500);
   });
+
+  it("test-1-dollar cart: flat $1, no fee, no shipping collection", async () => {
+    await createCheckoutSession({
+      lines: [{ photoSlug: "test-1-dollar", sizeId: "8x10", paperId: "photo-rag", quantity: 1 }],
+      origin: "http://localhost:3000",
+    });
+
+    const params = mockStripeCreate.mock.calls[0][0];
+    // Only the $1 line — no processing-fee line appended.
+    expect(params.line_items).toHaveLength(1);
+    expect(params.line_items[0].price_data.unit_amount).toBe(100);
+    // Shipping collection + options must be absent for the test cart so
+    // Stripe doesn't demand an address the customer can't fill in.
+    expect(params.shipping_address_collection).toBeUndefined();
+    expect(params.shipping_options).toBeUndefined();
+    expect(params.phone_number_collection.enabled).toBe(false);
+  });
+
+  it("rejects a cart that mixes an unpublished item with a regular item", async () => {
+    await expect(
+      createCheckoutSession({
+        lines: [
+          VALID_CART_LINE,
+          { photoSlug: "test-1-dollar", sizeId: "8x10", paperId: "photo-rag", quantity: 1 },
+        ],
+        origin: "http://localhost:3000",
+      })
+    ).rejects.toThrow(/mixes unpublished/);
+    expect(mockStripeCreate).not.toHaveBeenCalled();
+  });
 });
 
 describe("handleCheckoutSessionCompleted (webhook)", () => {

@@ -36,14 +36,15 @@ export type OrderConfirmationProps = {
   items: OrderItem[];
 };
 
-function formatAddress(a: Address): string {
+function formatAddress(a: Address | null | undefined): string {
+  if (!a) return "";
   const lines = [
     a.name,
     a.line1,
     a.line2 ?? "",
     [a.city, a.state, a.postalCode].filter(Boolean).join(", "),
     a.country,
-  ].filter((l) => l.length > 0);
+  ].filter((l) => l && l.length > 0);
   return lines.join("\n");
 }
 
