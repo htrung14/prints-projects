@@ -1,18 +1,29 @@
 /**
- * Single-order dispatch page - the one Rob clicks from the print-job email.
+ * Single-order dispatch page — the one Loupe clicks from the print-job email.
  *
- * Server component. Validates the HMAC token, auto-advances the order to
- * `sent_to_print` on first render, and renders the Cargo-aesthetic layout
- * with per-line-item download buttons + a tracking submission form.
+ * Server component. Validates the HMAC token and renders the dispatch layout
+ * with shipping address, line items, a "mark as sent to printer" button, and
+ * a tracking submission form.
+ *
+ * IMPORTANT: The `paid → sent_to_print` transition is NOT triggered on GET.
+ * Email security scanners (Microsoft SafeLinks, Gmail link prefetch, spam
+ * filters) issue GETs on every link in every email — if GET advanced status,
+ * Thalia sending the batch email would flip every order to `sent_to_print`
+ * before Loupe ever opened the link. The transition now only happens when
+ * the printer explicitly submits the `<form method="post">` below, which
+ * scanners never trigger. Idempotent: a second submit on an already-advanced
+ * order is a no-op.
  *
  * Note on the drop-ship model: we show the CUSTOMER's shipping address here,
- * not a forwarding address. Rob ships direct - no in-person pickup step.
+ * not a forwarding address. Loupe ships direct — no in-person pickup step.
  */
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { getOrderById } from "@/lib/supabase/queries/orders";
 import { updateOrderStatus } from "@/lib/supabase/queries/orders";
 import { audit } from "@/lib/supabase/queries/audit";
+import { alertSystemError } from "@/lib/alerting/dispatcher";
 import { verifyDispatchToken } from "@/lib/dispatch/token";
 import { getDispatchItemsForOrder } from "@/lib/dispatch/queries";
 import type { DispatchItem } from "@/lib/dispatch/queries";
@@ -58,30 +69,8 @@ export default async function DispatchOrderPage({
 
   const items = await getDispatchItemsForOrder(orderId);
 
-  // --- auto-advance on first view -----------------------------------------
-  if (order.status === "paid") {
-    // Fire and let the first render fall through; the status transition is
-    // best-effort. We await so the DB row is consistent with what we render.
-    try {
-      await updateOrderStatus(order.id, "sent_to_print", {
-        actor: "dispatch_view",
-      });
-      await audit({
-        orderId: order.id,
-        actor: "dispatch_view",
-        action: "status_change",
-        meta: { from: "paid", to: "sent_to_print" },
-      });
-      order.status = "sent_to_print";
-    } catch (err) {
-      // Don't block the render if the write failed - Rob should still see
-      // his download buttons. Surface via server log.
-      console.error(
-        `dispatch page: failed to auto-advance order ${order.id} to sent_to_print:`,
-        err
-      );
-    }
-  }
+  const markedRaw = rawSearch.marked;
+  const justMarked = typeof markedRaw === "string" && markedRaw === "1";
 
   return (
     <div
@@ -106,6 +95,8 @@ export default async function DispatchOrderPage({
             ))}
           </ul>
         </section>
+
+        <MarkSentToPrint order={order} token={token} justMarked={justMarked} />
 
         <section className="mt-14 border-t border-ink-line pt-8">
           <h2 className="label-caps" style={{ marginBottom: 12 }}>
@@ -132,6 +123,70 @@ export default async function DispatchOrderPage({
 }
 
 // ---------------------------------------------------------------------------
+// Server action: explicit `paid → sent_to_print` transition (POST only).
+// ---------------------------------------------------------------------------
+
+async function markSentToPrintAction(formData: FormData) {
+  "use server";
+
+  const orderId = String(formData.get("orderId") ?? "");
+  const token = String(formData.get("token") ?? "");
+  if (!orderId || !token) {
+    throw new Error("markSentToPrintAction: missing orderId or token.");
+  }
+
+  // Re-verify the token inside the action. Form fields are user-supplied and
+  // the action is callable as a top-level POST endpoint, so we must not trust
+  // that the caller ever passed through the GET render.
+  const payload = verifyDispatchToken(token);
+  if (!payload || payload.kind !== "single" || payload.orderId !== orderId) {
+    throw new Error("markSentToPrintAction: token does not authorize this order.");
+  }
+
+  const order = await getOrderById(orderId);
+  if (!order) {
+    throw new Error(`markSentToPrintAction: order ${orderId} not found.`);
+  }
+  if (order.fulfillmentTokenRevokedAt) {
+    throw new Error(`markSentToPrintAction: order ${orderId} link revoked.`);
+  }
+
+  // Idempotent: if the order already advanced past `paid`, no-op and redirect
+  // back. This matters because email scanners can't hit POST, but a legitimate
+  // printer can click the button twice by accident (or refresh the post-submit
+  // page), and we must not double-audit.
+  if (order.status !== "paid") {
+    redirect(`/dispatch/${orderId}?token=${token}&marked=1`);
+  }
+
+  // Flat actor name matches the convention of sibling dispatch audit rows
+  // (dispatch_submit, dispatch_download, dispatch_batch). Order scoping is
+  // already captured by the audit row's order_id FK and meta.trigger.
+  const actor = "dispatch_mark_sent";
+
+  try {
+    await updateOrderStatus(order.id, "sent_to_print", { actor });
+    await audit({
+      orderId: order.id,
+      actor,
+      action: "status_change",
+      meta: { from: "paid", to: "sent_to_print", trigger: "dispatch_page_mark_sent" },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`dispatch page markSentToPrint: failed to advance order ${order.id}:`, err);
+    // Alert ops — the printer is sitting in front of a broken button.
+    // We rethrow after so Next renders the error boundary / default 500 and
+    // the printer knows to email Thalia instead of assuming it worked.
+    await alertSystemError(`POST dispatch mark-sent (order=${order.id})`, msg);
+    throw err;
+  }
+
+  revalidatePath(`/dispatch/${orderId}`);
+  redirect(`/dispatch/${orderId}?token=${token}&marked=1`);
+}
+
+// ---------------------------------------------------------------------------
 // Sub-components (server)
 // ---------------------------------------------------------------------------
 
@@ -143,7 +198,7 @@ function Header({ order }: { order: Order }) {
   });
   return (
     <header className="flex flex-col gap-2">
-      <span className="label-caps">Dispatch · Brooklyn Archival</span>
+      <span className="label-caps">Dispatch · Loupe</span>
       <h1
         className="h-display-xl"
         style={{ color: "rgba(0,0,0,0.95)", fontSize: "clamp(2rem, 4vw, 3rem)" }}
@@ -272,6 +327,61 @@ function LineItem({ item, token, order }: { item: DispatchItem; token: string; o
   );
 }
 
+function MarkSentToPrint({
+  order,
+  token,
+  justMarked,
+}: {
+  order: Order;
+  token: string;
+  justMarked: boolean;
+}) {
+  const alreadyAdvanced = order.status !== "paid";
+  return (
+    <section className="mt-12 border-t border-ink-line pt-8">
+      <h2 className="label-caps" style={{ marginBottom: 12 }}>
+        Mark as sent to printer
+      </h2>
+      <p
+        className="text-sm"
+        style={{ color: "rgba(0,0,0,0.6)", marginBottom: 14, maxWidth: "62ch" }}
+      >
+        Click once Loupe has the order queued on the press. This moves the order to{" "}
+        <em>sent to print</em> in our system and lets Thalia see progress. COA or signature
+        decisions are handled out-of-band — reply to the print-job email if anything needs a call.
+      </p>
+      <form action={markSentToPrintAction}>
+        <input type="hidden" name="orderId" value={order.id} />
+        <input type="hidden" name="token" value={token} />
+        <button
+          type="submit"
+          className="btn-ghost"
+          style={{
+            padding: "10px 22px",
+            fontSize: 14,
+            opacity: alreadyAdvanced ? 0.5 : 1,
+            cursor: alreadyAdvanced ? "default" : "pointer",
+          }}
+          disabled={alreadyAdvanced}
+          aria-disabled={alreadyAdvanced}
+        >
+          {alreadyAdvanced ? "Already marked sent to printer" : "Mark as sent to printer"}
+        </button>
+      </form>
+      {justMarked ? (
+        <p
+          className="mt-3 text-sm"
+          style={{ color: "rgba(0,0,0,0.6)" }}
+          role="status"
+          aria-live="polite"
+        >
+          Recorded. Status is now <em>sent to print</em>.
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
 function StatusPill({ status }: { status: Order["status"] }) {
   const label = status.replace(/_/g, " ");
   return (
@@ -295,8 +405,8 @@ function FooterNote() {
       style={{ color: "rgba(0,0,0,0.5)" }}
     >
       <p>
-        This page is token-gated. If the link was forwarded outside Brooklyn Archival, reply to the
-        print-job email and Thalia will revoke it.
+        This page is token-gated. If the link was forwarded outside Loupe, reply to the print-job
+        email and Thalia will revoke it.
       </p>
     </footer>
   );

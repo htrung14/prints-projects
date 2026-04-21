@@ -14,7 +14,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/session";
-import { getOrderById } from "@/lib/supabase/queries/orders";
+import { getOrderById, getChildOrders } from "@/lib/supabase/queries/orders";
 import { listOrderItems, listAuditEntries } from "@/app/admin/_data";
 import OrderActions from "./OrderActions";
 
@@ -45,9 +45,10 @@ export default async function OrderDetailPage({ params }: PageProps<"/admin/orde
   const order = await getOrderById(id);
   if (!order) notFound();
 
-  const [items, audit] = await Promise.all([
+  const [items, audit, children] = await Promise.all([
     listOrderItems(order.id),
     listAuditEntries({ orderId: order.id, limit: 20 }),
+    getChildOrders(order.id),
   ]);
 
   const addr = order.shippingAddress;
@@ -60,6 +61,14 @@ export default async function OrderDetailPage({ params }: PageProps<"/admin/orde
         <Link href="/admin/orders" className="text-xs text-ink-faint underline underline-offset-4">
           ← Orders
         </Link>
+        {order.parentOrderId ? (
+          <Link
+            href={`/admin/orders/${order.parentOrderId}`}
+            className="text-xs text-ink-faint underline underline-offset-4"
+          >
+            Reprint of: {order.parentOrderId.slice(0, 8).toUpperCase()} →
+          </Link>
+        ) : null}
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <h1 className="h-display">
             Order {order.id.slice(0, 8)}
@@ -103,30 +112,38 @@ export default async function OrderDetailPage({ params }: PageProps<"/admin/orde
           <section className="flex flex-col gap-3">
             <h2 className="label-caps">Line items</h2>
             <div className="border-t border-ink-line">
-              {items.map((it) => (
-                <div
-                  key={it.id}
-                  className="flex flex-col gap-1 border-b border-ink-line py-3 text-sm"
-                >
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-ink-strong">{it.photoTitle}</span>
-                    <span>{formatMoney(it.unitPriceCents, order.currency)}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-3 text-xs text-ink-faint">
-                    <span>{it.sizeLabel}</span>
-                    <span>{it.paperName}</span>
-                    <span>
-                      Edition {it.editionNumber} / {it.editionTotal}
-                    </span>
-                    <span>Qty {it.quantity}</span>
-                    {it.printFileUrlSnapshot ? (
-                      <span title={it.printFileUrlSnapshot}>Print file: attached</span>
-                    ) : (
-                      <span>Print file: missing</span>
-                    )}
-                  </div>
+              {items.length === 0 ? (
+                <div className="border-b border-ink-line py-3 text-sm text-ink-faint">
+                  {order.status === "refunded"
+                    ? "No items (refunded: edition exceeded)"
+                    : "No items"}
                 </div>
-              ))}
+              ) : (
+                items.map((it) => (
+                  <div
+                    key={it.id}
+                    className="flex flex-col gap-1 border-b border-ink-line py-3 text-sm"
+                  >
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-ink-strong">{it.photoTitle}</span>
+                      <span>{formatMoney(it.unitPriceCents, order.currency)}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-3 text-xs text-ink-faint">
+                      <span>{it.sizeLabel}</span>
+                      <span>{it.paperName}</span>
+                      <span>
+                        Edition {it.editionNumber} / {it.editionTotal}
+                      </span>
+                      <span>Qty {it.quantity}</span>
+                      {it.printFileUrlSnapshot ? (
+                        <span title={it.printFileUrlSnapshot}>Print file: attached</span>
+                      ) : (
+                        <span>Print file: missing</span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </section>
 
@@ -192,6 +209,29 @@ export default async function OrderDetailPage({ params }: PageProps<"/admin/orde
             <section className="flex flex-col gap-2 text-sm">
               <h2 className="label-caps">Internal notes</h2>
               <p className="whitespace-pre-wrap text-ink">{order.notes}</p>
+            </section>
+          ) : null}
+
+          {children.length > 0 ? (
+            <section className="flex flex-col gap-2 text-sm">
+              <h2 className="label-caps">Reprints / reships ({children.length})</h2>
+              <ul className="border-t border-ink-line">
+                {children.map((c) => (
+                  <li
+                    key={c.id}
+                    className="flex items-baseline justify-between gap-3 border-b border-ink-line py-2"
+                  >
+                    <Link
+                      href={`/admin/orders/${c.id}`}
+                      className="underline underline-offset-4 text-ink-strong"
+                    >
+                      {c.id.slice(0, 8).toUpperCase()}
+                    </Link>
+                    <span className="text-xs text-ink-faint">{c.status.replace(/_/g, " ")}</span>
+                    <span className="text-xs text-ink-faint">{formatDateTime(c.createdAt)}</span>
+                  </li>
+                ))}
+              </ul>
             </section>
           ) : null}
         </div>

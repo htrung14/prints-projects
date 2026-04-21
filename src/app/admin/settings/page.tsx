@@ -1,7 +1,7 @@
 /**
  * /admin/settings — runtime-editable configuration.
  *
- * Currently just the printer email (sent to Rob when a batch is dispatched).
+ * Currently just the printer email (sent to Loupe when a batch is dispatched).
  * Backed by the `settings` table in Supabase. Falls back to the
  * `PRINT_SHOP_EMAIL` env var when unset, but the UI reflects only what's in
  * the DB so admins can see exactly what the system will use.

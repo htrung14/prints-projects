@@ -80,7 +80,7 @@ export async function sendOrderConfirmation(order: Order, items: OrderItem[]): P
 }
 
 // ---------------------------------------------------------------------------
-// Print-job email (to Rob at Brooklyn Archival)
+// Print-job email (to the printer at Loupe)
 // ---------------------------------------------------------------------------
 
 export async function sendPrintJobEmail(

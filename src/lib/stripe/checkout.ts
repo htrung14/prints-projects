@@ -10,7 +10,7 @@
  * - Guest checkout only - no `customer` param
  * - Currency: USD. Adaptive Pricing is a dashboard-level setting.
  * - Shipping address collected by Stripe (not pre-filled from us) ← Pastel #5 "shipping at checkout"
- * - Shipping: free US domestic, $20 international
+ * - Shipping: 4-tier regional (US free, CA $35, EU/UK $50, AU/ROW $65)
  * - `cart_lines_json` stored on session metadata so the webhook can rebuild
  *   the cart server-side without trusting the Stripe line-item echo.
  *
@@ -67,18 +67,84 @@ type LineItemParam = NonNullable<SessionCreateParams["line_items"]>[number];
 
 /**
  * Countries Stripe Checkout will offer in the shipping address collection.
- * Start: US, plus common international art-collector markets. Expand freely.
- * Two-letter ISO 3166-1 alpha-2 codes.
+ * Split into four tiers because Stripe hosted Checkout cannot restrict
+ * shipping_options per country — we pre-select the correct rate on our own
+ * /checkout page (destination picker) and narrow `allowed_countries` to the
+ * matching tier's subset before creating the session.
+ *
+ * Two-letter ISO 3166-1 alpha-2 codes. Tier rates are calibrated to real
+ * USPS/FedEx NYC-origin estimates (see docs-ai/shipping-model.md).
  */
-export const ALLOWED_COUNTRIES: ReadonlyArray<AllowedCountry> = [
-  "US",
-  "CA",
+export const US_COUNTRIES: ReadonlyArray<AllowedCountry> = ["US"];
+export const CA_COUNTRIES: ReadonlyArray<AllowedCountry> = ["CA"];
+export const EU_UK_COUNTRIES: ReadonlyArray<AllowedCountry> = [
   "GB",
-  "AU",
+  "IE",
   "DE",
   "FR",
   "NL",
+  "BE",
+  "LU",
+  "IT",
+  "ES",
+  "PT",
+  "AT",
+  "DK",
+  "SE",
+  "FI",
+  "NO",
+  "CH",
+  "IS",
+  "PL",
+  "CZ",
+  "GR",
+  "HU",
+  "SK",
+  "SI",
+  "HR",
+  "EE",
+  "LV",
+  "LT",
+  "RO",
+  "BG",
+  "CY",
+  "MT",
 ];
+export const AU_ROW_COUNTRIES: ReadonlyArray<AllowedCountry> = [
+  "AU",
+  "NZ",
+  "JP",
+  "SG",
+  "HK",
+  "KR",
+  "TW",
+  "TH",
+  "MY",
+  "IL",
+  "AE",
+  "SA",
+  "MX",
+  "BR",
+  "AR",
+  "CL",
+  "CO",
+  "ZA",
+  "IN",
+  "PH",
+];
+
+/**
+ * @deprecated Prefer the per-tier country arrays. Kept as the flattened
+ * aggregate for legacy doc/tooling references. No runtime callers.
+ */
+export const ALLOWED_COUNTRIES: ReadonlyArray<AllowedCountry> = [
+  ...US_COUNTRIES,
+  ...CA_COUNTRIES,
+  ...EU_UK_COUNTRIES,
+  ...AU_ROW_COUNTRIES,
+];
+
+export type ShippingDestination = "US" | "CA" | "EU_UK" | "AU_ROW";
 
 /**
  * Stripe Tax product code used on inline `product_data`. `txcd_99999999`
@@ -87,8 +153,44 @@ export const ALLOWED_COUNTRIES: ReadonlyArray<AllowedCountry> = [
  */
 const TAX_CODE_FALLBACK = "txcd_99999999";
 
-const FALLBACK_DOMESTIC_CENTS = 0; // Free US shipping
-const FALLBACK_INTL_CENTS = 2000; // $20 international
+// Per-tier shipping rates in USD cents.
+const SHIPPING_CENTS_US = 0; // Free US shipping
+const SHIPPING_CENTS_CA = 3500; // $35 Canada
+const SHIPPING_CENTS_EU_UK = 5000; // $50 UK + EU
+const SHIPPING_CENTS_AU_ROW = 6500; // $65 Australia + rest of world
+
+/**
+ * Map a destination tier to its country list.
+ */
+function countriesForDestination(destination: ShippingDestination): ReadonlyArray<AllowedCountry> {
+  switch (destination) {
+    case "US":
+      return US_COUNTRIES;
+    case "CA":
+      return CA_COUNTRIES;
+    case "EU_UK":
+      return EU_UK_COUNTRIES;
+    case "AU_ROW":
+      return AU_ROW_COUNTRIES;
+  }
+}
+
+/**
+ * Expected shipping cents for a given ISO2 country code. Used by the webhook
+ * as defence-in-depth to detect under-payment (e.g. buyer selected "United
+ * States — free" but shipped to Canada).
+ *
+ * Unknown country → return the highest tier (AU_ROW / $65). This biases the
+ * guard toward "alert on mismatch" rather than silently accepting under-payment.
+ */
+export function expectedShippingCentsFor(country: string): number {
+  const c = country.toUpperCase();
+  if ((US_COUNTRIES as ReadonlyArray<string>).includes(c)) return SHIPPING_CENTS_US;
+  if ((CA_COUNTRIES as ReadonlyArray<string>).includes(c)) return SHIPPING_CENTS_CA;
+  if ((EU_UK_COUNTRIES as ReadonlyArray<string>).includes(c)) return SHIPPING_CENTS_EU_UK;
+  if ((AU_ROW_COUNTRIES as ReadonlyArray<string>).includes(c)) return SHIPPING_CENTS_AU_ROW;
+  return SHIPPING_CENTS_AU_ROW;
+}
 
 // ---------------------------------------------------------------------------
 // Line-item construction
@@ -209,38 +311,63 @@ function buildLineItem(r: ResolvedCartLine): LineItemParam {
 // ---------------------------------------------------------------------------
 
 /**
- * Build the `shipping_options` array for this session.
+ * Build the `shipping_options` array for this session. Exactly one option per
+ * session, matching the tier the customer selected on /checkout:
+ *   - "US"     → $0   (free)
+ *   - "CA"     → $35  (Canada)
+ *   - "EU_UK"  → $50  (United Kingdom & EU)
+ *   - "AU_ROW" → $65  (Australia & rest of world)
  *
- * Two options: free domestic (US), $20 international.
+ * The webhook (src/lib/stripe/webhook.ts) re-checks shipping_cents against
+ * `expectedShippingCentsFor(country)` as defence-in-depth.
  */
-function buildShippingOptions(lines: CartLine[]): ShippingOptionParam[] {
-  const options: ShippingOptionParam[] = [];
-
-  options.push({
-    shipping_rate_data: {
-      type: "fixed_amount",
-      fixed_amount: {
-        amount: FALLBACK_DOMESTIC_CENTS,
-        currency: "usd",
-      },
-      display_name: "Free US shipping",
-      tax_behavior: "exclusive",
-    },
-  });
-  options.push({
-    shipping_rate_data: {
-      type: "fixed_amount",
-      fixed_amount: {
-        amount: FALLBACK_INTL_CENTS,
-        currency: "usd",
-      },
-      display_name: "International shipping",
-      tax_behavior: "exclusive",
-    },
-  });
-
-  // Stripe caps at 5 shipping_options per session.
-  return options.slice(0, 5);
+function buildShippingOptions(destination: ShippingDestination): ShippingOptionParam[] {
+  switch (destination) {
+    case "US":
+      return [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: { amount: SHIPPING_CENTS_US, currency: "usd" },
+            display_name: "United States — free",
+            tax_behavior: "exclusive",
+          },
+        },
+      ];
+    case "CA":
+      return [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: { amount: SHIPPING_CENTS_CA, currency: "usd" },
+            display_name: "Canada — $35",
+            tax_behavior: "exclusive",
+          },
+        },
+      ];
+    case "EU_UK":
+      return [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: { amount: SHIPPING_CENTS_EU_UK, currency: "usd" },
+            display_name: "United Kingdom & EU — $50",
+            tax_behavior: "exclusive",
+          },
+        },
+      ];
+    case "AU_ROW":
+      return [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: { amount: SHIPPING_CENTS_AU_ROW, currency: "usd" },
+            display_name: "Australia & rest of world — $65",
+            tax_behavior: "exclusive",
+          },
+        },
+      ];
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -270,6 +397,11 @@ function siteOrigin(): string {
 
 export type CreateCheckoutSessionArgs = {
   lines: CartLine[];
+  /**
+   * Shipping destination selected on /checkout. Narrows `allowed_countries`
+   * and picks the single matching shipping rate. Required for non-test carts.
+   */
+  destination?: ShippingDestination;
   /** Optional override for success/cancel origin (e.g. during tests). */
   origin?: string;
 };
@@ -325,7 +457,9 @@ export async function createCheckoutSession(
     });
   }
 
-  const shippingOptions = isTestCart ? undefined : buildShippingOptions(args.lines);
+  const destination: ShippingDestination = args.destination ?? "US";
+  const shippingOptions = isTestCart ? undefined : buildShippingOptions(destination);
+  const allowedCountries: ReadonlyArray<AllowedCountry> = countriesForDestination(destination);
 
   const origin = args.origin ?? siteOrigin();
   const successUrl = `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`;
@@ -345,7 +479,7 @@ export async function createCheckoutSession(
       ? {}
       : {
           shipping_address_collection: {
-            allowed_countries: [...ALLOWED_COUNTRIES],
+            allowed_countries: [...allowedCountries],
           },
           shipping_options: shippingOptions,
         }),

@@ -1,11 +1,11 @@
 /**
  * Presigned GET URL for R2 objects (master print TIFFs).
  *
- * Rob's fulfillment page never receives the object key or a direct URL in
+ * Printer's fulfillment page never receives the object key or a direct URL in
  * email - he clicks "Download print file" on the dispatch page, which hits
  * an API route that calls this helper and 302-redirects to the resulting URL.
  *
- * Default TTL: 7 days (per design doc §1a - covers Rob's printing window).
+ * Default TTL: 7 days (per design doc §1a - covers the printer's printing window).
  *
  * Server-only.
  */

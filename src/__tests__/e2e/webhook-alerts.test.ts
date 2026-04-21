@@ -59,7 +59,7 @@ function makeItem(overrides: Partial<OrderItem> = {}): OrderItem {
     sizeId: "8x10",
     sizeLabel: "8 × 10 in",
     paperId: "photo-rag",
-    paperName: "Hahnemühle Photo Rag Baryta",
+    paperName: "Hahnemühle Photo Rag 308 gsm",
     quantity: 1,
     unitPriceCents: 30000,
     editionNumber: 5,

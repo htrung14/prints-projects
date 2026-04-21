@@ -17,11 +17,29 @@ import { getAllPhotos } from "@/lib/photos";
 import { formatUsd, priceCents } from "@/lib/pricing";
 import type { PaperType, Photo } from "@/lib/types";
 
+type Destination = "US" | "CA" | "EU_UK" | "AU_ROW";
+
+const DESTINATION_OPTIONS: ReadonlyArray<{
+  value: Destination;
+  label: string;
+  summary: string;
+}> = [
+  { value: "US", label: "United States — free", summary: "$0 (United States)" },
+  { value: "CA", label: "Canada — $35", summary: "$35 (Canada)" },
+  { value: "EU_UK", label: "United Kingdom & EU — $50", summary: "$50 (United Kingdom & EU)" },
+  {
+    value: "AU_ROW",
+    label: "Australia & rest of world — $65",
+    summary: "$65 (Australia & rest of world)",
+  },
+];
+
 export default function CheckoutPage() {
   const { lines, subtotalCents, itemCount, remove } = useCart();
   const photos = getAllPhotos();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [destination, setDestination] = useState<Destination>("US");
 
   async function proceed() {
     if (pending || lines.length === 0) return;
@@ -31,7 +49,7 @@ export default function CheckoutPage() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lines }),
+        body: JSON.stringify({ lines, destination }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as {
@@ -98,6 +116,25 @@ export default function CheckoutPage() {
           })}
         </ul>
 
+        <fieldset className="space-y-2">
+          <legend className="label-caps mb-2">Ship to</legend>
+          <div className="flex flex-col gap-2">
+            {DESTINATION_OPTIONS.map((opt) => (
+              <label key={opt.value} className="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="destination"
+                  value={opt.value}
+                  checked={destination === opt.value}
+                  onChange={() => setDestination(opt.value)}
+                  disabled={pending}
+                />
+                <span>{opt.label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
         <dl className="space-y-1 text-sm">
           <div className="flex justify-between">
             <dt>Items</dt>
@@ -113,7 +150,9 @@ export default function CheckoutPage() {
           </div>
           <div className="flex justify-between">
             <dt>Shipping</dt>
-            <dd className="text-ink-faint">Free US / $20 international</dd>
+            <dd className="text-ink-strong">
+              {DESTINATION_OPTIONS.find((o) => o.value === destination)?.summary}
+            </dd>
           </div>
         </dl>
 
@@ -134,6 +173,10 @@ export default function CheckoutPage() {
           ) : null}
           <p className="text-[11px] text-ink-faint">
             Payment is processed securely by Stripe. We never see or store card details.
+          </p>
+          <p className="text-[11px] text-ink-faint">
+            Please double-check your shipping address at checkout — prints ship to the address
+            exactly as entered, and reshipping an undeliverable order is at your cost.
           </p>
         </div>
 

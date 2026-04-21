@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { getOrdersByEmail } from "@/lib/supabase/queries/orders";
+import { REF_PATTERN } from "@/lib/orderRef";
+import { getOrderByRefPrefix, getOrdersByEmail } from "@/lib/supabase/queries/orders";
 import type { Order, OrderStatus } from "@/lib/types";
 import TrackForm from "./TrackForm";
 
 type SearchParams = Promise<{
   email?: string | string[];
+  ref?: string | string[];
 }>;
 
 function formatCents(cents: number, currency = "usd"): string {
@@ -35,12 +37,15 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 };
 
 const STATUS_DESCRIPTIONS: Record<OrderStatus, string> = {
-  paid: "We've received your payment. Your order will be queued for printing shortly.",
-  queued_for_print: "Your print is in the queue and will be sent to our printer soon.",
-  sent_to_print: "Your print has been sent to the printer. Production takes up to 7 business days.",
-  printed: "Your print is ready and being prepared for shipment.",
-  shipped: "Your print is on its way!",
-  delivered: "Your print has been delivered.",
+  paid: "Payment received. Your order joins the next print batch (Tuesdays & Fridays).",
+  queued_for_print: "In the queue for the next batch to the print lab in New York.",
+  sent_to_print:
+    "Being printed and inspected at the lab. Total time from order to delivery is 2–3 weeks within the United States, and 3–5 weeks internationally.",
+  printed: "Printed, signed, and numbered. Packing and labeling now.",
+  shipped:
+    "Shipped. Tracking is below — allow a couple of days before the first carrier scan appears.",
+  delivered:
+    "Delivered. If anything arrived damaged, reply to the shipping confirmation within 14 days.",
   refunded: "This order has been refunded.",
   cancelled: "This order has been cancelled.",
 };
@@ -73,12 +78,31 @@ export default async function TrackPage({ searchParams }: { searchParams: Search
   const params = await searchParams;
   const rawEmail = params.email;
   const email = Array.isArray(rawEmail) ? rawEmail[0] : rawEmail;
+  const rawRef = params.ref;
+  const ref = Array.isArray(rawRef) ? rawRef[0] : rawRef;
 
   let orders: Order[] = [];
   let searched = false;
-
   let lookupError = false;
-  if (email) {
+
+  if (ref) {
+    searched = true;
+    const trimmed = ref.trim();
+    // Validate the 8-hex ref at the edge so a bad query string doesn't
+    // reach the query helper. Invalid refs are reported as "not found"
+    // rather than an error to keep the UX consistent with an email miss.
+    if (REF_PATTERN.test(trimmed)) {
+      try {
+        const order = await getOrderByRefPrefix(trimmed);
+        orders = order ? [order] : [];
+      } catch {
+        orders = [];
+        lookupError = true;
+      }
+    } else {
+      orders = [];
+    }
+  } else if (email) {
     searched = true;
     try {
       orders = await getOrdersByEmail(email);
@@ -87,6 +111,9 @@ export default async function TrackPage({ searchParams }: { searchParams: Search
       lookupError = true;
     }
   }
+
+  // Pre-fill the form with whichever identifier the user already submitted.
+  const defaultLookup = ref ?? email ?? "";
 
   return (
     <div className="px-6 py-20 md:px-8">
@@ -97,11 +124,12 @@ export default async function TrackPage({ searchParams }: { searchParams: Search
             Where&rsquo;s my <em>print</em>?
           </h1>
           <p className="max-w-md text-lg leading-relaxed text-ink">
-            Enter the email address you used at checkout to see your order status.
+            Enter the email address you used at checkout, or the 8-character order reference from
+            your confirmation email.
           </p>
         </div>
 
-        <TrackForm defaultEmail={email ?? ""} />
+        <TrackForm defaultValue={defaultLookup} />
 
         {searched && lookupError ? (
           <div className="space-y-4 border-t border-ink-line pt-10">
@@ -116,9 +144,11 @@ export default async function TrackPage({ searchParams }: { searchParams: Search
           </div>
         ) : searched && orders.length === 0 ? (
           <div className="space-y-4 border-t border-ink-line pt-10">
-            <p className="text-lg text-ink">No orders found for that email.</p>
+            <p className="text-lg text-ink">
+              {ref ? "No order found for that reference." : "No orders found for that email."}
+            </p>
             <p className="text-base text-ink-faint">
-              Double-check the address or contact us at{" "}
+              Double-check the {ref ? "reference" : "address"} or contact us at{" "}
               <a href="mailto:info@thaliabassim.com" className="underline">
                 info@thaliabassim.com
               </a>

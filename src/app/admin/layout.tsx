@@ -48,6 +48,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
               <nav className="flex items-baseline gap-5 text-sm">
                 <Link href="/admin/orders">Orders</Link>
                 <Link href="/admin/photos">Photos</Link>
+                <Link href="/admin/alerts">Alerts</Link>
                 <Link href="/admin/audit">Audit</Link>
               </nav>
             ) : null}

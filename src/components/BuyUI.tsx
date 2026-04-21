@@ -148,19 +148,35 @@ export default function BuyUI({ photo }: { photo: Photo }) {
 
       {/* Fixed size + edition meta. Archival context now lives with the paper
           picker (below) so this line is tight. */}
-      <p
-        className="font-mono"
+      <div
         style={{
-          fontSize: 12,
-          color: "var(--i5)",
-          letterSpacing: "0.04em",
           marginBottom: 26,
           paddingBottom: 18,
           borderBottom: "1px solid var(--i1)",
         }}
       >
-        {FIXED_SIZE_LABEL} · Archival pigment · Ed. of {photo.editionTotal}
-      </p>
+        <p
+          className="font-mono"
+          style={{
+            fontSize: 12,
+            color: "var(--i5)",
+            letterSpacing: "0.04em",
+          }}
+        >
+          {FIXED_SIZE_LABEL} · Archival pigment · Ed. of {photo.editionTotal}
+        </p>
+        <p
+          className="font-mono"
+          style={{
+            fontSize: 12,
+            color: "var(--i5)",
+            letterSpacing: "0.04em",
+            marginTop: 4,
+          }}
+        >
+          Hahnemühle Photo Rag 308 gsm · 100+ year archival lightfastness
+        </p>
+      </div>
 
       {/* CTA + micro-meta below. The button keeps the headline price on its
           right edge as a redundancy check right before commit. */}
@@ -190,7 +206,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         >
           Certificate of authenticity included.
           <br />
-          Ships within 7 business days.
+          Delivery 2–3 weeks US · 3–5 weeks international.
         </p>
       </div>
 
@@ -222,9 +238,6 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         </div>
       </section>
 
-      {/* Shipping & returns - kept collapsed. Reference detail; the
-          essential "ships in 14 business days" line already sits under
-          the CTA, so this accordion is for the longer policy copy. */}
       <Disclosure
         label="Shipping & Returns"
         value=""
@@ -233,7 +246,12 @@ export default function BuyUI({ photo }: { photo: Photo }) {
       >
         <div style={{ fontSize: 16, lineHeight: 1.65, color: "var(--ink)", maxWidth: "58ch" }}>
           <p style={{ marginBottom: 12 }}>
-            Ships in a flat waterproof package within 7 business days.
+            A 3% processing fee is added at checkout to cover Stripe card costs. Included in the
+            final total.
+          </p>
+          <p style={{ marginBottom: 12 }}>
+            Ships in a flat waterproof package. Total delivery takes 2–3 weeks within the United
+            States, and 3–5 weeks internationally.
           </p>
           <p>
             Dispatched worldwide via insured courier. If your print arrives damaged, email a photo

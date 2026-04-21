@@ -233,9 +233,11 @@ export function OrderConfirmation({ order, items }: OrderConfirmationProps) {
               marginBottom: 24,
             }}
           >
-            Each print is signed, numbered, and made to order on archival pigment paper. Please
-            allow up to 7 business days before shipment. You will receive tracking once your print
-            ships.
+            Each print is signed, numbered, and made to order on archival pigment paper. Total time
+            from order to delivery is 2–3 weeks within the United States, and 3–5 weeks
+            internationally (production and shipping combined). You will receive tracking once your
+            print ships. A numbered Certificate of Authenticity, hand-signed, ships with every
+            print.
           </Text>
 
           {/* CTA */}

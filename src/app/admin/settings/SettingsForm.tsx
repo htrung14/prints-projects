@@ -11,11 +11,16 @@ type Props = {
 export default function SettingsForm({ initialValue, envFallback }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isTesting, startTestTransition] = useTransition();
   const [value, setValue] = useState(initialValue);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
   const isDirty = value.trim() !== initialValue.trim();
   const effective = value.trim() || envFallback || "(not set — no printer email will be sent)";
+  // The test button sends to the CURRENTLY SAVED address (initialValue),
+  // with env fallback — same resolver as getPrinterEmail() server-side.
+  const savedAddress = initialValue.trim() || envFallback || "";
+  const canSendTest = savedAddress.length > 0;
 
   async function save() {
     setMsg(null);
@@ -32,6 +37,30 @@ export default function SettingsForm({ initialValue, envFallback }: Props) {
       }
       setMsg({ kind: "ok", text: "Saved." });
       router.refresh();
+    });
+  }
+
+  async function sendTest() {
+    setMsg(null);
+    startTestTransition(async () => {
+      const res = await fetch("/api/admin/settings/test-email", { method: "POST" });
+      let body: { ok?: boolean; to?: string; error?: string } = {};
+      try {
+        body = (await res.json()) as typeof body;
+      } catch {
+        // Non-JSON response — fall through to status-based error.
+      }
+      if (!res.ok) {
+        setMsg({
+          kind: "err",
+          text: body.error || `Test email failed: ${res.status}`,
+        });
+        return;
+      }
+      setMsg({
+        kind: "ok",
+        text: `Test email sent to ${body.to ?? savedAddress}.`,
+      });
     });
   }
 
@@ -65,15 +94,28 @@ export default function SettingsForm({ initialValue, envFallback }: Props) {
         )}
       </p>
 
-      <div>
-        <button
-          type="button"
-          disabled={isPending || !isDirty}
-          onClick={save}
-          className="btn-ghost disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isPending ? "Saving…" : "Save"}
-        </button>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={isPending || !isDirty}
+            onClick={save}
+            className="btn-ghost disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isPending ? "Saving…" : "Save"}
+          </button>
+          <button
+            type="button"
+            disabled={isTesting || !canSendTest}
+            onClick={sendTest}
+            className="btn-ghost disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isTesting ? "Sending…" : "Send test email"}
+          </button>
+        </div>
+        <p className="text-xs text-ink-faint">
+          Sends to the saved address; save first if you changed it.
+        </p>
       </div>
 
       {msg && (

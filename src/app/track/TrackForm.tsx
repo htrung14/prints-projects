@@ -2,26 +2,36 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { REF_PATTERN } from "@/lib/orderRef";
 
-export default function TrackForm({ defaultEmail }: { defaultEmail: string }) {
+export default function TrackForm({ defaultValue }: { defaultValue: string }) {
   const router = useRouter();
-  const [email, setEmail] = useState(defaultEmail);
+  const [value, setValue] = useState(defaultValue);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim()) return;
-    router.push(`/track?email=${encodeURIComponent(email.trim())}`);
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    // If the input matches an 8-char hex order reference, submit as ?ref=,
+    // otherwise treat it as an email lookup. The server validates both.
+    if (REF_PATTERN.test(trimmed)) {
+      router.push(`/track?ref=${encodeURIComponent(trimmed.toUpperCase())}`);
+    } else {
+      router.push(`/track?email=${encodeURIComponent(trimmed)}`);
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-3">
       <input
-        type="email"
-        name="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="you@example.com"
+        type="text"
+        name="lookup"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="you@example.com or order ref (e.g. A1B2C3D4)"
+        aria-label="Email or order reference"
         required
+        autoComplete="off"
         className="flex-1 border border-ink-line bg-transparent px-4 py-3.5 text-base text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
       />
       <button

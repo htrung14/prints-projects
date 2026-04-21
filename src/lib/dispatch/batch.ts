@@ -53,6 +53,7 @@ type OrderRow = {
   tracking_number: string | null;
   carrier: string | null;
   notes: string | null;
+  parent_order_id: string | null;
 };
 
 type OrderItemRow = {
@@ -101,6 +102,7 @@ function rowToOrder(row: OrderRow): Order {
     trackingNumber: row.tracking_number,
     carrier: row.carrier,
     notes: row.notes,
+    parentOrderId: row.parent_order_id ?? null,
   };
 }
 
@@ -212,7 +214,16 @@ export async function batchOrdersForPrint(actorEmail: string): Promise<{
   }
 
   // Pull items for every batched order in one round-trip.
-  const { data: itemRowsData } = await db.from("order_items").select("*").in("order_id", orderIds);
+  // Throw on DB error — we already flipped orders to queued_for_print, so the
+  // admin must see this fail loudly rather than silently email the printer a
+  // batch with missing line items.
+  const { data: itemRowsData, error: itemsErr } = await db
+    .from("order_items")
+    .select("*")
+    .in("order_id", orderIds);
+  if (itemsErr) {
+    throw new Error(`Failed to fetch order_items for batch: ${itemsErr.message}`);
+  }
   const itemRows = (itemRowsData ?? []) as OrderItemRow[];
   const itemsByOrder = new Map<string, OrderItem[]>();
   for (const r of itemRows) {
@@ -221,14 +232,39 @@ export async function batchOrdersForPrint(actorEmail: string): Promise<{
     itemsByOrder.set(r.order_id, list);
   }
 
-  const ordersForEmail = rows.map((row) => {
+  const ordersForEmail: Array<{ order: Order; items: OrderItem[]; dispatchUrl: string }> = [];
+  const skippedZeroItemOrderIds: string[] = [];
+  for (const row of rows) {
     const order = rowToOrder(row);
-    return {
+    const orderItems = itemsByOrder.get(order.id) ?? [];
+    // Belt-and-suspenders: the reprint RPC (create_reprint_order) and the
+    // checkout RPC (create_order_with_items) both insert order + items
+    // atomically, so a zero-item paid order should be unreachable. Guard
+    // anyway — one orphan landing in Loupe's inbox is the exact incident
+    // the RPC was added to prevent.
+    if (orderItems.length === 0) {
+      skippedZeroItemOrderIds.push(order.id);
+      continue;
+    }
+    ordersForEmail.push({
       order,
-      items: itemsByOrder.get(order.id) ?? [],
+      items: orderItems,
       dispatchUrl: buildDispatchUrl(order.id, { kind: "single" }),
-    };
-  });
+    });
+  }
+
+  if (skippedZeroItemOrderIds.length > 0) {
+    const msg =
+      `Found ${skippedZeroItemOrderIds.length} order(s) with zero line items in batch dispatch; ` +
+      `skipped from printer email to avoid orphan shipments. order_ids=${skippedZeroItemOrderIds.join(",")}. ` +
+      `These rows are already flipped to queued_for_print — investigate + reconcile manually.`;
+    console.error(`[batch-dispatch] zero-item orders: ${msg}`);
+    Sentry.captureException(new Error(msg), {
+      tags: { pipeline: "batch-dispatch:zero-item-guard" },
+      extra: { orderIds: skippedZeroItemOrderIds },
+    });
+    await alertSystemError("batch-dispatch zero-item guard", msg);
+  }
 
   await runSafely(async () => {
     const { error: auditErr } = await db.from("audit_log").insert(
@@ -257,10 +293,18 @@ export async function batchOrdersForPrint(actorEmail: string): Promise<{
   let printerEmailSent = false;
   let printerEmailError: string | undefined;
   try {
-    const result = await sendPrinterBatchEmail(ordersForEmail);
-    printerEmailResolved = result.resolved;
-    printerEmailSent = result.sent;
-    printerEmailError = result.error;
+    if (ordersForEmail.length === 0) {
+      // Every batched row was filtered out by the zero-item guard. We've
+      // already alerted above; don't send an empty-body email to Loupe.
+      printerEmailResolved = true;
+      printerEmailSent = false;
+      printerEmailError = "All batched orders had zero items — skipped printer email.";
+    } else {
+      const result = await sendPrinterBatchEmail(ordersForEmail);
+      printerEmailResolved = result.resolved;
+      printerEmailSent = result.sent;
+      printerEmailError = result.error;
+    }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error(`[batch-dispatch] printer batch email: ${msg}`);

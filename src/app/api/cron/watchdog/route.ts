@@ -65,7 +65,7 @@ export async function GET(req: NextRequest): Promise<Response> {
       autoHandled: "Nothing — this alert is the only action taken.",
       actionRequired: true,
       actionInstructions:
-        "Check with the printer (Brooklyn Archival) on batch status. If printed, update order status to 'printed'. If delayed, communicate ETA to affected customers.",
+        "Check with Michael at Loupe on batch status. If printed, update order status to 'printed'. If delayed, communicate ETA to affected customers.",
       timestamp: new Date().toISOString(),
       metadata: { staleCount: stale.length, orderIds: stale.map((o) => o.id) },
     });

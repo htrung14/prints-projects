@@ -12,8 +12,11 @@
 
 import "server-only";
 import { randomBytes } from "node:crypto";
+import { REF_PATTERN } from "@/lib/orderRef";
 import type { Address, Order, OrderItem, OrderStatus } from "@/lib/types";
 import { serverClient } from "@/lib/supabase/server";
+import { audit } from "@/lib/supabase/queries/audit";
+import { alertSystemError } from "@/lib/alerting/dispatcher";
 
 // ---------------------------------------------------------------------------
 // DB row shapes
@@ -38,6 +41,7 @@ type OrderRow = {
   tracking_number: string | null;
   carrier: string | null;
   notes: string | null;
+  parent_order_id: string | null;
 };
 
 type OrderItemRow = {
@@ -59,7 +63,7 @@ type OrderItemRow = {
 };
 
 const ORDER_COLUMNS =
-  "id, created_at, stripe_checkout_session_id, stripe_payment_intent_id, customer_email, customer_name, shipping_address, subtotal_cents, tax_cents, shipping_cents, total_cents, currency, status, fulfillment_token, fulfillment_token_revoked_at, print_job_email_sent_at, tracking_number, carrier, notes";
+  "id, created_at, stripe_checkout_session_id, stripe_payment_intent_id, customer_email, customer_name, shipping_address, subtotal_cents, tax_cents, shipping_cents, total_cents, currency, status, fulfillment_token, fulfillment_token_revoked_at, print_job_email_sent_at, tracking_number, carrier, notes, parent_order_id";
 
 // ---------------------------------------------------------------------------
 // Parsing / mapping
@@ -136,6 +140,7 @@ function rowToOrder(row: OrderRow): Order {
     trackingNumber: row.tracking_number,
     carrier: row.carrier,
     notes: row.notes,
+    parentOrderId: row.parent_order_id ?? null,
   };
 }
 
@@ -283,6 +288,127 @@ export async function insertOrderWithItems(
 }
 
 // ---------------------------------------------------------------------------
+// insertRefundedStub
+//
+// When an edition sells out mid-transaction (EDITION_EXCEEDED after Stripe has
+// already captured payment), the webhook auto-refunds the customer but there
+// is no edition to assign — so `insertOrderWithItems` cannot persist the row.
+// Without a DB row, the event is invisible to /admin/orders and Thalia can
+// only reconcile by cross-referencing Stripe dashboard + Notion audit.
+//
+// This helper writes a stub `orders` row (status='refunded', no items) so the
+// event is visible alongside regular orders. The existing unique constraint
+// on `stripe_checkout_session_id` guarantees idempotency across webhook
+// retries — we catch the duplicate-key error and treat it as a no-op.
+//
+// Returns the inserted order's id so callers can attach an audit_log entry.
+// ---------------------------------------------------------------------------
+
+export type InsertRefundedStubArgs = {
+  stripeSessionId: string;
+  stripePaymentIntentId: string | null;
+  customerEmail: string;
+  customerName: string;
+  shippingAddress: Address;
+  subtotalCents: number;
+  taxCents: number;
+  shippingCents: number;
+  totalCents: number;
+  currency: string;
+  notes: string;
+};
+
+export type InsertRefundedStubResult =
+  | { order: Order; idempotent: false }
+  | { order: Order; idempotent: true };
+
+export async function insertRefundedStub(
+  args: InsertRefundedStubArgs
+): Promise<InsertRefundedStubResult> {
+  const db = serverClient();
+
+  // Idempotency: if a stub (or real) row already exists for this session,
+  // return it without re-inserting. The unique constraint on
+  // stripe_checkout_session_id would also catch this on insert, but checking
+  // first avoids a noisy error in Supabase logs on every webhook retry.
+  const { data: existing, error: selErr } = await db
+    .from("orders")
+    .select(ORDER_COLUMNS)
+    .eq("stripe_checkout_session_id", args.stripeSessionId)
+    .maybeSingle();
+  if (selErr) {
+    throw new Error(`insertRefundedStub: pre-check failed: ${selErr.message}`);
+  }
+  if (existing) {
+    // Guard against shadowing a real paid order. If the webhook already
+    // persisted a paid order for this session and a retry lands in the
+    // EDITION_EXCEEDED path (or vice versa), returning the existing row
+    // silently would hide a real customer order behind the "refunded"
+    // idempotent label. Only treat as idempotent when the prior row is
+    // itself a refunded stub; anything else is a consistency error and
+    // must surface via admin alert.
+    const existingRow = existing as OrderRow;
+    if (existingRow.status === "refunded") {
+      return { order: rowToOrder(existingRow), idempotent: true };
+    }
+    throw new Error(
+      `insertRefundedStub: existing order for session ${args.stripeSessionId} is status=${existingRow.status}, not refunded. refusing to shadow a real order.`
+    );
+  }
+
+  const row = {
+    stripe_checkout_session_id: args.stripeSessionId,
+    stripe_payment_intent_id: args.stripePaymentIntentId,
+    customer_email: args.customerEmail,
+    customer_name: args.customerName,
+    shipping_address: args.shippingAddress,
+    subtotal_cents: args.subtotalCents,
+    tax_cents: args.taxCents,
+    shipping_cents: args.shippingCents,
+    total_cents: args.totalCents,
+    currency: args.currency,
+    status: "refunded",
+    fulfillment_token: generateFulfillmentToken(),
+    fulfillment_token_revoked_at: new Date().toISOString(),
+    notes: args.notes,
+  };
+
+  const { data, error } = await db.from("orders").insert(row).select(ORDER_COLUMNS).single();
+  if (error) {
+    // Race with a concurrent webhook retry → unique constraint fires. Treat
+    // as idempotent: re-read the winning row and return it.
+    if (/duplicate key|unique constraint|already exists/i.test(error.message)) {
+      const { data: raced, error: raceErr } = await db
+        .from("orders")
+        .select(ORDER_COLUMNS)
+        .eq("stripe_checkout_session_id", args.stripeSessionId)
+        .maybeSingle();
+      if (raceErr) {
+        throw new Error(
+          `insertRefundedStub: duplicate key, then re-read failed: ${raceErr.message}`
+        );
+      }
+      if (raced) {
+        const racedRow = raced as OrderRow;
+        if (racedRow.status !== "refunded") {
+          throw new Error(
+            `insertRefundedStub: existing order for session ${args.stripeSessionId} is status=${racedRow.status}, not refunded. refusing to shadow a real order.`
+          );
+        }
+        return { order: rowToOrder(racedRow), idempotent: true };
+      }
+      // Extremely unlikely: duplicate key but no row visible. Fall through.
+    }
+    throw new Error(`insertRefundedStub failed: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error("insertRefundedStub: insert returned no row");
+  }
+
+  return { order: rowToOrder(data as OrderRow), idempotent: false };
+}
+
+// ---------------------------------------------------------------------------
 // Reads
 // ---------------------------------------------------------------------------
 
@@ -295,6 +421,64 @@ export async function getOrderById(id: string): Promise<Order | null> {
   }
   if (!data) return null;
   return rowToOrder(data as OrderRow);
+}
+
+/**
+ * Look up an order by the 8-character reference shown to customers
+ * (first 8 chars of the UUID, displayed uppercase) on /thank-you and
+ * the confirmation email.
+ *
+ * Implementation: the 8-char ref is the first UUID segment, so we build
+ * a UUID range [prefix-0000-…, next-0000-…) and compare directly on the
+ * UUID column. This avoids PostgREST casting quirks around LIKE on uuid.
+ * Validates the input as 8 hex chars up front to prevent unbounded
+ * queries from a bad prefix.
+ *
+ * Throws on DB error (mirrors `getOrderById`). Returns null if no match, and
+ * also returns null if two orders share the same 8-hex prefix — showing the
+ * most recent to a stranger would leak another customer's order.
+ */
+export async function getOrderByRefPrefix(prefix: string): Promise<Order | null> {
+  if (!REF_PATTERN.test(prefix)) {
+    // Invalid shape — treat as "no match" without hitting the DB. Callers
+    // should validate at the edge, but this belt-and-braces guard keeps an
+    // accidental bad prefix from leaking a wildcard query.
+    return null;
+  }
+  const lowered = prefix.toLowerCase();
+  const lowerBound = `${lowered}-0000-0000-0000-000000000000`;
+  // Increment the 32-bit prefix to get the exclusive upper bound. If the
+  // prefix is ffffffff there is no larger UUID, so we skip the upper bound
+  // (the lower bound alone still narrows to <= one possible first-segment).
+  const prefixInt = parseInt(lowered, 16);
+  const hasUpper = prefixInt < 0xffffffff;
+  const upperBound = hasUpper
+    ? `${(prefixInt + 1).toString(16).padStart(8, "0")}-0000-0000-0000-000000000000`
+    : null;
+
+  const db = serverClient();
+  // limit(2): if two orders share the same 8-hex prefix (~1 in 4B per pair),
+  // the ref is ambiguous and we refuse to guess — returning the most recent
+  // would expose a stranger's order to the wrong customer.
+  let query = db
+    .from("orders")
+    .select(ORDER_COLUMNS)
+    .gte("id", lowerBound)
+    .order("created_at", { ascending: false })
+    .limit(2);
+  if (upperBound) {
+    query = query.lt("id", upperBound);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(`getOrderByRefPrefix failed: ${error.message}`);
+  }
+  const rows = (data ?? []) as OrderRow[];
+  if (rows.length === 0) return null;
+  if (rows.length > 1) return null; // ambiguous prefix — privacy-safe fallback
+  return rowToOrder(rows[0]);
 }
 
 export async function getOrderBySessionId(sessionId: string): Promise<Order | null> {
@@ -399,4 +583,186 @@ export async function listOrders(filter: ListOrdersFilter = {}): Promise<Order[]
   }
   const rows = (data ?? []) as OrderRow[];
   return rows.map(rowToOrder);
+}
+
+// ---------------------------------------------------------------------------
+// Reprint / reship
+//
+// A reprint is modelled as a *new* orders row with status='paid' and
+// parent_order_id pointing at the original. This lets it flow through the
+// normal batch-dispatch pipeline (Thalia clicks "Send batch" Tue/Fri) without
+// any special-case code in the printer queue.
+//
+// Invariants:
+//   * stripe_payment_intent_id is NULL — no Stripe involvement, Loupe absorbs
+//     the cost for damage claims
+//   * totals are all 0 — free reprint, so admin reports don't double-count
+//   * edition_number is copied from the parent items — this is a reprint of
+//     the *same* print, not a new edition slot (edition_sold must NOT bump)
+//   * a fresh fulfillment_token is generated — parent's dispatch link stays
+//     intact, child gets its own printer link when the batch sends
+// ---------------------------------------------------------------------------
+
+export async function getChildOrders(parentId: string): Promise<Order[]> {
+  const db = serverClient();
+  const { data, error } = await db
+    .from("orders")
+    .select(ORDER_COLUMNS)
+    .eq("parent_order_id", parentId)
+    .order("created_at", { ascending: false });
+  if (error) {
+    throw new Error(`getChildOrders(${parentId}) failed: ${error.message}`);
+  }
+  const rows = (data ?? []) as OrderRow[];
+  return rows.map(rowToOrder);
+}
+
+type ReprintItemRow = {
+  photo_id: string;
+  photo_slug: string;
+  photo_title: string;
+  size_id: string;
+  size_label: string;
+  paper_id: string;
+  paper_name: string;
+  quantity: number;
+  unit_price_cents: number;
+  edition_number: number;
+  edition_total: number;
+};
+
+export async function createReprintOrder(
+  parentOrderId: string,
+  actor: string,
+  reason: string
+): Promise<Order> {
+  const db = serverClient();
+
+  // --- 1. Load parent + items ----------------------------------------------
+  // We still load the parent/items client-side to (a) derive a stable
+  // session_id suffix for the child and (b) build the items_jsonb payload
+  // for the RPC. The RPC re-reads the parent FOR SHARE for atomicity; this
+  // client-side read is for payload construction, not for consistency.
+  const { data: parentRow, error: parentErr } = await db
+    .from("orders")
+    .select(ORDER_COLUMNS)
+    .eq("id", parentOrderId)
+    .maybeSingle();
+  if (parentErr) {
+    throw new Error(`createReprintOrder: parent lookup failed: ${parentErr.message}`);
+  }
+  if (!parentRow) {
+    throw new Error(`createReprintOrder: parent order ${parentOrderId} not found`);
+  }
+  const parent = rowToOrder(parentRow as OrderRow);
+
+  const { data: itemRows, error: itemsErr } = await db
+    .from("order_items")
+    .select(
+      "photo_id, photo_slug, photo_title, size_id, size_label, paper_id, paper_name, quantity, unit_price_cents, edition_number, edition_total, print_file_url_snapshot"
+    )
+    .eq("order_id", parentOrderId);
+  if (itemsErr) {
+    throw new Error(`createReprintOrder: items lookup failed: ${itemsErr.message}`);
+  }
+  const items = (itemRows ?? []) as (ReprintItemRow & {
+    print_file_url_snapshot: string | null;
+  })[];
+  if (items.length === 0) {
+    throw new Error(
+      `createReprintOrder: parent order ${parentOrderId} has no items — cannot reprint a refunded stub`
+    );
+  }
+
+  // --- 2. Build RPC payload -----------------------------------------------
+  // The stripe_checkout_session_id column is UNIQUE; we suffix the parent's
+  // session id with a timestamp so reprints collide neither with the parent
+  // nor with each other. No Stripe side-effect — this value is internal only.
+  const nowIso = new Date().toISOString();
+  const timestampTag = Date.now().toString(36);
+  const childSessionId = `${parent.stripeCheckoutSessionId}-reprint-${timestampTag}`;
+  const reasonTrimmed = reason.trim();
+  const childNotes = `reprint: ${reasonTrimmed}. parent order: ${parentOrderId.slice(0, 8)}`;
+  const fulfillmentToken = generateFulfillmentToken();
+
+  // Edition numbers reuse the parent's values — this is a reprint of the
+  // same piece, not a new edition slot. The RPC does NOT touch
+  // photos.edition_sold and does NOT call create_order_with_items.
+  const itemsPayload = items.map((it) => ({
+    photo_id: it.photo_id,
+    photo_slug: it.photo_slug,
+    photo_title: it.photo_title,
+    size_id: it.size_id,
+    size_label: it.size_label,
+    paper_id: it.paper_id,
+    paper_name: it.paper_name,
+    quantity: it.quantity,
+    unit_price_cents: it.unit_price_cents,
+    edition_number: it.edition_number,
+    edition_total: it.edition_total,
+    print_file_url_snapshot: it.print_file_url_snapshot,
+  }));
+
+  // --- 3. Atomic RPC: insert child order + clone items in one transaction --
+  // Prior implementation did the two inserts sequentially with a best-effort
+  // rollback; a mid-flight failure could leave a childless paid order that
+  // would be swept into the next printer batch with zero line items. The
+  // RPC runs both inserts in a single transaction — either both land or
+  // neither does.
+  const { data: rpcData, error: rpcErr } = await db.rpc("create_reprint_order", {
+    p_parent_order_id: parentOrderId,
+    p_items: itemsPayload,
+    p_session_id: childSessionId,
+    p_fulfillment_token: fulfillmentToken,
+    p_notes: childNotes,
+  });
+  if (rpcErr) {
+    throw new Error(`createReprintOrder: create_reprint_order RPC failed: ${rpcErr.message}`);
+  }
+  if (typeof rpcData !== "string" || rpcData.length === 0) {
+    throw new Error("createReprintOrder: create_reprint_order RPC returned empty id");
+  }
+  const childId = rpcData;
+
+  // Re-fetch the row for the return shape (avoids relying on sparse RPC
+  // output shape if we ever add columns).
+  const { data: childRow, error: childErr } = await db
+    .from("orders")
+    .select(ORDER_COLUMNS)
+    .eq("id", childId)
+    .maybeSingle();
+  if (childErr) {
+    throw new Error(`createReprintOrder: child re-read failed: ${childErr.message}`);
+  }
+  if (!childRow) {
+    throw new Error(`createReprintOrder: child order ${childId} not visible after RPC`);
+  }
+  const child = rowToOrder(childRow as OrderRow);
+
+  // --- 4. Audit both orders ------------------------------------------------
+  // Outside the RPC because `audit()` is a separate write that swallows its
+  // own errors (Sentry + stderr). If either fails, we alert but don't
+  // rethrow — the RPC already persisted the reprint and the caller expects
+  // success. `audit()` itself is non-throwing, so in practice this try/catch
+  // only fires on unexpected runtime errors; keep it to satisfy the
+  // no-silent-failures rule (every catch routes through alertSystemError).
+  try {
+    await audit({
+      orderId: parentOrderId,
+      actor,
+      action: "reprint_created",
+      meta: { childOrderId: child.id, reason: reasonTrimmed, createdAt: nowIso },
+    });
+    await audit({
+      orderId: child.id,
+      actor,
+      action: "reprint_of",
+      meta: { parentOrderId, reason: reasonTrimmed, createdAt: nowIso },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    await alertSystemError("createReprintOrder audit", msg);
+  }
+
+  return child;
 }

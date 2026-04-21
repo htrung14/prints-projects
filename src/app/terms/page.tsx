@@ -30,9 +30,10 @@ export default function TermsPage() {
 
         <Section id="shipping" n={1} heading="Shipping &amp; Delivery">
           <p>
-            <strong>Production lead time.</strong> Prints are made to order. Expected turnaround
-            from order to dispatch: 7 business days. An order confirmation email is sent at
-            purchase; a second email is sent when the order dispatches.
+            <strong>Production lead time.</strong> Prints are made to order. Expected total delivery
+            time: 2–3 weeks within the United States, 3–5 weeks internationally. An order
+            confirmation email is sent at purchase; a second email is sent when the order
+            dispatches.
           </p>
           <p>
             <strong>Domestic shipping (United States).</strong> Flat rate per size class, shipped by
@@ -45,21 +46,25 @@ export default function TermsPage() {
             the destination country on delivery; these fees are not collected at checkout.
           </p>
           <p>
-            <strong>Shipping rates.</strong> Domestic (US) shipping is charged at a flat rate of
-            $20. International shipping is charged at a flat rate of $45. There is no free shipping
-            threshold.
+            <strong>Shipping rates.</strong> Shipping within the United States is free.
+            International shipping is charged at a flat rate by region: $35 to Canada, $50 to the
+            United Kingdom and EU, and $65 to Australia and the rest of world.
+          </p>
+          <p>
+            <strong>Authentication.</strong> Every print ships with a numbered Certificate of
+            Authenticity, signed by the artist.
           </p>
           <p>
             <strong>Reporting a shipping issue.</strong> If your order arrives damaged or does not
-            arrive within a reasonable window, contact info@thaliabassim.com within seven business
-            days of the expected delivery date.
+            arrive within a reasonable window, contact info@thaliabassim.com within fourteen days of
+            the expected delivery date.
           </p>
         </Section>
 
         <Section id="returns" n={2} heading="Refunds &amp; Returns">
           <p>
             Each print is made to order and all sales are final. If your print arrives damaged,
-            contact us within 7 days with a clear photo showing the damage alongside the sealed,
+            contact us within 14 days with a clear photo showing the damage alongside the sealed,
             unopened shipping packaging. We verify all claims against our shipping records before
             issuing replacements at no cost.
           </p>

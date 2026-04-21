@@ -6,6 +6,7 @@ import { createTriagedDispatcher } from "./triage";
 import { systemErrorAlert } from "./alerts";
 import type { Alert } from "./types";
 import { getResend } from "@/lib/email/client";
+import { audit } from "@/lib/supabase/queries/audit";
 
 const ALERT_FROM = "alerts@thaliabassim.com";
 
@@ -81,6 +82,37 @@ export async function alertSafely(context: string, alert: Alert): Promise<void> 
       });
     } catch {
       // If Sentry itself throws, we're out of belt-and-braces signals.
+    }
+  }
+
+  // Audit-log every alertSafely invocation (success OR dispatcher-throw) so
+  // /admin/alerts surfaces dispatcher-handled incidents. Without this row,
+  // Thalia only sees the 3 hardcoded audit actions and every alertSystemError
+  // call is invisible in admin. Belt-and-suspenders try/catch: audit() is
+  // already non-throwing, but if it somehow blows up we still must not
+  // break the alertSafely contract (fire-and-forget, never throws).
+  try {
+    await audit({
+      orderId: null,
+      actor: "system",
+      action: "alert_system_error",
+      meta: {
+        context,
+        title: alert.title,
+        severity: alert.severity,
+        summary: alert.whatHappened?.slice(0, 500),
+      },
+    });
+  } catch (auditErr) {
+    // Never throw from alertSafely. Sentry-capture so we know the /admin/alerts
+    // feed has gone deaf (no console.error alone per no-silent-failures rule).
+    try {
+      Sentry.captureException(auditErr, {
+        tags: { pipeline: "alerting-audit-write", context },
+        extra: { alertTitle: alert.title, alertSeverity: alert.severity },
+      });
+    } catch {
+      // Last-resort: Sentry itself is down. We've already tried every signal.
     }
   }
 }

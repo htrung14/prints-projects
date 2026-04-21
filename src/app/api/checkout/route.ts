@@ -16,10 +16,9 @@
 
 import { after, type NextRequest } from "next/server";
 import type { CartLine } from "@/lib/types";
-import { createCheckoutSession } from "@/lib/stripe/checkout";
+import { createCheckoutSession, type ShippingDestination } from "@/lib/stripe/checkout";
 import { softInventoryCheck } from "@/lib/stripe/inventory-check";
-import { getDispatcher } from "@/lib/alerting/dispatcher";
-import { systemErrorAlert } from "@/lib/alerting";
+import { alertSystemError } from "@/lib/alerting/dispatcher";
 
 // Force the Node runtime - the Stripe SDK and Supabase service-role client
 // rely on Node-only APIs (crypto, Buffer). Edge would silently fail at runtime.
@@ -32,7 +31,7 @@ export const dynamic = "force-dynamic";
 // Body validation
 // ---------------------------------------------------------------------------
 
-type CheckoutRequestBody = { lines: CartLine[] };
+type CheckoutRequestBody = { lines: CartLine[]; destination: ShippingDestination };
 
 function parseBody(body: unknown): CheckoutRequestBody {
   if (typeof body !== "object" || body === null) {
@@ -43,7 +42,16 @@ function parseBody(body: unknown): CheckoutRequestBody {
   if (!Array.isArray(lines) || lines.length === 0) {
     throw new BadRequest("body.lines must be a non-empty array");
   }
-  return { lines: lines as CartLine[] };
+  const destination = rec.destination;
+  if (
+    destination !== "US" &&
+    destination !== "CA" &&
+    destination !== "EU_UK" &&
+    destination !== "AU_ROW"
+  ) {
+    throw new BadRequest('body.destination must be "US", "CA", "EU_UK", or "AU_ROW"');
+  }
+  return { lines: lines as CartLine[], destination };
 }
 
 class BadRequest extends Error {
@@ -85,7 +93,10 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   try {
-    const session = await createCheckoutSession({ lines: parsed.lines });
+    const session = await createCheckoutSession({
+      lines: parsed.lines,
+      destination: parsed.destination,
+    });
     if (!session.url) {
       // `url` is null only for embedded/custom UI modes; we always use hosted.
       throw new Error("Stripe did not return a Checkout URL");
@@ -106,12 +117,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       return Response.json({ error: msg }, { status: 400 });
     }
 
-    console.error("POST /api/checkout failed:", err);
-    after(() => {
-      getDispatcher()
-        .send(systemErrorAlert("POST /api/checkout", msg))
-        .catch(() => {});
-    });
+    after(() => alertSystemError("POST /api/checkout", msg));
     return Response.json(
       { error: "Checkout session creation failed. Please retry." },
       { status: 500 }

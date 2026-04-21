@@ -235,8 +235,8 @@ export async function POST(request: NextRequest, ctx: { params: Promise<{ orderI
     orderId,
     actor: email,
     action: "email_resent",
-    meta: { kind },
+    meta: { kind, to: order.customerEmail },
   });
 
-  return NextResponse.json({ ok: true, kind, orderId });
+  return NextResponse.json({ ok: true, kind, orderId, to: order.customerEmail });
 }

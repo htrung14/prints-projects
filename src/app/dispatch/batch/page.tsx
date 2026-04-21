@@ -1,5 +1,5 @@
 /**
- * Weekly batch dispatch page. Rob can submit tracking for every pending
+ * Weekly batch dispatch page. The printer can submit tracking for every pending
  * order in one sitting.
  *
  * Token kind must be `batch`. The orderId encoded in the token is not

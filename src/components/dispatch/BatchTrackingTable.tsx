@@ -3,7 +3,7 @@
 /**
  * Client-interactive table for the batch dispatch page.
  *
- * Lets Rob fill per-row tracking, optionally apply a single carrier/tracking
+ * Lets the printer fill per-row tracking, optionally apply a single carrier/tracking
  * across all empty rows, and submit every row in one round-trip to
  * /api/dispatch/batch.
  */

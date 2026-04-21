@@ -1,5 +1,5 @@
 /**
- * Print-job email - to Rob at Brooklyn Archival.
+ * Print-job email — to the printer at Loupe Digital.
  *
  * Per docs/system-design.md §8:
  * - No attachments, no direct file URLs.

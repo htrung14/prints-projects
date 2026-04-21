@@ -3,3 +3,9 @@ rooms:
 - name: workflow
   description: User preferences and workflow rules
   keywords: [workflow, preference, rule, frontend, design, responsive, sweep, desktop, mobile]
+- name: at-tamassok-sessions
+  description: At-Tamassok (thaliabassim.com) session journals — what shipped, decisions made, lessons learned
+  keywords: [at-tamassok, thalia, thaliabassim, print shop, editions, shipping, stripe, supabase, loupe, admin, reprint, dispatch, webhook, alerts, post-launch, pre-launch, consensus, lessons]
+- name: at-tamassok-lessons
+  description: Durable lessons from At-Tamassok work — patterns to repeat, patterns to avoid
+  keywords: [lessons, premature closure, plan then verify, motion vs progress, silent failures, no silent failures, atomic writes, transactions, code review, consensus, senior dev feedback]

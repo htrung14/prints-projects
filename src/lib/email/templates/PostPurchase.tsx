@@ -54,7 +54,8 @@ function contentForTouch(
       return {
         preview: `A short note on your order ${ref}.`,
         subject: `A short note on your order ${ref}`,
-        body: "A quick note while your print is being made. Each one is produced by hand on archival pigment paper. Please allow up to 7 business days before dispatch. We'll write again when tracking is attached.",
+        body: "Your order is now in the queue for our next print run. Each piece is printed to order by a small lab in New York, then signed and numbered by hand before it ships. Total time from order to delivery is 2–3 weeks within the United States, and 3–5 weeks internationally. We'll write again the moment your print leaves the lab.",
+        cta: { label: "Read the essay", href: `${base}/essay` },
       };
     case 2:
       return {

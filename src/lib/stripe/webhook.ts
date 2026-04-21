@@ -19,8 +19,8 @@ import "server-only";
 import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 import type { Address, CartLine, Order, OrderItem } from "@/lib/types";
-import { resolveCartLines } from "./checkout";
-import { insertOrderWithItems } from "@/lib/supabase/queries/orders";
+import { resolveCartLines, expectedShippingCentsFor } from "./checkout";
+import { insertOrderWithItems, insertRefundedStub } from "@/lib/supabase/queries/orders";
 import { audit } from "@/lib/supabase/queries/audit";
 import {
   sendOrderConfirmation,
@@ -148,7 +148,7 @@ function extractPaymentIntentId(session: Stripe.Checkout.Session): string | null
 // ---------------------------------------------------------------------------
 
 /**
- * Persist the order, notify Rob + the customer, schedule the post-purchase
+ * Persist the order, notify the printer + the customer, schedule the post-purchase
  * drip sequence, and audit-log. Idempotent on
  * `stripe_checkout_session_id`.
  *
@@ -191,6 +191,34 @@ export async function handleCheckoutSessionCompleted(
   const shippingCents = session.total_details?.amount_shipping ?? 0;
   const totalCents = session.amount_total ?? subtotalCents + taxCents + shippingCents;
   const currency = session.currency ?? "usd";
+
+  // Guard: we narrow `allowed_countries` to the selected tier at session
+  // creation time, but Stripe still lets the buyer edit the shipping country
+  // on the hosted page in some edge cases. Re-derive the expected rate from
+  // the *actual* shipping country and alert if the buyer under-paid
+  // (e.g. picked "United States — free" then shipped to Canada, or picked
+  // "EU — $50" then shipped to Australia). Advisory only — the order still
+  // persists; ops holds the shipment and collects the difference.
+  const expected = expectedShippingCentsFor(address.country);
+  if (shippingCents < expected) {
+    const shortfall = expected - shippingCents;
+    const msg =
+      `Order ${session.id}: shipping country ${address.country} expects ${expected}¢ ` +
+      `(US=0, CA=3500, EU/UK=5000, AU/ROW=6500) but buyer paid only ${shippingCents}¢. ` +
+      `Likely picked a cheaper tier at checkout. Hold shipment and collect the ` +
+      `$${(shortfall / 100).toFixed(2)} shortfall before dispatch.`;
+    Sentry.captureMessage("shipping/country mismatch at checkout", {
+      level: "warning",
+      tags: { pipeline: "stripe-webhook:shipping-mismatch" },
+      extra: {
+        sessionId: session.id,
+        country: address.country,
+        shippingCents,
+        expectedCents: expected,
+      },
+    });
+    await alertSystemError("shipping/country mismatch", msg);
+  }
 
   // ---- 3. Insert order + items (atomic edition assignment) ----
   let inserted: { order: Order; items: OrderItem[] };
@@ -258,7 +286,7 @@ export async function handleCheckoutSessionCompleted(
     dispatchUrl = buildDispatchUrl(order.id, { kind: "single" });
   } catch (err) {
     // buildDispatchUrl may throw if DISPATCH_SIGNING_SECRET is unset. Don't
-    // block the webhook on it - Rob can reissue from admin later.
+    // block the webhook on it - Printer can reissue from admin later.
     const msg = err instanceof Error ? err.message : String(err);
     console.error(`webhook(${order.id}): buildDispatchUrl failed: ${msg}`);
     Sentry.captureException(err, { tags: { pipeline: "stripe-webhook:buildDispatchUrl" } });
@@ -568,6 +596,70 @@ export async function handleEditionExceeded(
     }
   }
 
+  // Persist a stub order so /admin/orders surfaces this event. Without a row
+  // Thalia has to cross-reference Stripe dashboard + Notion audit to find it.
+  // Wrapped so a DB failure does NOT break the refund flow — but it DOES
+  // alert (no silent failures). Derive the address defensively: Stripe may
+  // not have collected one on an async-payment flow, but on EDITION_EXCEEDED
+  // the shipping address is always present (checkout requires it).
+  let stubOrderId: string | null = null;
+  try {
+    const address = extractShippingAddress(session);
+    const customerEmail =
+      session.customer_details?.email ?? session.customer_email ?? "unknown@example.invalid";
+    const customerName =
+      session.customer_details?.name ?? session.customer_details?.individual_name ?? address.name;
+    // Stripe's `amount_subtotal` is already pre-tax + pre-shipping, so we
+    // use it directly. Max(0, …) guards against any future Stripe quirk.
+    const subtotalCents = Math.max(0, session.amount_subtotal ?? 0);
+    const notes = `auto-refunded: edition exceeded at fulfill (refund: ${
+      refundSucceeded ? "ok" : "failed - manual action required"
+    })`;
+    const { order: stub } = await insertRefundedStub({
+      stripeSessionId: session.id,
+      stripePaymentIntentId: piId,
+      customerEmail,
+      customerName,
+      shippingAddress: address,
+      subtotalCents,
+      taxCents: session.total_details?.amount_tax ?? 0,
+      shippingCents: session.total_details?.amount_shipping ?? 0,
+      totalCents: session.amount_total ?? 0,
+      currency: session.currency ?? "usd",
+      notes,
+    });
+    stubOrderId = stub.id;
+
+    // Audit the stub so the order detail page shows the event in its log.
+    // audit() swallows errors internally (non-throwing) per its contract.
+    await audit({
+      orderId: stub.id,
+      actor: "system",
+      action: "order_refunded_edition_exceeded",
+      meta: {
+        sessionId: session.id,
+        paymentIntentId: piId,
+        refundSucceeded,
+        errorMessage,
+      },
+    });
+  } catch (stubErr) {
+    const msg = stubErr instanceof Error ? stubErr.message : String(stubErr);
+    console.error(`webhook: refunded-stub insert failed for session ${session.id}: ${msg}`);
+    Sentry.captureException(stubErr, {
+      tags: { pipeline: "stripe-webhook:refunded-stub" },
+      extra: { sessionId: session.id, paymentIntentId: piId, refundSucceeded },
+    });
+    // Alert but DON'T rethrow — the refund already succeeded (or already
+    // alerted on its own failure). Losing admin visibility is bad, but
+    // re-throwing here would trigger Stripe to retry and potentially refund
+    // twice via the outer handler.
+    await alertSystemError(
+      `refunded-stub insert (session ${session.id})`,
+      `Edition-exceeded stub order could NOT be persisted to the DB (${msg}). Refund ${refundSucceeded ? "was" : "was NOT"} issued to PI ${piId}. This order will NOT appear in /admin/orders — reconcile manually via Stripe dashboard.`
+    );
+  }
+
   // alertSafely handles console.error + Sentry.captureException on dispatcher
   // failure so we don't silently lose this alert even if Telegram + email
   // channels are both down.
@@ -590,6 +682,7 @@ export async function handleEditionExceeded(
       email,
       error: errorMessage,
       refundSucceeded,
+      stubOrderId,
     },
   });
 }

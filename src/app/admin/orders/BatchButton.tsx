@@ -210,7 +210,7 @@ export function BatchButton({ paidOrdersCount, previewOrders, printerEmail }: Ba
             disabled={step === "loading"}
             style={{
               fontFamily: "Favorit, sans-serif",
-              backgroundColor: "#0072BB",
+              backgroundColor: "var(--btn-accent)",
               color: "white",
               border: "none",
               borderRadius: 4,
@@ -250,7 +250,7 @@ export function BatchButton({ paidOrdersCount, previewOrders, printerEmail }: Ba
       disabled={disabled}
       style={{
         fontFamily: "Favorit, sans-serif",
-        backgroundColor: "#0072BB",
+        backgroundColor: "var(--btn-accent)",
         color: "white",
         border: "none",
         borderRadius: 4,

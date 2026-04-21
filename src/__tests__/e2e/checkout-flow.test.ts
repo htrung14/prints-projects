@@ -23,8 +23,41 @@ vi.mock("@/lib/supabase/queries/photos", () => ({
 }));
 
 const mockInsertOrderWithItems = vi.fn();
+const mockInsertRefundedStub = vi.fn().mockResolvedValue({
+  order: {
+    id: "stub-order-001",
+    createdAt: "2026-04-20T00:00:00Z",
+    stripeCheckoutSessionId: "cs_test_session_123",
+    stripePaymentIntentId: "pi_test_123",
+    customerEmail: "buyer@example.com",
+    customerName: "Test Buyer",
+    shippingAddress: {
+      name: "Test Buyer",
+      line1: "123 Art St",
+      line2: null,
+      city: "Brooklyn",
+      state: "NY",
+      postalCode: "11201",
+      country: "US",
+    },
+    subtotalCents: 30000,
+    taxCents: 2000,
+    shippingCents: 0,
+    totalCents: 32000,
+    currency: "usd",
+    status: "refunded",
+    fulfillmentToken: "stub-token",
+    fulfillmentTokenRevokedAt: "2026-04-20T00:00:00Z",
+    printJobEmailSentAt: null,
+    trackingNumber: null,
+    carrier: null,
+    notes: "auto-refunded: edition exceeded at fulfill (refund: ok)",
+  },
+  idempotent: false,
+});
 vi.mock("@/lib/supabase/queries/orders", () => ({
   insertOrderWithItems: (...args: unknown[]) => mockInsertOrderWithItems(...args),
+  insertRefundedStub: (...args: unknown[]) => mockInsertRefundedStub(...args),
 }));
 
 const mockSendOrderConfirmation = vi.fn().mockResolvedValue(undefined);
@@ -234,20 +267,76 @@ describe("createCheckoutSession", () => {
     expect(session.url).toBe("https://checkout.stripe.com/test");
   });
 
-  it("offers free US shipping + $20 international", async () => {
+  it("US destination: free shipping", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE, { ...VALID_CART_LINE, photoSlug: "tyre-feb-2022" }],
       origin: "http://localhost:3000",
+      destination: "US",
     });
 
     const params = mockStripeCreate.mock.calls[0][0];
-    expect(params.shipping_options).toHaveLength(2);
-    // Free US domestic
+    expect(params.shipping_options).toHaveLength(1);
     expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(0);
-    expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("Free");
-    // $20 international
-    expect(params.shipping_options[1].shipping_rate_data.fixed_amount.amount).toBe(2000);
+    expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("United States");
+    expect(params.shipping_address_collection.allowed_countries).toEqual(["US"]);
+  });
+
+  it("CA destination: $35", async () => {
+    mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
+    await createCheckoutSession({
+      lines: [VALID_CART_LINE],
+      origin: "http://localhost:3000",
+      destination: "CA",
+    });
+
+    const params = mockStripeCreate.mock.calls[0][0];
+    expect(params.shipping_options).toHaveLength(1);
+    expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(3500);
+    expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("Canada");
+    expect(params.shipping_address_collection.allowed_countries).toEqual(["CA"]);
+  });
+
+  it("EU_UK destination: $50", async () => {
+    mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
+    await createCheckoutSession({
+      lines: [VALID_CART_LINE],
+      origin: "http://localhost:3000",
+      destination: "EU_UK",
+    });
+
+    const params = mockStripeCreate.mock.calls[0][0];
+    expect(params.shipping_options).toHaveLength(1);
+    expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(5000);
+    expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("EU");
+    const allowed = params.shipping_address_collection.allowed_countries;
+    expect(allowed).toContain("GB");
+    expect(allowed).toContain("DE");
+    expect(allowed).toContain("FR");
+    expect(allowed).not.toContain("US");
+    expect(allowed).not.toContain("CA");
+    expect(allowed).not.toContain("AU");
+  });
+
+  it("AU_ROW destination: $65", async () => {
+    mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
+    await createCheckoutSession({
+      lines: [VALID_CART_LINE],
+      origin: "http://localhost:3000",
+      destination: "AU_ROW",
+    });
+
+    const params = mockStripeCreate.mock.calls[0][0];
+    expect(params.shipping_options).toHaveLength(1);
+    expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(6500);
+    expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("Australia");
+    const allowed = params.shipping_address_collection.allowed_countries;
+    expect(allowed).toContain("AU");
+    expect(allowed).toContain("JP");
+    expect(allowed).toContain("NZ");
+    expect(allowed).not.toContain("US");
+    expect(allowed).not.toContain("CA");
+    expect(allowed).not.toContain("GB");
   });
 
   it("test-1-dollar cart: flat $1, no fee, no shipping collection", async () => {

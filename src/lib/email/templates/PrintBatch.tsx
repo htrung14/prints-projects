@@ -52,6 +52,33 @@ function formatShipTo(order: Order): string {
     .join(" · ");
 }
 
+const REPRINT_REASON_MAX = 80;
+
+/**
+ * Returns the reprint marker label ("REPRINT · <reason>" or "REPRINT") if
+ * this order is a reprint, else null. Detects reprints via parentOrderId
+ * first, falling back to the `notes` convention ("reprint: ...") for rows
+ * that predate the parent_order_id column being populated.
+ */
+function getReprintLabel(order: Order): string | null {
+  const isReprint =
+    Boolean(order.parentOrderId) ||
+    (typeof order.notes === "string" &&
+      order.notes.trimStart().toLowerCase().startsWith("reprint:"));
+  if (!isReprint) return null;
+
+  const notes = order.notes ?? "";
+  const match = notes.match(/^\s*reprint:\s*(.*?)(?:\.\s*parent order:.*)?$/i);
+  const rawReason = match?.[1]?.trim() ?? "";
+  if (!rawReason) return "REPRINT";
+
+  const truncated =
+    rawReason.length > REPRINT_REASON_MAX
+      ? rawReason.slice(0, REPRINT_REASON_MAX) + "…"
+      : rawReason;
+  return `REPRINT · ${truncated}`;
+}
+
 export function PrintBatch({ orders }: PrintBatchProps) {
   const count = orders.length;
   const totalPrints = orders.reduce(
@@ -100,17 +127,33 @@ export function PrintBatch({ orders }: PrintBatchProps) {
             </Text>
             <Text style={{ ...baseTextStyle, color: colors.inkSoft, margin: "0 0 28px" }}>
               {count} order{count === 1 ? "" : "s"} · {totalPrints} print
-              {totalPrints === 1 ? "" : "s"} total. Each order below has its own dispatch link with
-              the print file and shipping details.
+              {totalPrints === 1 ? "" : "s"} total. Each order below has its own dispatch link for
+              the shipping address, COA notes, and tracking upload.
             </Text>
 
             {orders.map(({ order, items, dispatchUrl }, idx) => {
               const ref = formatOrderReference(order);
               const orderPrintCount = items.reduce((a, i) => a + i.quantity, 0);
+              const reprintLabel = getReprintLabel(order);
               return (
                 <Section key={order.id} style={{ marginBottom: idx === count - 1 ? 0 : 28 }}>
                   {idx > 0 && (
                     <Hr style={{ borderColor: colors.rule, margin: "0 0 20px", borderWidth: 1 }} />
+                  )}
+                  {reprintLabel && (
+                    <Text
+                      style={{
+                        ...baseTextStyle,
+                        fontSize: 11,
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        color: colors.blue,
+                        fontWeight: 600,
+                        margin: "0 0 6px",
+                      }}
+                    >
+                      {reprintLabel}
+                    </Text>
                   )}
                   <Text
                     style={{
@@ -211,8 +254,9 @@ export function PrintBatch({ orders }: PrintBatchProps) {
                 margin: 0,
               }}
             >
-              Reply to this email with any questions. Files download from the order pages; links
-              expire in 7 days — ping Thalia to regenerate.
+              Reply to this email with any questions. Each order link above carries the shipping
+              address, COA notes, and the tracking upload form for when the print leaves the lab.
+              Files aren&apos;t attached — you already have all photos on hand.
             </Text>
           </div>
         </Container>

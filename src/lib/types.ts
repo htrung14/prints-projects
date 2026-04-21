@@ -65,12 +65,12 @@ export type CartLine = {
 
 /**
  * Order status enum. **Drop-ship model (2026-04-16):**
- * Rob at Brooklyn Archival ships direct to the customer. No in-person pickup step.
+ * Michael at Loupe Digital ships direct to the customer. No in-person pickup step.
  *
  * paid          → webhook received, order persisted
- * sent_to_print → Rob opened the dispatch link (auto-set on first fulfillment-page visit)
- * printed       → (optional) Rob marks printed before shipping
- * shipped       → Rob submits tracking on the dispatch page
+ * sent_to_print → Printer opened the dispatch link (auto-set on first fulfillment-page visit)
+ * printed       → (optional) Printer marks printed before shipping
+ * shipped       → Printer submits tracking on the dispatch page
  * delivered     → (optional) carrier webhook or manual set
  * refunded      → Stripe refund processed via admin
  * cancelled     → pre-ship cancellation
@@ -115,6 +115,14 @@ export type Order = {
   trackingNumber: string | null;
   carrier: string | null;
   notes: string | null; // internal
+  /**
+   * When set, this order is a reprint/reship of another order (damage, lost
+   * in transit, etc.). Reprints are modelled as a new order row with
+   * status='paid' so they flow through the normal batch-dispatch pipeline.
+   * Optional on the type so existing row→Order mappers (admin list page,
+   * dispatch batch) don't need synchronous updates to satisfy typecheck.
+   */
+  parentOrderId?: string | null;
 };
 
 export type OrderItem = {
@@ -135,7 +143,7 @@ export type OrderItem = {
 };
 
 // -----------------------------------------------------------------------------
-// Dispatch (Rob's magic link)
+// Dispatch (printer's magic link)
 // -----------------------------------------------------------------------------
 
 export type DispatchTokenPayload = {

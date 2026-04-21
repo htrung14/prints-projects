@@ -22,6 +22,40 @@ function formatCents(cents: number, currency = "usd"): string {
   }).format(cents / 100);
 }
 
+/**
+ * Title-case a free-form customer name for display.
+ *
+ * Buyers occasionally type their name all lowercase ("mr. j smith"),
+ * which looks careless when echoed back verbatim. This is a defensive
+ * cosmetic touch only — the stored value is unchanged.
+ *
+ * Only reformat when the input is entirely lowercase OR entirely uppercase:
+ * anything with existing mixed case ("McDonald", "O'Brien", "van der Berg")
+ * is assumed to be intentional and returned as-is — previous blanket
+ * lowercase+capitalise damaged those names.
+ *
+ * Honorifics (Mr/Mrs/Ms/Dr/Prof/St) keep a trailing period even when
+ * the buyer omitted it. Defensive against empty strings.
+ */
+function toNameCase(s: string): string {
+  if (!s) return "";
+  const trimmed = s.trim();
+  if (!trimmed) return "";
+  const hasMixedCase = trimmed !== trimmed.toLowerCase() && trimmed !== trimmed.toUpperCase();
+  if (hasMixedCase) return trimmed; // user's intentional capitalisation stays
+  return trimmed
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) =>
+      // common honorifics keep their period cap
+      /^(mr|mrs|ms|dr|prof|st)\.?$/.test(w)
+        ? w.charAt(0).toUpperCase() + w.slice(1) + (w.endsWith(".") ? "" : ".")
+        : w.charAt(0).toUpperCase() + w.slice(1)
+    )
+    .join(" ");
+}
+
 async function getSessionDetails(sessionId: string) {
   try {
     const stripe = stripeClient();
@@ -98,6 +132,29 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Sea
     );
   }
 
+  // Edition sold out between payment and webhook confirmation — the webhook
+  // auto-refunds and writes a refunded stub. Stripe still reports the session
+  // as payment_status="paid", so without this branch a losing buyer would
+  // see a success confirmation over a refunded stub.
+  if (order?.status === "refunded") {
+    return (
+      <div className="px-6 py-20 md:px-8">
+        <div className="mx-auto max-w-xl space-y-5">
+          <span className="label-caps">Order</span>
+          <h1 className="h-display text-3xl">Your order could not be fulfilled.</h1>
+          <p className="text-sm leading-relaxed text-ink">
+            This edition sold out between your payment and our confirmation. Your card has been
+            refunded; it may take a few business days to appear on your statement. We&rsquo;re sorry
+            — the remaining editions are live at thaliabassim.com.
+          </p>
+          <Link href="/" className="btn-ghost inline-block">
+            Back to editions →
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (!session && !order) {
     return (
       <div className="px-6 py-20 md:px-8">
@@ -128,7 +185,9 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Sea
           >
             Your order is in.
           </h1>
-          {customerName ? <p className="text-lg text-ink">Thank you, {customerName}.</p> : null}
+          {customerName && customerName.trim() ? (
+            <p className="text-lg text-ink">Thank you, {toNameCase(customerName)}.</p>
+          ) : null}
           {orderRef ? (
             <p className="text-sm text-ink-faint">
               Order{" "}
@@ -295,8 +354,8 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Sea
           </p>
         )}
         <p className="text-base leading-relaxed text-ink">
-          Every edition is printed, signed, and numbered by hand. Please allow up to 7 business days
-          before shipment.
+          Every edition is printed, signed, and numbered by hand. Please allow 2–3 weeks for
+          delivery within the United States, and 3–5 weeks internationally.
         </p>
 
         <div className="flex flex-wrap gap-3 pt-3">

@@ -14,7 +14,7 @@ import { after, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth/session";
 import { setSetting } from "@/lib/supabase/queries/settings";
 import { audit } from "@/lib/supabase/queries/audit";
-import { getDispatcher } from "@/lib/alerting/dispatcher";
+import { alertSafely } from "@/lib/alerting/dispatcher";
 import { systemErrorAlert } from "@/lib/alerting";
 
 export const runtime = "nodejs";
@@ -57,18 +57,15 @@ export async function POST(request: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "save failed";
     console.error(`POST /api/admin/settings setSetting failed (actor=${session.email}):`, err);
-    after(() => {
-      getDispatcher()
-        .send(
-          systemErrorAlert(
-            `POST /api/admin/settings print_shop_email (actor=${session.email})`,
-            message
-          )
+    after(() =>
+      alertSafely(
+        `POST /api/admin/settings print_shop_email (actor=${session.email})`,
+        systemErrorAlert(
+          `POST /api/admin/settings print_shop_email (actor=${session.email})`,
+          message
         )
-        .catch((alertErr) => {
-          console.error("admin/settings: alert dispatch failed:", alertErr);
-        });
-    });
+      )
+    );
     return NextResponse.json({ error: message }, { status: 500 });
   }
 

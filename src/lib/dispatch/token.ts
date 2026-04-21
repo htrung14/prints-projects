@@ -1,7 +1,7 @@
 /**
  * Dispatch magic-link HMAC tokens.
  *
- * Rob at Brooklyn Archival gets a signed URL per order (or one batch digest
+ * The printer (Loupe Digital) gets a signed URL per order (or one batch digest
  * URL per week) in the print-job email. The token proves the link came from
  * us, carries the order id (or "batch" scope), and expires after the TTL.
  *
