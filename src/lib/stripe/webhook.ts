@@ -279,7 +279,9 @@ export async function runPostOrderSideEffects(
   const currency = order.currency;
 
   await runSafely("sendOrderConfirmation", () => sendOrderConfirmation(order, items), order.id);
-  if (dispatchUrl) {
+  // Print-lab notification is opt-in: only run when PRINT_SHOP_EMAIL is
+  // explicitly configured. Otherwise orders are batched manually.
+  if (dispatchUrl && process.env.PRINT_SHOP_EMAIL) {
     const url = dispatchUrl;
     await runSafely("sendPrintJobEmail", () => sendPrintJobEmail(order, items, url), order.id);
   }
@@ -455,7 +457,7 @@ export async function handleEditionExceeded(
           `A full refund has been issued to your original payment method. You should see it within 5-10 business days.`,
           ``,
           `If you'd like to select a different print, we'd love to have you back:`,
-          `${process.env.NEXT_PUBLIC_APP_URL ?? "https://attamassok.com"}`,
+          `${process.env.NEXT_PUBLIC_APP_URL ?? "https://www.thaliabassim.com"}`,
           ``,
           `Thank you for your understanding.`,
           `— Thalia Bassim Studio`,
