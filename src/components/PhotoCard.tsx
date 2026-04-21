@@ -20,7 +20,7 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
       >
         <SaveButton slug={photo.slug} />
         <Image
-          src={photo.imageUrl}
+          src={photo.imageUrl.replace("/catalog/", "/catalog-hires/")}
           alt={photo.imageAlt}
           fill
           sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
