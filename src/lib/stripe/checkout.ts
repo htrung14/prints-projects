@@ -176,20 +176,40 @@ function countriesForDestination(destination: ShippingDestination): ReadonlyArra
 }
 
 /**
+ * Map an ISO2 country code to its shipping tier. Returns null when we don't
+ * ship to that country (caller must 4xx before reaching session creation).
+ */
+export function tierForCountry(country: string): ShippingDestination | null {
+  const c = country.toUpperCase();
+  if ((US_COUNTRIES as ReadonlyArray<string>).includes(c)) return "US";
+  if ((CA_COUNTRIES as ReadonlyArray<string>).includes(c)) return "CA";
+  if ((EU_UK_COUNTRIES as ReadonlyArray<string>).includes(c)) return "EU_UK";
+  if ((AU_ROW_COUNTRIES as ReadonlyArray<string>).includes(c)) return "AU_ROW";
+  return null;
+}
+
+/**
  * Expected shipping cents for a given ISO2 country code. Used by the webhook
- * as defence-in-depth to detect under-payment (e.g. buyer selected "United
- * States — free" but shipped to Canada).
+ * as defence-in-depth to detect under-payment (e.g. a session somehow
+ * completed with a mismatched country/rate).
  *
- * Unknown country → return the highest tier (AU_ROW / $65). This biases the
- * guard toward "alert on mismatch" rather than silently accepting under-payment.
+ * Unknown country → return the highest tier (AU_ROW / $65). Biases the guard
+ * toward "alert on mismatch" rather than silently accepting under-payment.
  */
 export function expectedShippingCentsFor(country: string): number {
-  const c = country.toUpperCase();
-  if ((US_COUNTRIES as ReadonlyArray<string>).includes(c)) return SHIPPING_CENTS_US;
-  if ((CA_COUNTRIES as ReadonlyArray<string>).includes(c)) return SHIPPING_CENTS_CA;
-  if ((EU_UK_COUNTRIES as ReadonlyArray<string>).includes(c)) return SHIPPING_CENTS_EU_UK;
-  if ((AU_ROW_COUNTRIES as ReadonlyArray<string>).includes(c)) return SHIPPING_CENTS_AU_ROW;
-  return SHIPPING_CENTS_AU_ROW;
+  const tier = tierForCountry(country);
+  switch (tier) {
+    case "US":
+      return SHIPPING_CENTS_US;
+    case "CA":
+      return SHIPPING_CENTS_CA;
+    case "EU_UK":
+      return SHIPPING_CENTS_EU_UK;
+    case "AU_ROW":
+      return SHIPPING_CENTS_AU_ROW;
+    case null:
+      return SHIPPING_CENTS_AU_ROW;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -398,10 +418,12 @@ function siteOrigin(): string {
 export type CreateCheckoutSessionArgs = {
   lines: CartLine[];
   /**
-   * Shipping destination selected on /checkout. Narrows `allowed_countries`
-   * and picks the single matching shipping rate. Required for non-test carts.
+   * ISO 3166-1 alpha-2 country code the buyer selected on /checkout. Used to
+   * derive the shipping tier, narrow `allowed_countries`, and pick the single
+   * matching shipping rate. Required for non-test carts; ignored for the
+   * hidden `test-1-dollar` flow. Throws if the country is not in any tier.
    */
-  destination?: ShippingDestination;
+  country?: string;
   /** Optional override for success/cancel origin (e.g. during tests). */
   origin?: string;
 };
@@ -457,9 +479,23 @@ export async function createCheckoutSession(
     });
   }
 
-  const destination: ShippingDestination = args.destination ?? "US";
-  const shippingOptions = isTestCart ? undefined : buildShippingOptions(destination);
-  const allowedCountries: ReadonlyArray<AllowedCountry> = countriesForDestination(destination);
+  // Derive the tier from the buyer's country. Test cart skips this entirely.
+  // Default to "US" ONLY for test carts, where shipping is suppressed anyway.
+  let shippingOptions: ShippingOptionParam[] | undefined;
+  let allowedCountries: ReadonlyArray<AllowedCountry> = US_COUNTRIES;
+  if (!isTestCart) {
+    if (!args.country) {
+      throw new Error("createCheckoutSession: country is required for non-test carts");
+    }
+    const tier = tierForCountry(args.country);
+    if (!tier) {
+      throw new Error(
+        `createCheckoutSession: we don't currently ship to ${args.country.toUpperCase()}`
+      );
+    }
+    shippingOptions = buildShippingOptions(tier);
+    allowedCountries = [args.country.toUpperCase() as AllowedCountry];
+  }
 
   const origin = args.origin ?? siteOrigin();
   const successUrl = `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`;

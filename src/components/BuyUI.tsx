@@ -246,8 +246,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
       >
         <div style={{ fontSize: 16, lineHeight: 1.65, color: "var(--ink)", maxWidth: "58ch" }}>
           <p style={{ marginBottom: 12 }}>
-            A 3% processing fee is added at checkout to cover Stripe card costs. Included in the
-            final total.
+            A 3% processing fee is added at checkout. Included in the final total.
           </p>
           <p style={{ marginBottom: 12 }}>
             Ships in a flat waterproof package. Total delivery takes 2–3 weeks within the United

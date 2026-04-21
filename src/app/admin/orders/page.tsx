@@ -23,6 +23,7 @@ import { serverClient } from "@/lib/supabase/server";
 import { getPrinterEmail } from "@/lib/supabase/queries/settings";
 import { alertSystemError } from "@/lib/alerting";
 import type { Address, Order, OrderStatus } from "@/lib/types";
+import { formatCountry } from "@/lib/countries";
 import { BatchButton } from "./BatchButton";
 
 async function countItemsByOrder(orderIds: string[]): Promise<Record<string, number>> {
@@ -168,76 +169,8 @@ function parseQ(raw: string | string[] | undefined): string | null {
   return trimmed.slice(0, 120);
 }
 
-// ---------------------------------------------------------------------------
-// Country lookup
-// ---------------------------------------------------------------------------
-//
-// Inline map of the countries Stripe Checkout offers (mirrors ALLOWED_COUNTRIES
-// in src/lib/stripe/checkout.ts). Flag + name makes the "Ship to" column
-// skimmable; fall back to the raw ISO code if an unknown country sneaks in
-// (e.g. Stripe adds a new market before we update the map).
-const COUNTRY_MAP: Record<string, { flag: string; name: string }> = {
-  US: { flag: "🇺🇸", name: "United States" },
-  CA: { flag: "🇨🇦", name: "Canada" },
-  GB: { flag: "🇬🇧", name: "United Kingdom" },
-  IE: { flag: "🇮🇪", name: "Ireland" },
-  DE: { flag: "🇩🇪", name: "Germany" },
-  FR: { flag: "🇫🇷", name: "France" },
-  NL: { flag: "🇳🇱", name: "Netherlands" },
-  BE: { flag: "🇧🇪", name: "Belgium" },
-  LU: { flag: "🇱🇺", name: "Luxembourg" },
-  IT: { flag: "🇮🇹", name: "Italy" },
-  ES: { flag: "🇪🇸", name: "Spain" },
-  PT: { flag: "🇵🇹", name: "Portugal" },
-  AT: { flag: "🇦🇹", name: "Austria" },
-  DK: { flag: "🇩🇰", name: "Denmark" },
-  SE: { flag: "🇸🇪", name: "Sweden" },
-  FI: { flag: "🇫🇮", name: "Finland" },
-  NO: { flag: "🇳🇴", name: "Norway" },
-  CH: { flag: "🇨🇭", name: "Switzerland" },
-  IS: { flag: "🇮🇸", name: "Iceland" },
-  PL: { flag: "🇵🇱", name: "Poland" },
-  CZ: { flag: "🇨🇿", name: "Czechia" },
-  GR: { flag: "🇬🇷", name: "Greece" },
-  HU: { flag: "🇭🇺", name: "Hungary" },
-  SK: { flag: "🇸🇰", name: "Slovakia" },
-  SI: { flag: "🇸🇮", name: "Slovenia" },
-  HR: { flag: "🇭🇷", name: "Croatia" },
-  EE: { flag: "🇪🇪", name: "Estonia" },
-  LV: { flag: "🇱🇻", name: "Latvia" },
-  LT: { flag: "🇱🇹", name: "Lithuania" },
-  RO: { flag: "🇷🇴", name: "Romania" },
-  BG: { flag: "🇧🇬", name: "Bulgaria" },
-  CY: { flag: "🇨🇾", name: "Cyprus" },
-  MT: { flag: "🇲🇹", name: "Malta" },
-  AU: { flag: "🇦🇺", name: "Australia" },
-  NZ: { flag: "🇳🇿", name: "New Zealand" },
-  JP: { flag: "🇯🇵", name: "Japan" },
-  SG: { flag: "🇸🇬", name: "Singapore" },
-  HK: { flag: "🇭🇰", name: "Hong Kong" },
-  KR: { flag: "🇰🇷", name: "South Korea" },
-  TW: { flag: "🇹🇼", name: "Taiwan" },
-  TH: { flag: "🇹🇭", name: "Thailand" },
-  MY: { flag: "🇲🇾", name: "Malaysia" },
-  IL: { flag: "🇮🇱", name: "Israel" },
-  AE: { flag: "🇦🇪", name: "United Arab Emirates" },
-  SA: { flag: "🇸🇦", name: "Saudi Arabia" },
-  MX: { flag: "🇲🇽", name: "Mexico" },
-  BR: { flag: "🇧🇷", name: "Brazil" },
-  AR: { flag: "🇦🇷", name: "Argentina" },
-  CL: { flag: "🇨🇱", name: "Chile" },
-  CO: { flag: "🇨🇴", name: "Colombia" },
-  ZA: { flag: "🇿🇦", name: "South Africa" },
-  IN: { flag: "🇮🇳", name: "India" },
-  PH: { flag: "🇵🇭", name: "Philippines" },
-};
-
-function formatCountry(raw: string): string {
-  const code = (raw ?? "").toUpperCase().trim();
-  const entry = COUNTRY_MAP[code];
-  if (!entry) return code || "—";
-  return `${entry.flag} ${entry.name}`;
-}
+// Country formatting comes from @/lib/countries (single source of truth shared
+// with /checkout's dropdown). Adds a country there; it appears here for free.
 
 function formatMoney(cents: number, currency: string): string {
   const amount = (cents / 100).toFixed(2);

@@ -8,38 +8,78 @@
  * already surfaces Apple Pay, Google Pay, and Link natively; no extra
  * integration needed.
  *
+ * Shipping model: buyer picks their country here, we derive the tier
+ * server-side. Stripe's `allowed_countries` is narrowed to exactly that
+ * country so a buyer who picks US can't ship to Canada, and vice versa.
  */
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { getAllPhotos } from "@/lib/photos";
 import { formatUsd, priceCents } from "@/lib/pricing";
 import type { PaperType, Photo } from "@/lib/types";
+import { COUNTRY_OPTIONS } from "@/lib/countries";
 
-type Destination = "US" | "CA" | "EU_UK" | "AU_ROW";
+// Per-tier rate in cents, inlined for the UI summary line. Kept in sync with
+// src/lib/stripe/checkout.ts's SHIPPING_CENTS_* constants and tierForCountry().
+const TIER_CENTS: Record<"US" | "CA" | "EU_UK" | "AU_ROW", number> = {
+  US: 0,
+  CA: 3500,
+  EU_UK: 5000,
+  AU_ROW: 6500,
+};
 
-const DESTINATION_OPTIONS: ReadonlyArray<{
-  value: Destination;
-  label: string;
-  summary: string;
-}> = [
-  { value: "US", label: "United States — free", summary: "$0 (United States)" },
-  { value: "CA", label: "Canada — $35", summary: "$35 (Canada)" },
-  { value: "EU_UK", label: "United Kingdom & EU — $50", summary: "$50 (United Kingdom & EU)" },
-  {
-    value: "AU_ROW",
-    label: "Australia & rest of world — $65",
-    summary: "$65 (Australia & rest of world)",
-  },
-];
+const EU_UK_CODES = new Set([
+  "GB",
+  "IE",
+  "DE",
+  "FR",
+  "NL",
+  "BE",
+  "LU",
+  "IT",
+  "ES",
+  "PT",
+  "AT",
+  "DK",
+  "SE",
+  "FI",
+  "NO",
+  "CH",
+  "IS",
+  "PL",
+  "CZ",
+  "GR",
+  "HU",
+  "SK",
+  "SI",
+  "HR",
+  "EE",
+  "LV",
+  "LT",
+  "RO",
+  "BG",
+  "CY",
+  "MT",
+]);
+
+function shippingCentsFor(country: string): number {
+  const c = country.toUpperCase();
+  if (c === "US") return TIER_CENTS.US;
+  if (c === "CA") return TIER_CENTS.CA;
+  if (EU_UK_CODES.has(c)) return TIER_CENTS.EU_UK;
+  return TIER_CENTS.AU_ROW;
+}
 
 export default function CheckoutPage() {
   const { lines, subtotalCents, itemCount, remove } = useCart();
   const photos = getAllPhotos();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [destination, setDestination] = useState<Destination>("US");
+  const [country, setCountry] = useState<string>("US");
+
+  const shippingCents = useMemo(() => shippingCentsFor(country), [country]);
 
   async function proceed() {
     if (pending || lines.length === 0) return;
@@ -49,7 +89,7 @@ export default function CheckoutPage() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lines, destination }),
+        body: JSON.stringify({ lines, country }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as {
@@ -90,6 +130,8 @@ export default function CheckoutPage() {
   }
 
   const processingFeeCents = Math.ceil(subtotalCents * 0.03);
+  const totalCents = subtotalCents + processingFeeCents + shippingCents;
+  const shippingLabel = shippingCents === 0 ? "Free" : `${formatUsd(shippingCents)} (${country})`;
 
   return (
     <div className="border-t border-ink-line px-6 py-16 md:px-8">
@@ -116,24 +158,29 @@ export default function CheckoutPage() {
           })}
         </ul>
 
-        <fieldset className="space-y-2">
-          <legend className="label-caps mb-2">Ship to</legend>
-          <div className="flex flex-col gap-2">
-            {DESTINATION_OPTIONS.map((opt) => (
-              <label key={opt.value} className="flex items-center gap-2 text-sm">
-                <input
-                  type="radio"
-                  name="destination"
-                  value={opt.value}
-                  checked={destination === opt.value}
-                  onChange={() => setDestination(opt.value)}
-                  disabled={pending}
-                />
-                <span>{opt.label}</span>
-              </label>
+        <div className="space-y-2">
+          <label htmlFor="ship-to-country" className="label-caps block">
+            Ship to
+          </label>
+          <select
+            id="ship-to-country"
+            name="country"
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            disabled={pending}
+            className="w-full border border-ink-line bg-transparent px-4 py-3 text-base text-ink focus:border-ink focus:outline-none"
+          >
+            {COUNTRY_OPTIONS.map((opt) => (
+              <option key={opt.code} value={opt.code}>
+                {opt.flag} {opt.name}
+              </option>
             ))}
-          </div>
-        </fieldset>
+          </select>
+          <p className="text-xs text-ink-faint">
+            Shipping is calculated from the country you select. At the next step Stripe collects
+            your full address.
+          </p>
+        </div>
 
         <dl className="space-y-1 text-sm">
           <div className="flex justify-between">
@@ -150,9 +197,7 @@ export default function CheckoutPage() {
           </div>
           <div className="flex justify-between">
             <dt>Shipping</dt>
-            <dd className="text-ink-strong">
-              {DESTINATION_OPTIONS.find((o) => o.value === destination)?.summary}
-            </dd>
+            <dd className="text-ink-strong">{shippingLabel}</dd>
           </div>
         </dl>
 
@@ -164,7 +209,7 @@ export default function CheckoutPage() {
             onClick={proceed}
           >
             <span>{pending ? "Redirecting…" : "Proceed to checkout"}</span>
-            <span className="btn-ink-price">{formatUsd(subtotalCents + processingFeeCents)}</span>
+            <span className="btn-ink-price">{formatUsd(totalCents)}</span>
           </button>
           {error ? (
             <p role="alert" className="text-sm" style={{ color: "#b91c1c" }}>

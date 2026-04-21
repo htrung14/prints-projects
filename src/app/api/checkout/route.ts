@@ -16,7 +16,7 @@
 
 import { after, type NextRequest } from "next/server";
 import type { CartLine } from "@/lib/types";
-import { createCheckoutSession, type ShippingDestination } from "@/lib/stripe/checkout";
+import { createCheckoutSession, tierForCountry } from "@/lib/stripe/checkout";
 import { softInventoryCheck } from "@/lib/stripe/inventory-check";
 import { alertSystemError } from "@/lib/alerting/dispatcher";
 
@@ -31,7 +31,7 @@ export const dynamic = "force-dynamic";
 // Body validation
 // ---------------------------------------------------------------------------
 
-type CheckoutRequestBody = { lines: CartLine[]; destination: ShippingDestination };
+type CheckoutRequestBody = { lines: CartLine[]; country: string };
 
 function parseBody(body: unknown): CheckoutRequestBody {
   if (typeof body !== "object" || body === null) {
@@ -42,16 +42,15 @@ function parseBody(body: unknown): CheckoutRequestBody {
   if (!Array.isArray(lines) || lines.length === 0) {
     throw new BadRequest("body.lines must be a non-empty array");
   }
-  const destination = rec.destination;
-  if (
-    destination !== "US" &&
-    destination !== "CA" &&
-    destination !== "EU_UK" &&
-    destination !== "AU_ROW"
-  ) {
-    throw new BadRequest('body.destination must be "US", "CA", "EU_UK", or "AU_ROW"');
+  const country = rec.country;
+  if (typeof country !== "string" || !/^[A-Za-z]{2}$/.test(country)) {
+    throw new BadRequest("body.country must be a 2-letter ISO country code");
   }
-  return { lines: lines as CartLine[], destination };
+  const upper = country.toUpperCase();
+  if (tierForCountry(upper) === null) {
+    throw new BadRequest(`we don't currently ship to ${upper}`);
+  }
+  return { lines: lines as CartLine[], country: upper };
 }
 
 class BadRequest extends Error {
@@ -95,7 +94,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   try {
     const session = await createCheckoutSession({
       lines: parsed.lines,
-      destination: parsed.destination,
+      country: parsed.country,
     });
     if (!session.url) {
       // `url` is null only for embedded/custom UI modes; we always use hosted.

@@ -253,6 +253,7 @@ describe("createCheckoutSession", () => {
     const session = await createCheckoutSession({
       lines: [VALID_CART_LINE],
       origin: "http://localhost:3000",
+      country: "US",
     });
 
     expect(mockStripeCreate).toHaveBeenCalledOnce();
@@ -267,12 +268,12 @@ describe("createCheckoutSession", () => {
     expect(session.url).toBe("https://checkout.stripe.com/test");
   });
 
-  it("US destination: free shipping", async () => {
+  it("US country: free shipping, allowed_countries narrowed to [US]", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE, { ...VALID_CART_LINE, photoSlug: "tyre-feb-2022" }],
       origin: "http://localhost:3000",
-      destination: "US",
+      country: "US",
     });
 
     const params = mockStripeCreate.mock.calls[0][0];
@@ -282,12 +283,12 @@ describe("createCheckoutSession", () => {
     expect(params.shipping_address_collection.allowed_countries).toEqual(["US"]);
   });
 
-  it("CA destination: $35", async () => {
+  it("CA country: $35, allowed_countries narrowed to [CA]", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE],
       origin: "http://localhost:3000",
-      destination: "CA",
+      country: "CA",
     });
 
     const params = mockStripeCreate.mock.calls[0][0];
@@ -297,46 +298,46 @@ describe("createCheckoutSession", () => {
     expect(params.shipping_address_collection.allowed_countries).toEqual(["CA"]);
   });
 
-  it("EU_UK destination: $50", async () => {
+  it("DE country (EU_UK tier): $50, allowed_countries narrowed to [DE]", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE],
       origin: "http://localhost:3000",
-      destination: "EU_UK",
+      country: "DE",
     });
 
     const params = mockStripeCreate.mock.calls[0][0];
     expect(params.shipping_options).toHaveLength(1);
     expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(5000);
     expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("EU");
-    const allowed = params.shipping_address_collection.allowed_countries;
-    expect(allowed).toContain("GB");
-    expect(allowed).toContain("DE");
-    expect(allowed).toContain("FR");
-    expect(allowed).not.toContain("US");
-    expect(allowed).not.toContain("CA");
-    expect(allowed).not.toContain("AU");
+    expect(params.shipping_address_collection.allowed_countries).toEqual(["DE"]);
   });
 
-  it("AU_ROW destination: $65", async () => {
+  it("AU country (AU_ROW tier): $65, allowed_countries narrowed to [AU]", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE],
       origin: "http://localhost:3000",
-      destination: "AU_ROW",
+      country: "AU",
     });
 
     const params = mockStripeCreate.mock.calls[0][0];
     expect(params.shipping_options).toHaveLength(1);
     expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(6500);
     expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("Australia");
-    const allowed = params.shipping_address_collection.allowed_countries;
-    expect(allowed).toContain("AU");
-    expect(allowed).toContain("JP");
-    expect(allowed).toContain("NZ");
-    expect(allowed).not.toContain("US");
-    expect(allowed).not.toContain("CA");
-    expect(allowed).not.toContain("GB");
+    expect(params.shipping_address_collection.allowed_countries).toEqual(["AU"]);
+  });
+
+  it("unsupported country throws before Stripe is called", async () => {
+    mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
+    await expect(
+      createCheckoutSession({
+        lines: [VALID_CART_LINE],
+        origin: "http://localhost:3000",
+        country: "ZZ",
+      })
+    ).rejects.toThrow("we don't currently ship to ZZ");
+    expect(mockStripeCreate).not.toHaveBeenCalled();
   });
 
   it("test-1-dollar cart: flat $1, no fee, no shipping collection", async () => {
