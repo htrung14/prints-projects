@@ -45,47 +45,20 @@ function verifySignature(body: string, signature: string | null, secret: string)
 
 export async function POST(req: NextRequest): Promise<Response> {
   const secret = process.env.SENTRY_WEBHOOK_SECRET;
-  const rawBody = await req.text();
-
-  // Log headers + first bytes of body so we can diagnose what Sentry sends.
-  const headerEntries: Record<string, string> = {};
-  req.headers.forEach((v, k) => {
-    if (/^sentry|signature|hook/i.test(k)) headerEntries[k] = v;
-  });
-  console.log(
-    "[alerts/sentry] headers:",
-    JSON.stringify(headerEntries),
-    "bodyLen:",
-    rawBody.length,
-    "bodyHead:",
-    rawBody.slice(0, 200)
-  );
-
   if (!secret) {
     return new Response("SENTRY_WEBHOOK_SECRET not configured", { status: 500 });
   }
 
-  // Sentry may send signature as `sentry-hook-signature` (with "sha256=" prefix
-  // per newer docs) or our own `x-webhook-secret` for manual testing.
+  const rawBody = await req.text();
+
+  // Sentry sends HMAC-SHA256 (sometimes `sha256=` prefixed).
+  // `x-webhook-secret` is the manual-testing fallback.
   const rawSig = req.headers.get("sentry-hook-signature");
   const signature = rawSig?.replace(/^sha256=/, "") ?? null;
   const plainSecret = req.headers.get("x-webhook-secret");
 
   const signatureOk =
     (signature && verifySignature(rawBody, signature, secret)) || plainSecret === secret;
-
-  // Fire a best-effort Telegram diagnostic on any hit so we can see what landed.
-  // This runs even on signature failure so we can debug misconfiguration.
-  after(() => {
-    getDispatcher()
-      .send(
-        systemErrorAlert(
-          "Sentry webhook diagnostic",
-          `hit=/api/alerts/sentry signatureOk=${signatureOk} bodyLen=${rawBody.length} headers=${JSON.stringify(headerEntries)} bodyHead=${rawBody.slice(0, 400)}`
-        )
-      )
-      .catch((err) => console.error("[alerts/sentry] diagnostic dispatch failed:", err));
-  });
 
   if (!signatureOk) {
     return new Response("Invalid signature", { status: 401 });
@@ -107,17 +80,16 @@ export async function POST(req: NextRequest): Promise<Response> {
   const value = issue.metadata?.value ?? issue.title ?? "(no message)";
   const culprit = issue.culprit ?? "unknown";
   const permalink = issue.permalink ?? issue.web_url ?? "";
-  const count = issue.count ?? 1;
-  const users = issue.userCount ?? 0;
+  const count = Number(issue.count ?? 1);
+  const users = Number(issue.userCount ?? 0);
 
   const context = `${type} at ${culprit}`;
-  const message = [
-    value,
-    `Seen ${count} time(s), ${users} user(s) affected.`,
-    permalink ? `Details: ${permalink}` : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const messageParts = [value];
+  if (count > 1 || users > 0) {
+    messageParts.push(`Seen ${count} time(s), ${users} user(s) affected.`);
+  }
+  if (permalink) messageParts.push(`Details: ${permalink}`);
+  const message = messageParts.join(" ");
 
   after(() => {
     getDispatcher()
