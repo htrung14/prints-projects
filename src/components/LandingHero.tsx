@@ -11,7 +11,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
       <div className="hfb">
         <figure className="hfb-fig">
           <Image
-            src={lead.imageUrl}
+            src={lead.imageUrl.replace("/catalog/", "/catalog-hires/")}
             alt={lead.imageAlt}
             fill
             priority
