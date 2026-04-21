@@ -6,7 +6,6 @@ export type AlertDispatcherConfig = {
 };
 
 const DEFAULT_SEVERITY_FILTER: Record<string, AlertSeverity[]> = {
-  notion: ["critical", "warning", "info"],
   email: ["critical"],
   telegram: ["critical"],
 };

@@ -1,7 +1,6 @@
 import { createAlertDispatcher } from "./dispatch";
 import { createTelegramChannel } from "./channels/telegram";
 import { createEmailChannel } from "./channels/email";
-import { createNotionChannel } from "./channels/notion";
 import { createTriagedDispatcher } from "./triage";
 import { getResend, fromAddress } from "@/lib/email/client";
 
@@ -27,8 +26,6 @@ export function getDispatcher() {
       }, ADMIN_EMAILS)
     );
   }
-
-  channels.push(createNotionChannel());
 
   const baseDispatcher = createAlertDispatcher({ channels });
   return createTriagedDispatcher(baseDispatcher);

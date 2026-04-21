@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import { systemErrorAlert } from "@/lib/alerting";
 import { triageAlert } from "@/lib/alerting/triage";
-import { createAlertDispatcher } from "@/lib/alerting/dispatch";
 import { createTelegramChannel } from "@/lib/alerting/channels/telegram";
 import { createEmailChannel } from "@/lib/alerting/channels/email";
-import { createNotionChannel } from "@/lib/alerting/channels/notion";
 import { getResend, fromAddress } from "@/lib/email/client";
 
 export async function POST(req: Request) {
@@ -18,7 +16,6 @@ export async function POST(req: Request) {
     "test-alert endpoint"
   );
 
-  // Step 1: Run triage and report what it decided
   let triageResult;
   try {
     triageResult = await triageAlert(alert);
@@ -29,7 +26,6 @@ export async function POST(req: Request) {
     });
   }
 
-  // Step 2: Bypass triage — send directly to all channels and report per-channel results
   const channelResults: Record<string, string> = {};
 
   const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, ADMIN_EMAILS } = process.env;
@@ -66,16 +62,5 @@ export async function POST(req: Request) {
     channelResults.email = "skipped: ADMIN_EMAILS not set";
   }
 
-  try {
-    const notion = createNotionChannel();
-    await notion.send(alert);
-    channelResults.notion = "ok";
-  } catch (e) {
-    channelResults.notion = `error: ${(e as Error).message}`;
-  }
-
-  return NextResponse.json({
-    triageResult,
-    channelResults,
-  });
+  return NextResponse.json({ triageResult, channelResults });
 }
