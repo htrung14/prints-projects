@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import type { Alert, AlertChannel, AlertSeverity } from "./types";
 
 export type AlertDispatcherConfig = {
@@ -15,20 +16,35 @@ export function createAlertDispatcher(config: AlertDispatcherConfig) {
 
   return {
     async send(alert: Alert): Promise<void> {
-      const results = await Promise.allSettled(
-        config.channels
-          .filter((ch) => {
-            const allowed = filter[ch.name] ?? ["critical", "warning", "info"];
-            return allowed.includes(alert.severity);
-          })
-          .map((ch) => ch.send(alert))
-      );
+      const selected = config.channels.filter((ch) => {
+        const allowed = filter[ch.name] ?? ["critical", "warning", "info"];
+        return allowed.includes(alert.severity);
+      });
 
-      for (const result of results) {
+      const results = await Promise.allSettled(selected.map((ch) => ch.send(alert)));
+
+      results.forEach((result, idx) => {
         if (result.status === "rejected") {
-          console.error(`Alert channel failed: ${result.reason}`);
+          const channelName = selected[idx]?.name ?? "unknown";
+          // This module is the terminal sink — we can't alert about our own
+          // failure via ourselves. Route it to Sentry so the outage is visible
+          // even when Telegram + email are both down. console.error alone
+          // would be silently discarded in production.
+          const err =
+            result.reason instanceof Error
+              ? result.reason
+              : new Error(`Alert channel "${channelName}" failed: ${String(result.reason)}`);
+          try {
+            Sentry.captureException(err, {
+              tags: { pipeline: "alerting-dispatch", channel: channelName },
+              extra: { alertTitle: alert.title, alertSeverity: alert.severity },
+            });
+          } catch {
+            // If Sentry itself throws, we're out of belt-and-braces signals.
+          }
+          console.error(`[alerting] channel "${channelName}" failed:`, err.message);
         }
-      }
+      });
     },
   };
 }

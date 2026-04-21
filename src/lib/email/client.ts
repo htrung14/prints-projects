@@ -33,14 +33,19 @@ export function fromAddress(): string {
 }
 
 /**
- * Where print-job emails go (Rob at Brooklyn Archival).
- * Throws if unset - we refuse to silently send the print job to the wrong
+ * Legacy helper retained for anything still reading the env var directly.
+ * Prefer `getPrinterEmail()` from `@/lib/supabase/queries/settings`, which
+ * reads from the admin-editable settings table with env fallback.
+ *
+ * Throws if unset — we refuse to silently send the print job to the wrong
  * address.
  */
 export function printShopAddress(): string {
   const addr = process.env.PRINT_SHOP_EMAIL;
   if (!addr) {
-    throw new Error("PRINT_SHOP_EMAIL is not set. Cannot send print-job email to the lab.");
+    throw new Error(
+      "PRINT_SHOP_EMAIL env not set and no admin setting configured. Set it at /admin/settings."
+    );
   }
   return addr;
 }

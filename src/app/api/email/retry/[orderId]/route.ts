@@ -13,6 +13,7 @@
  */
 
 import { NextResponse, type NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { adminServerClient } from "@/lib/supabase/admin";
 import {
   sendOrderConfirmation,
@@ -22,6 +23,7 @@ import {
 import { getOrderById } from "@/lib/supabase/queries/orders";
 import { audit } from "@/lib/supabase/queries/audit";
 import { serverClient } from "@/lib/supabase/server";
+import { alertSystemError } from "@/lib/alerting/dispatcher";
 import type { OrderItem } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -125,14 +127,43 @@ export async function POST(request: NextRequest, ctx: { params: Promise<{ orderI
   // ---------------------------------------------------------------------------
   // Load order + items
   // ---------------------------------------------------------------------------
-  const order = await getOrderById(orderId);
+  let order;
+  try {
+    order = await getOrderById(orderId);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`email/retry(${orderId}) getOrderById failure (actor=${email}):`, err);
+    Sentry.captureException(err, {
+      tags: { pipeline: `email-retry:${kind}` },
+      extra: { orderId, actor: email, phase: "getOrderById" },
+    });
+    await alertSystemError(
+      `email retry ${kind} (order ${orderId}) order lookup`,
+      `Admin ${email} tried to resend the ${kind} email but order lookup failed: ${msg}`
+    );
+    return NextResponse.json({ error: `Order lookup failed: ${msg}` }, { status: 500 });
+  }
   if (!order) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
   let items: OrderItem[] = [];
   if (kind !== "shipped") {
-    items = await listItemsFor(orderId);
+    try {
+      items = await listItemsFor(orderId);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`email/retry(${orderId}) listItemsFor failure (actor=${email}):`, err);
+      Sentry.captureException(err, {
+        tags: { pipeline: `email-retry:${kind}` },
+        extra: { orderId, actor: email, phase: "listItemsFor" },
+      });
+      await alertSystemError(
+        `email retry ${kind} (order ${orderId}) items lookup`,
+        `Admin ${email} tried to resend the ${kind} email but items lookup failed: ${msg}`
+      );
+      return NextResponse.json({ error: `Items lookup failed: ${msg}` }, { status: 500 });
+    }
     if (items.length === 0) {
       return NextResponse.json({ error: "Order has no items; cannot resend." }, { status: 409 });
     }
@@ -154,13 +185,14 @@ export async function POST(request: NextRequest, ctx: { params: Promise<{ orderI
         // re-sign from here, and the admin sees a bounced auth page if they
         // forgot to paste the link.
         let dispatchUrl = "";
-        try {
-          const body = (await request.json().catch(() => null)) as { dispatchUrl?: unknown } | null;
-          if (body && typeof body === "object" && typeof body.dispatchUrl === "string") {
-            dispatchUrl = body.dispatchUrl;
-          }
-        } catch {
-          // no body - fine
+        // `request.json().catch(() => null)` shields against missing-body and
+        // invalid-JSON cases; the surrounding code only reads well-typed
+        // fields afterwards, so no further try/catch is needed here.
+        const body = (await request.json().catch(() => null)) as {
+          dispatchUrl?: unknown;
+        } | null;
+        if (body && typeof body === "object" && typeof body.dispatchUrl === "string") {
+          dispatchUrl = body.dispatchUrl;
         }
         if (!dispatchUrl) {
           return NextResponse.json(
@@ -186,6 +218,16 @@ export async function POST(request: NextRequest, ctx: { params: Promise<{ orderI
       action: "email_resend_failed",
       meta: { kind, error: message },
     });
+    // The admin sees the 502 inline, but also surface to the ops channel so
+    // repeated failures are visible without having to trawl the audit log.
+    Sentry.captureException(err, {
+      tags: { pipeline: `email-retry:${kind}` },
+      extra: { orderId, actor: email },
+    });
+    await alertSystemError(
+      `email retry ${kind} (order ${orderId})`,
+      `Admin ${email} tried to resend the ${kind} email for order ${orderId} but sending failed: ${message}`
+    );
     return NextResponse.json({ error: `Send failed: ${message}` }, { status: 502 });
   }
 

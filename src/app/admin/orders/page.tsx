@@ -6,9 +6,11 @@
  */
 
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 import { requireAdmin } from "@/lib/auth/session";
 import { listOrders } from "@/lib/supabase/queries/orders";
 import { serverClient } from "@/lib/supabase/server";
+import { getPrinterEmail } from "@/lib/supabase/queries/settings";
 import type { Order, OrderStatus } from "@/lib/types";
 import { BatchButton } from "./BatchButton";
 
@@ -19,7 +21,15 @@ async function countItemsByOrder(orderIds: string[]): Promise<Record<string, num
     .from("order_items")
     .select("order_id, quantity")
     .in("order_id", orderIds);
-  if (error || !data) return {};
+  if (error) {
+    console.error(`[admin/orders] countItemsByOrder failed: ${error.message}`);
+    Sentry.captureException(new Error(`countItemsByOrder failed: ${error.message}`), {
+      tags: { pipeline: "admin-orders-page:count-items" },
+      extra: { orderIdsCount: orderIds.length },
+    });
+    return {};
+  }
+  if (!data) return {};
   const counts: Record<string, number> = {};
   for (const row of data as Array<{ order_id: string; quantity: number }>) {
     counts[row.order_id] = (counts[row.order_id] ?? 0) + row.quantity;
@@ -103,7 +113,8 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
 
   const paidItemCounts = await countItemsByOrder(paidOrders.map((o) => o.id));
   const paidPreview = toPreview(paidOrders, paidItemCounts);
-  const printerEmail = process.env.PRINT_SHOP_EMAIL ?? null;
+  // DB setting (editable at /admin/settings) with env fallback.
+  const printerEmail = await getPrinterEmail();
 
   return (
     <section className="flex flex-col gap-6">

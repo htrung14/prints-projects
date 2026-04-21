@@ -15,9 +15,17 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import * as Sentry from "@sentry/nextjs";
 import type { OrderStatus } from "@/lib/types";
 
-const STATUS_ORDER: OrderStatus[] = ["paid", "sent_to_print", "printed", "shipped", "delivered"];
+const STATUS_ORDER: OrderStatus[] = [
+  "paid",
+  "queued_for_print",
+  "sent_to_print",
+  "printed",
+  "shipped",
+  "delivered",
+];
 
 const TERMINAL: OrderStatus[] = ["refunded", "cancelled"];
 
@@ -67,6 +75,9 @@ export default function OrderActions({
       setMsg({
         kind: "err",
         text: e instanceof Error ? e.message : "Unknown error.",
+      });
+      Sentry.captureException(e, {
+        tags: { surface: "admin", action: "admin-action" },
       });
       return false;
     }

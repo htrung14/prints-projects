@@ -12,10 +12,12 @@
  */
 
 import "server-only";
+import * as Sentry from "@sentry/nextjs";
 import { render } from "@react-email/render";
 import * as React from "react";
 import type { Order, OrderItem } from "@/lib/types";
-import { fromAddress, getResend, printShopAddress } from "./client";
+import { fromAddress, getResend } from "./client";
+import { getPrinterEmail } from "@/lib/supabase/queries/settings";
 import OrderConfirmation from "./templates/OrderConfirmation";
 import PrintJob from "./templates/PrintJob";
 import Shipped from "./templates/Shipped";
@@ -25,6 +27,7 @@ import PostPurchase, {
 } from "./templates/PostPurchase";
 import { formatOrderReference } from "./templates/_shared";
 import { schedulePostPurchaseInserts } from "./scheduled";
+import { alertSystemError } from "@/lib/alerting/dispatcher";
 
 /**
  * Thin wrapper around Resend's emails.send that renders a React Email
@@ -83,11 +86,20 @@ export async function sendOrderConfirmation(order: Order, items: OrderItem[]): P
 export async function sendPrintJobEmail(
   order: Order,
   items: OrderItem[],
-  dispatchUrl: string
+  dispatchUrl: string,
+  /**
+   * Optional override. When omitted, we fetch from settings (DB → env fallback).
+   * Callers in hot paths (webhook) pre-resolve it to avoid an extra DB call.
+   */
+  recipient?: string
 ): Promise<void> {
   const ref = formatOrderReference(order);
+  const to = recipient ?? (await getPrinterEmail());
+  if (!to) {
+    throw new Error("sendPrintJobEmail: no printer email configured (check /admin/settings).");
+  }
   await sendRenderedEmail({
-    to: printShopAddress(),
+    to,
     // Reply threads back to Thalia's inbox, not a noreply.
     replyTo: fromAddress(),
     subject: `[Order ${ref}] New print job, ready to fulfill`,
@@ -147,4 +159,36 @@ export async function sendPostPurchaseTouch(
       { name: "order_ref", value: ref },
     ],
   });
+}
+
+// ---------------------------------------------------------------------------
+// sendAndAlert — thin observability wrapper.
+//
+// Wraps any of the send* functions so a failure is:
+//   1. logged (console.error)
+//   2. captured to Sentry with `pipeline: "email:<label>"`
+//   3. fanned to the ops alert channels via alertSystemError
+// and then rethrown — callers still decide whether to swallow the throw
+// (webhook runSafely pattern) or let it bubble (admin resend route returns
+// 502). Use in new code instead of ad-hoc try/catch around the send
+// functions, and REQUIRED for any future post-purchase cron so the missing
+// `RESEND_API_KEY` / render errors / Resend 5xx all surface to operators.
+// ---------------------------------------------------------------------------
+
+export async function sendAndAlert<T>(
+  label: string,
+  orderId: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`email:${label} (order ${orderId}) failed: ${msg}`);
+    Sentry.captureException(err, {
+      tags: { pipeline: `email:${label}`, orderId },
+    });
+    await alertSystemError(`email ${label} (order ${orderId})`, msg);
+    throw err;
+  }
 }

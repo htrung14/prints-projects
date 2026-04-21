@@ -157,7 +157,7 @@ function buildEntry(filename, parsed, index) {
       `Photographed in ${location ? titleCase(location) : "Lebanon"}${
         month && year ? `, ${month} ${year}` : ""
       }. Part of At-Tamassok — a series on the small domestic rituals that persist across distance and displacement.`,
-      "Printed to order on archival pigment paper with a 1 inch border for handling.",
+      "Printed to order on archival pigment paper with a border for handling.",
     ],
     imageUrl: `/images/catalog/${slug}.jpg`,
     imageAlt,

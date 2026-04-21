@@ -11,13 +11,15 @@
  *   4. Write an audit entry (Track A)
  */
 
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { verifyDispatchToken } from "@/lib/dispatch/token";
 import { updateOrderTracking } from "@/lib/dispatch/queries";
 import { getOrderById, updateOrderStatus } from "@/lib/supabase/queries/orders";
 import { audit } from "@/lib/supabase/queries/audit";
 import { sendShippedNotification } from "@/lib/email/send";
+import { getDispatcher } from "@/lib/alerting/dispatcher";
+import { systemErrorAlert } from "@/lib/alerting";
 
 const CARRIERS = ["USPS", "UPS", "FedEx", "DHL"] as const;
 
@@ -57,7 +59,21 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ orderId: s
     return NextResponse.json({ error: "Token does not authorize this order." }, { status: 403 });
   }
 
-  const order = await getOrderById(orderId);
+  let order;
+  try {
+    order = await getOrderById(orderId);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`dispatch/status(${orderId}) getOrderById failure:`, err);
+    after(() => {
+      getDispatcher()
+        .send(systemErrorAlert(`POST /api/dispatch/${orderId}/status order lookup`, msg))
+        .catch((alertErr) => {
+          console.error(`dispatch/status(${orderId}): alert dispatch failed:`, alertErr);
+        });
+    });
+    return NextResponse.json({ error: "Failed to load order. Please retry." }, { status: 500 });
+  }
   if (!order) {
     return NextResponse.json({ error: "Order not found." }, { status: 404 });
   }
@@ -77,7 +93,15 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ orderId: s
       actor: "dispatch_submit",
     });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
     console.error(`dispatch/status POST ${orderId} db failure:`, err);
+    after(() => {
+      getDispatcher()
+        .send(systemErrorAlert(`POST /api/dispatch/${orderId}/status (tracking/status write)`, msg))
+        .catch((alertErr) => {
+          console.error(`dispatch/status(${orderId}): alert dispatch failed:`, alertErr);
+        });
+    });
     return NextResponse.json({ error: "Failed to record tracking. Try again." }, { status: 500 });
   }
 
@@ -88,7 +112,17 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ orderId: s
       await sendShippedNotification(refreshed);
     }
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
     console.error(`dispatch/status POST ${orderId} email failure (non-blocking):`, err);
+    after(() => {
+      getDispatcher()
+        .send(
+          systemErrorAlert(`POST /api/dispatch/${orderId}/status shipped-email (non-blocking)`, msg)
+        )
+        .catch((alertErr) => {
+          console.error(`dispatch/status(${orderId}): email-alert dispatch failed:`, alertErr);
+        });
+    });
   }
   try {
     await audit({
@@ -102,7 +136,17 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ orderId: s
       },
     });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
     console.error(`dispatch/status POST ${orderId} audit failure (non-blocking):`, err);
+    after(() => {
+      getDispatcher()
+        .send(
+          systemErrorAlert(`POST /api/dispatch/${orderId}/status audit-write (non-blocking)`, msg)
+        )
+        .catch((alertErr) => {
+          console.error(`dispatch/status(${orderId}): audit-alert dispatch failed:`, alertErr);
+        });
+    });
   }
 
   return NextResponse.json({ ok: true });

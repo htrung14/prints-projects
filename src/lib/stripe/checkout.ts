@@ -10,7 +10,7 @@
  * - Guest checkout only - no `customer` param
  * - Currency: USD. Adaptive Pricing is a dashboard-level setting.
  * - Shipping address collected by Stripe (not pre-filled from us) ← Pastel #5 "shipping at checkout"
- * - Flat-rate shipping: $20 domestic, $45 international
+ * - Shipping: free US domestic, $20 international
  * - `cart_lines_json` stored on session metadata so the webhook can rebuild
  *   the cart server-side without trusting the Stripe line-item echo.
  *
@@ -87,8 +87,8 @@ export const ALLOWED_COUNTRIES: ReadonlyArray<AllowedCountry> = [
  */
 const TAX_CODE_FALLBACK = "txcd_99999999";
 
-const FALLBACK_DOMESTIC_CENTS = 2000; // $20 US
-const FALLBACK_INTL_CENTS = 4500; // $45 international
+const FALLBACK_DOMESTIC_CENTS = 0; // Free US shipping
+const FALLBACK_INTL_CENTS = 2000; // $20 international
 
 // ---------------------------------------------------------------------------
 // Line-item construction
@@ -211,7 +211,7 @@ function buildLineItem(r: ResolvedCartLine): LineItemParam {
 /**
  * Build the `shipping_options` array for this session.
  *
- * Two flat-rate options: $20 domestic (US), $45 international.
+ * Two options: free domestic (US), $20 international.
  */
 function buildShippingOptions(lines: CartLine[]): ShippingOptionParam[] {
   const options: ShippingOptionParam[] = [];
@@ -223,7 +223,7 @@ function buildShippingOptions(lines: CartLine[]): ShippingOptionParam[] {
         amount: FALLBACK_DOMESTIC_CENTS,
         currency: "usd",
       },
-      display_name: "Standard shipping (US)",
+      display_name: "Free US shipping",
       tax_behavior: "exclusive",
     },
   });

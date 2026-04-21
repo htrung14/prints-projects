@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import * as Sentry from "@sentry/nextjs";
 
 type OrderPreview = {
   id: string;
@@ -22,7 +23,9 @@ function formatMoney(cents: number, currency: string): string {
 }
 
 export function BatchButton({ paidOrdersCount, previewOrders, printerEmail }: BatchButtonProps) {
-  const [step, setStep] = useState<"idle" | "confirm" | "loading" | "done" | "error">("idle");
+  const [step, setStep] = useState<"idle" | "confirm" | "loading" | "done" | "warning" | "error">(
+    "idle"
+  );
   const [message, setMessage] = useState<string>("");
 
   const disabled = paidOrdersCount === 0;
@@ -36,21 +39,55 @@ export function BatchButton({ paidOrdersCount, previewOrders, printerEmail }: Ba
       if (!res.ok) throw new Error(data.error || "Batch dispatch failed");
       const delta = data.batched - previewOrders.length;
       const base = `Batched ${data.batched} order${data.batched === 1 ? "" : "s"}.`;
-      const note =
+      const deltaNote =
         delta === 0
           ? ""
           : delta > 0
             ? ` (${delta} new since preview.)`
             : ` (${-delta} fewer since preview — likely another admin or status change.)`;
-      setStep("done");
-      setMessage(base + note);
+
+      // Truthful printer-email status. The server returns
+      // `printerEmailResolved` + `printerEmailSent` so the UI can stop
+      // falsely claiming delivery on a silent dispatcher/Resend failure.
+      const resolved = data.printerEmailResolved !== false;
+      const sent = data.printerEmailSent !== false;
+      let printerNote: string;
+      let nextStep: "done" | "warning";
+      if (!resolved) {
+        nextStep = "warning";
+        printerNote =
+          " Printer email NOT sent — no printer email configured. Set one at /admin/settings, then hand off manually or re-run.";
+      } else if (!sent) {
+        nextStep = "warning";
+        const reason = data.printerEmailError ? ` (${data.printerEmailError})` : "";
+        printerNote = ` Printer email NOT sent${reason} — check alerts / Sentry and hand off manually or retry.`;
+      } else {
+        nextStep = "done";
+        printerNote = " Printer email delivered.";
+      }
+
+      setStep(nextStep);
+      setMessage(base + deltaNote + printerNote);
     } catch (err) {
       setStep("error");
       setMessage(err instanceof Error ? err.message : "Unknown error");
+      Sentry.captureException(err, {
+        tags: { surface: "admin", action: "batch-dispatch" },
+      });
     }
   }
 
-  if (step === "done" || step === "error") {
+  if (step === "done" || step === "warning" || step === "error") {
+    // Colour key:
+    //   done    → green (all good)
+    //   warning → amber (batched OK, printer email did NOT go through)
+    //   error   → red (the API call itself failed)
+    const palette =
+      step === "error"
+        ? { bg: "#fee2e2", fg: "#7f1d1d" }
+        : step === "warning"
+          ? { bg: "#fef3c7", fg: "#78350f" }
+          : { bg: "#dcfce7", fg: "#14532d" };
     return (
       <p
         style={{
@@ -58,8 +95,8 @@ export function BatchButton({ paidOrdersCount, previewOrders, printerEmail }: Ba
           padding: "8px 12px",
           borderRadius: 4,
           fontSize: 14,
-          backgroundColor: step === "error" ? "#fee2e2" : "#dcfce7",
-          color: step === "error" ? "#7f1d1d" : "#14532d",
+          backgroundColor: palette.bg,
+          color: palette.fg,
         }}
       >
         {message}
@@ -151,7 +188,14 @@ export function BatchButton({ paidOrdersCount, previewOrders, printerEmail }: Ba
                 </>
               ) : (
                 <span style={{ color: "#b45309" }}>
-                  No printer email sent (<code>PRINT_SHOP_EMAIL</code> not set).
+                  No printer email set. Configure it at{" "}
+                  <a
+                    href="/admin/settings"
+                    style={{ color: "#b45309", textDecoration: "underline" }}
+                  >
+                    /admin/settings
+                  </a>
+                  .
                 </span>
               )}
             </li>

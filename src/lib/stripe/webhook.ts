@@ -16,6 +16,7 @@
  */
 
 import "server-only";
+import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 import type { Address, CartLine, Order, OrderItem } from "@/lib/types";
 import { resolveCartLines } from "./checkout";
@@ -28,6 +29,7 @@ import {
 } from "@/lib/email/send";
 import { buildDispatchUrl } from "@/lib/dispatch/url";
 import { alertAfterOrder } from "@/lib/alerting/webhook-alerts";
+import { alertSafely, alertSystemError } from "@/lib/alerting/dispatcher";
 
 // ---------------------------------------------------------------------------
 // Metadata shape
@@ -257,7 +259,10 @@ export async function handleCheckoutSessionCompleted(
   } catch (err) {
     // buildDispatchUrl may throw if DISPATCH_SIGNING_SECRET is unset. Don't
     // block the webhook on it - Rob can reissue from admin later.
-    console.error(`webhook(${order.id}): buildDispatchUrl failed: ${(err as Error).message}`);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`webhook(${order.id}): buildDispatchUrl failed: ${msg}`);
+    Sentry.captureException(err, { tags: { pipeline: "stripe-webhook:buildDispatchUrl" } });
+    await alertSystemError(`buildDispatchUrl (order ${order.id})`, msg);
   }
 
   return { order, items, dispatchUrl };
@@ -279,11 +284,36 @@ export async function runPostOrderSideEffects(
   const currency = order.currency;
 
   await runSafely("sendOrderConfirmation", () => sendOrderConfirmation(order, items), order.id);
-  // Print-lab notification is opt-in: only run when PRINT_SHOP_EMAIL is
-  // explicitly configured. Otherwise orders are batched manually.
-  if (dispatchUrl && process.env.PRINT_SHOP_EMAIL) {
-    const url = dispatchUrl;
-    await runSafely("sendPrintJobEmail", () => sendPrintJobEmail(order, items, url), order.id);
+  // Print-lab notification is opt-in: only run when the printer email is
+  // configured (in admin settings, or as env fallback). Otherwise orders
+  // are batched manually.
+  if (dispatchUrl) {
+    const { getPrinterEmail } = await import("@/lib/supabase/queries/settings");
+    const printerEmail = await getPrinterEmail();
+    if (printerEmail) {
+      const url = dispatchUrl;
+      await runSafely(
+        "sendPrintJobEmail",
+        () => sendPrintJobEmail(order, items, url, printerEmail),
+        order.id
+      );
+    } else {
+      // Misconfiguration, not transient: we have a dispatch URL but nowhere
+      // to send it. Fire a single admin alert per order (idempotency on
+      // `stripe_checkout_session_id` ensures we only reach here once).
+      console.warn(
+        `webhook(${order.id}): dispatchUrl available but no printer email configured — skipping print-job email`
+      );
+      Sentry.captureMessage("sendPrintJobEmail skipped: no printer email configured", {
+        level: "warning",
+        tags: { pipeline: "stripe-webhook:sendPrintJobEmail" },
+        extra: { orderId: order.id },
+      });
+      await alertSystemError(
+        `sendPrintJobEmail skipped (order ${order.id})`,
+        `Order ${order.id} paid and a dispatch URL was generated, but no printer email is configured (admin settings or PRINT_SHOP_EMAIL env). Print job was NOT sent. Configure the printer email at /admin/settings, then use the admin "resend print job" button to deliver it.`
+      );
+    }
   }
   await runSafely(
     "schedulePostPurchaseSequence",
@@ -313,13 +343,22 @@ export async function runPostOrderSideEffects(
 }
 
 /**
- * Run a side-effect that must not fail the webhook. Logs + swallows.
+ * Run a side-effect that must not fail the webhook. Logs + alerts + swallows.
+ *
+ * We never rethrow here — Stripe would retry forever on side-effect errors.
+ * Instead we fan the error out to three places so it cannot disappear:
+ *   1. console.error (Vercel logs)
+ *   2. Sentry.captureException (last-resort signal if dispatcher is down)
+ *   3. alertSystemError(...) → dispatcher (email + Telegram + Notion)
  */
 async function runSafely(label: string, fn: () => Promise<void>, orderId: string): Promise<void> {
   try {
     await fn();
   } catch (err) {
-    console.error(`webhook(${orderId}): ${label} failed: ${(err as Error).message ?? String(err)}`);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`webhook(${orderId}): ${label} failed: ${msg}`);
+    Sentry.captureException(err, { tags: { pipeline: `stripe-webhook:${label}`, orderId } });
+    await alertSystemError(`${label} (order ${orderId})`, msg);
   }
 }
 
@@ -335,6 +374,15 @@ async function handleChargeRefunded(charge: Stripe.Charge): Promise<void> {
 
   if (!piId) {
     console.warn("webhook: charge.refunded has no payment_intent — cannot map to order");
+    Sentry.captureMessage("charge.refunded with no payment_intent", {
+      level: "warning",
+      tags: { pipeline: "stripe-webhook:charge.refunded" },
+      extra: { chargeId: charge.id },
+    });
+    await alertSystemError(
+      `charge.refunded (charge ${charge.id})`,
+      "Refund event arrived with no payment_intent — cannot map to order. Check Stripe Dashboard manually."
+    );
     return;
   }
 
@@ -347,6 +395,10 @@ async function handleChargeRefunded(charge: Stripe.Charge): Promise<void> {
 
   if (!data) {
     console.info(`webhook: charge.refunded for PI ${piId} — no matching order found`);
+    await alertSystemError(
+      `charge.refunded (PI ${piId})`,
+      `Refund issued in Stripe for payment intent ${piId} but no matching order found in database. Possible data drift — investigate.`
+    );
     return;
   }
 
@@ -359,9 +411,9 @@ async function handleChargeRefunded(charge: Stripe.Charge): Promise<void> {
     })
   );
 
-  const { getDispatcher } = await import("@/lib/alerting/dispatcher");
-  const dispatcher = getDispatcher();
-  await dispatcher.send({
+  // Don't rethrow — we already updated the order status above, so a dispatcher
+  // failure here shouldn't cause Stripe to retry and duplicate the update.
+  await alertSafely(`charge.refunded (order ${data.id})`, {
     type: "system_error",
     severity: "warning",
     title: "Order refunded via Stripe",
@@ -387,6 +439,15 @@ async function handleDisputeCreated(dispute: Stripe.Dispute): Promise<void> {
 
   if (!piId) {
     console.warn("webhook: charge.dispute.created has no payment_intent");
+    Sentry.captureMessage("charge.dispute.created with no payment_intent", {
+      level: "error",
+      tags: { pipeline: "stripe-webhook:charge.dispute.created" },
+      extra: { disputeId: dispute.id },
+    });
+    await alertSystemError(
+      `charge.dispute.created (dispute ${dispute.id})`,
+      `Dispute opened but no payment_intent on the event — cannot map to order. Respond manually in Stripe Dashboard within 7 days.`
+    );
     return;
   }
 
@@ -397,10 +458,9 @@ async function handleDisputeCreated(dispute: Stripe.Dispute): Promise<void> {
     .eq("stripe_payment_intent_id", piId)
     .maybeSingle();
 
-  const { getDispatcher } = await import("@/lib/alerting/dispatcher");
-  const dispatcher = getDispatcher();
-
-  await dispatcher.send({
+  // Don't rethrow: disputes need human response regardless of whether our
+  // alerting pipeline is healthy. Log + Sentry via alertSafely is enough.
+  await alertSafely(`charge.dispute.created (dispute ${dispute.id})`, {
     type: "system_error",
     severity: "critical",
     title: "Payment dispute opened",
@@ -429,15 +489,38 @@ export async function handleEditionExceeded(
 ): Promise<void> {
   const piId = extractPaymentIntentId(session);
   if (!piId) {
-    console.error("webhook: EDITION_EXCEEDED but no payment_intent to refund");
+    // Customer paid, edition is gone, and we have no PI to refund. This is
+    // worst-case — they need manual intervention NOW.
+    const msg = `EDITION_EXCEEDED but no payment_intent to refund. Session: ${session.id}. Original error: ${errorMessage}`;
+    console.error(`webhook: ${msg}`);
+    Sentry.captureMessage("EDITION_EXCEEDED with no payment_intent", {
+      level: "fatal",
+      tags: { pipeline: "stripe-webhook:edition-exceeded" },
+      extra: { sessionId: session.id, errorMessage },
+    });
+    await alertSystemError(
+      `edition-exceeded (session ${session.id})`,
+      `CRITICAL: Customer paid, edition sold out, and no payment_intent on session to auto-refund. Manual refund required immediately in Stripe Dashboard. ${msg}`
+    );
     return;
   }
 
   const stripe = (await import("./client")).stripeClient();
+  let refundSucceeded = false;
   try {
     await stripe.refunds.create({ payment_intent: piId });
+    refundSucceeded = true;
   } catch (refundErr) {
-    console.error(`webhook: auto-refund failed for PI ${piId}: ${(refundErr as Error).message}`);
+    const msg = refundErr instanceof Error ? refundErr.message : String(refundErr);
+    console.error(`webhook: auto-refund failed for PI ${piId}: ${msg}`);
+    Sentry.captureException(refundErr, {
+      tags: { pipeline: "stripe-webhook:auto-refund" },
+      extra: { paymentIntentId: piId, sessionId: session.id },
+    });
+    await alertSystemError(
+      `auto-refund (PI ${piId})`,
+      `CRITICAL: Edition exceeded for session ${session.id} but auto-refund to PI ${piId} FAILED (${msg}). Refund the customer manually in Stripe Dashboard.`
+    );
   }
 
   const email = session.customer_details?.email ?? session.customer_email;
@@ -445,7 +528,7 @@ export async function handleEditionExceeded(
     try {
       const { getResend, fromAddress } = await import("@/lib/email/client");
       const resend = getResend();
-      await resend.emails.send({
+      const { error: sendError } = await resend.emails.send({
         from: fromAddress(),
         to: email,
         subject: "We're sorry — your order could not be fulfilled",
@@ -463,29 +546,52 @@ export async function handleEditionExceeded(
           `— Thalia Bassim Studio`,
         ].join("\n"),
       });
+      if (sendError) {
+        // Resend's SDK reports API rejections via `{ error }`, not a throw.
+        const m =
+          typeof sendError === "object" && sendError !== null && "message" in sendError
+            ? String((sendError as { message?: unknown }).message)
+            : JSON.stringify(sendError);
+        throw new Error(`Resend send failed: ${m}`);
+      }
     } catch (emailErr) {
-      console.error(`webhook: apology email failed for ${email}: ${(emailErr as Error).message}`);
+      const msg = emailErr instanceof Error ? emailErr.message : String(emailErr);
+      console.error(`webhook: apology email failed for ${email}: ${msg}`);
+      Sentry.captureException(emailErr, {
+        tags: { pipeline: "stripe-webhook:apology-email" },
+        extra: { email, sessionId: session.id },
+      });
+      await alertSystemError(
+        `apology email (${email})`,
+        `Edition-exceeded apology email to ${email} failed: ${msg}. Refund ${refundSucceeded ? "was" : "was NOT"} issued. Contact customer manually.`
+      );
     }
   }
 
-  try {
-    const { getDispatcher } = await import("@/lib/alerting/dispatcher");
-    const dispatcher = getDispatcher();
-    await dispatcher.send({
-      type: "system_error",
-      severity: "critical",
-      title: "Edition exceeded — auto-refund issued",
-      whatHappened: `Session ${session.id} paid but edition was exhausted. Auto-refund issued to PI ${piId}. Customer: ${email ?? "unknown"}. Error: ${errorMessage}`,
-      autoHandled: "Full refund issued automatically. Apology email sent to customer.",
-      actionRequired: false,
-      actionInstructions:
-        "None — handled automatically. Verify refund appeared in Stripe Dashboard if concerned.",
-      timestamp: new Date().toISOString(),
-      metadata: { sessionId: session.id, paymentIntentId: piId, email, error: errorMessage },
-    });
-  } catch (alertErr) {
-    console.error(`webhook: edition-exceeded alert failed: ${(alertErr as Error).message}`);
-  }
+  // alertSafely handles console.error + Sentry.captureException on dispatcher
+  // failure so we don't silently lose this alert even if Telegram + email
+  // channels are both down.
+  await alertSafely(`edition-exceeded (session ${session.id})`, {
+    type: "system_error",
+    severity: "critical",
+    title: "Edition exceeded — auto-refund issued",
+    whatHappened: `Session ${session.id} paid but edition was exhausted. Auto-refund ${refundSucceeded ? "issued" : "FAILED"} to PI ${piId}. Customer: ${email ?? "unknown"}. Error: ${errorMessage}`,
+    autoHandled: refundSucceeded
+      ? "Full refund issued automatically. Apology email sent to customer."
+      : "Refund FAILED — manual action required.",
+    actionRequired: !refundSucceeded,
+    actionInstructions: refundSucceeded
+      ? "None — handled automatically. Verify refund appeared in Stripe Dashboard if concerned."
+      : "Issue refund manually in Stripe Dashboard immediately.",
+    timestamp: new Date().toISOString(),
+    metadata: {
+      sessionId: session.id,
+      paymentIntentId: piId,
+      email,
+      error: errorMessage,
+      refundSucceeded,
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------

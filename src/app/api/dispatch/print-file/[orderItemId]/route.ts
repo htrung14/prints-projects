@@ -12,12 +12,14 @@
  *   6. 302 redirect to the URL
  */
 
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { verifyDispatchToken } from "@/lib/dispatch/token";
 import { getDispatchItemById, recordPrintFileUrlSnapshot } from "@/lib/dispatch/queries";
 import { getOrderById } from "@/lib/supabase/queries/orders";
 import { audit } from "@/lib/supabase/queries/audit";
 import { getPrintFileSignedUrl } from "@/lib/r2/signed-url";
+import { getDispatcher } from "@/lib/alerting/dispatcher";
+import { systemErrorAlert } from "@/lib/alerting";
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ orderItemId: string }> }) {
   const { orderItemId } = await ctx.params;
@@ -32,7 +34,21 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ orderItemId
     return NextResponse.json({ error: "Invalid or expired token." }, { status: 401 });
   }
 
-  const item = await getDispatchItemById(orderItemId);
+  let item;
+  try {
+    item = await getDispatchItemById(orderItemId);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`dispatch/print-file(${orderItemId}) getDispatchItemById failure:`, err);
+    after(() => {
+      getDispatcher()
+        .send(systemErrorAlert(`GET /api/dispatch/print-file/${orderItemId} item lookup`, msg))
+        .catch((alertErr) => {
+          console.error(`dispatch/print-file(${orderItemId}): alert dispatch failed:`, alertErr);
+        });
+    });
+    return NextResponse.json({ error: "Failed to load item. Please retry." }, { status: 500 });
+  }
   if (!item) {
     return NextResponse.json({ error: "Item not found." }, { status: 404 });
   }
@@ -43,7 +59,21 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ orderItemId
     return NextResponse.json({ error: "Token does not authorize this item." }, { status: 403 });
   }
 
-  const order = await getOrderById(item.orderId);
+  let order;
+  try {
+    order = await getOrderById(item.orderId);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`dispatch/print-file(${orderItemId}) getOrderById failure:`, err);
+    after(() => {
+      getDispatcher()
+        .send(systemErrorAlert(`GET /api/dispatch/print-file/${orderItemId} order lookup`, msg))
+        .catch((alertErr) => {
+          console.error(`dispatch/print-file(${orderItemId}): alert dispatch failed:`, alertErr);
+        });
+    });
+    return NextResponse.json({ error: "Failed to load order. Please retry." }, { status: 500 });
+  }
   if (!order) {
     return NextResponse.json({ error: "Order not found." }, { status: 404 });
   }
@@ -59,7 +89,20 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ orderItemId
   try {
     signed = await getPrintFileSignedUrl(item.photoPrintFileKey);
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
     console.error(`dispatch/print-file: failed to sign ${item.photoPrintFileKey}:`, err);
+    after(() => {
+      getDispatcher()
+        .send(
+          systemErrorAlert(
+            `GET /api/dispatch/print-file/${orderItemId} r2-sign (key=${item.photoPrintFileKey})`,
+            msg
+          )
+        )
+        .catch((alertErr) => {
+          console.error(`dispatch/print-file(${orderItemId}): alert dispatch failed:`, alertErr);
+        });
+    });
     return NextResponse.json({ error: "Could not generate download link." }, { status: 500 });
   }
 
@@ -67,7 +110,23 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ orderItemId
   try {
     await recordPrintFileUrlSnapshot(orderItemId, signed);
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
     console.error(`dispatch/print-file: snapshot write failed for ${orderItemId}:`, err);
+    after(() => {
+      getDispatcher()
+        .send(
+          systemErrorAlert(
+            `GET /api/dispatch/print-file/${orderItemId} snapshot-write (non-blocking)`,
+            msg
+          )
+        )
+        .catch((alertErr) => {
+          console.error(
+            `dispatch/print-file(${orderItemId}): snapshot-alert dispatch failed:`,
+            alertErr
+          );
+        });
+    });
   }
   try {
     await audit({
@@ -77,7 +136,23 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ orderItemId
       meta: { orderItemId, r2Key: item.photoPrintFileKey },
     });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
     console.error(`dispatch/print-file: audit write failed for ${orderItemId}:`, err);
+    after(() => {
+      getDispatcher()
+        .send(
+          systemErrorAlert(
+            `GET /api/dispatch/print-file/${orderItemId} audit-write (non-blocking)`,
+            msg
+          )
+        )
+        .catch((alertErr) => {
+          console.error(
+            `dispatch/print-file(${orderItemId}): audit-alert dispatch failed:`,
+            alertErr
+          );
+        });
+    });
   }
 
   return NextResponse.redirect(signed, { status: 302 });

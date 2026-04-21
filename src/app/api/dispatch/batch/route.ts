@@ -10,13 +10,15 @@
  * the UI can annotate individual rows.
  */
 
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { verifyDispatchToken } from "@/lib/dispatch/token";
 import { updateOrderTracking } from "@/lib/dispatch/queries";
 import { getOrderById, updateOrderStatus } from "@/lib/supabase/queries/orders";
 import { audit } from "@/lib/supabase/queries/audit";
 import { sendShippedNotification } from "@/lib/email/send";
+import { getDispatcher } from "@/lib/alerting/dispatcher";
+import { systemErrorAlert } from "@/lib/alerting";
 
 const CARRIERS = ["USPS", "UPS", "FedEx", "DHL"] as const;
 
@@ -94,7 +96,23 @@ export async function POST(req: NextRequest) {
           await sendShippedNotification(refreshed);
         }
       } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
         console.error(`dispatch/batch: email failure for ${upd.orderId} (non-blocking):`, err);
+        after(() => {
+          getDispatcher()
+            .send(
+              systemErrorAlert(
+                `POST /api/dispatch/batch shipped-email ${upd.orderId} (non-blocking)`,
+                msg
+              )
+            )
+            .catch((alertErr) => {
+              console.error(
+                `dispatch/batch(${upd.orderId}): email-alert dispatch failed:`,
+                alertErr
+              );
+            });
+        });
       }
       try {
         await audit({
@@ -107,15 +125,41 @@ export async function POST(req: NextRequest) {
           },
         });
       } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
         console.error(`dispatch/batch: audit failure for ${upd.orderId} (non-blocking):`, err);
+        after(() => {
+          getDispatcher()
+            .send(
+              systemErrorAlert(
+                `POST /api/dispatch/batch audit-write ${upd.orderId} (non-blocking)`,
+                msg
+              )
+            )
+            .catch((alertErr) => {
+              console.error(
+                `dispatch/batch(${upd.orderId}): audit-alert dispatch failed:`,
+                alertErr
+              );
+            });
+        });
       }
 
       succeeded.push(upd.orderId);
     } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed.";
       console.error(`dispatch/batch: ${upd.orderId} failed:`, err);
+      after(() => {
+        getDispatcher()
+          .send(
+            systemErrorAlert(`POST /api/dispatch/batch tracking/status write ${upd.orderId}`, msg)
+          )
+          .catch((alertErr) => {
+            console.error(`dispatch/batch(${upd.orderId}): alert dispatch failed:`, alertErr);
+          });
+      });
       failed.push({
         orderId: upd.orderId,
-        error: err instanceof Error ? err.message : "Failed.",
+        error: msg,
       });
     }
   }

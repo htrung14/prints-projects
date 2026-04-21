@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import type { Alert, AlertSeverity } from "./types";
 
 export type TriageResult = {
@@ -84,8 +85,21 @@ export async function triageAlert(alert: Alert): Promise<TriageResult> {
     const text: string = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
     return parseTriageResponse(text);
   } catch (err) {
-    console.error("[triage] Google AI failed:", (err as Error).message);
-    return passThrough(alert, `Triage failed: ${(err as Error).message}`);
+    // Triage failure is non-fatal — we fall back to passThrough so the alert
+    // still fires — but we must surface the LLM outage so it doesn't go
+    // unnoticed. Without this, Google AI could be down for weeks and the
+    // only signal would be degraded alert quality.
+    const error = err instanceof Error ? err : new Error(String(err));
+    try {
+      Sentry.captureException(error, {
+        tags: { pipeline: "alerting-triage", provider: "google-ai" },
+        extra: { alertTitle: alert.title, alertType: alert.type },
+      });
+    } catch {
+      // Sentry unavailable — nothing more we can do from the terminal sink.
+    }
+    console.error("[triage] Google AI failed:", error.message);
+    return passThrough(alert, `Triage failed: ${error.message}`);
   }
 }
 

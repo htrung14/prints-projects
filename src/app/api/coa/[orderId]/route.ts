@@ -9,11 +9,13 @@
  * Node runtime - @react-pdf needs Node primitives, not the edge runtime.
  */
 
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { verifyDispatchToken } from "@/lib/dispatch/token";
 import { getOrderById } from "@/lib/supabase/queries/orders";
 import { generateCoaPdf } from "@/lib/coa/generate";
 import { serverClient } from "@/lib/supabase/server";
+import { getDispatcher } from "@/lib/alerting/dispatcher";
+import { systemErrorAlert } from "@/lib/alerting";
 import type { OrderItem } from "@/lib/types";
 import { formatOrderReference } from "@/lib/email/templates/_shared";
 
@@ -98,7 +100,21 @@ export async function GET(request: NextRequest, ctx: { params: Promise<{ orderId
     return new NextResponse("Token not valid for this order", { status: 403 });
   }
 
-  const order = await getOrderById(orderId);
+  let order;
+  try {
+    order = await getOrderById(orderId);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`coa(${orderId}) getOrderById failure:`, err);
+    after(() => {
+      getDispatcher()
+        .send(systemErrorAlert(`GET /api/coa/${orderId} order lookup (item=${itemId})`, msg))
+        .catch((alertErr) => {
+          console.error(`coa(${orderId}): alert dispatch failed:`, alertErr);
+        });
+    });
+    return new NextResponse("Failed to load order.", { status: 500 });
+  }
   if (!order) {
     return new NextResponse("Order not found", { status: 404 });
   }
@@ -106,7 +122,21 @@ export async function GET(request: NextRequest, ctx: { params: Promise<{ orderId
     return new NextResponse("Token revoked", { status: 403 });
   }
 
-  const item = await getOrderItem(orderId, itemId);
+  let item;
+  try {
+    item = await getOrderItem(orderId, itemId);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`coa(${orderId}) getOrderItem failure (item=${itemId}):`, err);
+    after(() => {
+      getDispatcher()
+        .send(systemErrorAlert(`GET /api/coa/${orderId} item lookup (item=${itemId})`, msg))
+        .catch((alertErr) => {
+          console.error(`coa(${orderId}): alert dispatch failed:`, alertErr);
+        });
+    });
+    return new NextResponse("Failed to load order item.", { status: 500 });
+  }
   if (!item) {
     return new NextResponse("Order item not found", { status: 404 });
   }
@@ -116,6 +146,14 @@ export async function GET(request: NextRequest, ctx: { params: Promise<{ orderId
     pdf = await generateCoaPdf(order, item);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "COA render failed";
+    console.error(`COA render failed for order=${orderId} item=${itemId}:`, err);
+    after(() => {
+      getDispatcher()
+        .send(systemErrorAlert(`GET /api/coa/${orderId} (item=${itemId})`, msg))
+        .catch((alertErr) => {
+          console.error(`coa(${orderId}): alert dispatch failed:`, alertErr);
+        });
+    });
     return new NextResponse(msg, { status: 500 });
   }
 

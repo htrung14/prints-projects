@@ -17,10 +17,10 @@
 
 import type { NextRequest } from "next/server";
 import { after } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { stripeClient, webhookSecret } from "@/lib/stripe/client";
 import { dispatchWebhookEvent, runPostOrderSideEffects } from "@/lib/stripe/webhook";
-import { getDispatcher } from "@/lib/alerting/dispatcher";
-import { systemErrorAlert } from "@/lib/alerting";
+import { alertSystemError } from "@/lib/alerting/dispatcher";
 import type Stripe from "stripe";
 
 // Node runtime only - the Stripe SDK's signature verification uses the
@@ -41,7 +41,13 @@ export async function POST(req: NextRequest): Promise<Response> {
   try {
     rawBody = await req.text();
   } catch (err) {
-    console.error(`Stripe webhook: failed to read request body: ${(err as Error).message}`);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`Stripe webhook: failed to read request body: ${msg}`);
+    Sentry.captureException(err, { tags: { pipeline: "stripe-webhook:body-read" } });
+    // Best-effort alert; body-read failures are rare and worth surfacing.
+    after(() => {
+      alertSystemError("Stripe webhook: body read", msg);
+    });
     return new Response("Failed to read request body", { status: 400 });
   }
 
@@ -50,8 +56,15 @@ export async function POST(req: NextRequest): Promise<Response> {
   try {
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret());
   } catch (err) {
-    console.warn(`Stripe webhook signature verification failed: ${(err as Error).message}`);
-    return new Response(`Webhook signature verification failed: ${(err as Error).message}`, {
+    // Signature verification failures are either attacker probes (noise) or
+    // a rotated webhook secret (real ops issue). We send to Sentry so it's
+    // captured without spamming Telegram/email for every probe. If the
+    // attacker rate-limits or a real failure trend emerges, Sentry will
+    // show the pattern.
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`Stripe webhook signature verification failed: ${msg}`);
+    Sentry.captureException(err, { tags: { pipeline: "stripe-webhook:signature" } });
+    return new Response(`Webhook signature verification failed: ${msg}`, {
       status: 400,
     });
   }
@@ -62,17 +75,33 @@ export async function POST(req: NextRequest): Promise<Response> {
     // Side-effects (emails, alerts, audit) run after we return 200 to Stripe.
     if (result && "order" in result) {
       const session = event.data.object as Stripe.Checkout.Session;
-      after(() => runPostOrderSideEffects(result.order, result.items, session, result.dispatchUrl));
+      after(async () => {
+        try {
+          await runPostOrderSideEffects(result.order, result.items, session, result.dispatchUrl);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          Sentry.captureException(err, {
+            tags: { pipeline: "stripe-webhook:after-side-effects", eventType: event.type },
+            extra: { orderId: result.order.id, eventId: event.id },
+          });
+          await alertSystemError(
+            `Stripe webhook side-effects failed (order ${result.order.id})`,
+            msg
+          );
+        }
+      });
     }
 
     return new Response(null, { status: 200 });
   } catch (err) {
-    const msg = (err as Error).message ?? String(err);
+    const msg = err instanceof Error ? err.message : String(err);
     console.error(`Stripe webhook handler failed for event ${event.id} (${event.type}):`, err);
+    Sentry.captureException(err, {
+      tags: { pipeline: "stripe-webhook:handler", eventType: event.type },
+      extra: { eventId: event.id },
+    });
     after(() => {
-      getDispatcher()
-        .send(systemErrorAlert(`Stripe webhook: ${event.type} (${event.id})`, msg))
-        .catch(() => {});
+      alertSystemError(`Stripe webhook: ${event.type} (${event.id})`, msg);
     });
     return new Response("Internal error", { status: 500 });
   }

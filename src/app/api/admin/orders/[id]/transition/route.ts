@@ -13,12 +13,15 @@
  *    attempts to send the shipped-notification email via Track C.
  */
 
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { z } from "zod";
 import { getAdminSession } from "@/lib/auth/session";
 import { getOrderById, updateOrderStatus } from "@/lib/supabase/queries/orders";
 import { audit } from "@/lib/supabase/queries/audit";
+import { sendShippedNotification } from "@/lib/email/send";
 import { updateOrderFields } from "@/app/admin/_data";
+import { getDispatcher } from "@/lib/alerting/dispatcher";
+import { systemErrorAlert } from "@/lib/alerting";
 import type { OrderStatus } from "@/lib/types";
 
 const Body = z.object({
@@ -48,52 +51,88 @@ export async function POST(
   }
   const { to, tracking, carrier } = parsed;
 
-  const order = await getOrderById(id);
+  let order;
+  try {
+    order = await getOrderById(id);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`transition(${id}) getOrderById failure (actor=${session.email}):`, err);
+    after(() => {
+      getDispatcher()
+        .send(systemErrorAlert(`transition(${id}) order lookup (actor=${session.email})`, msg))
+        .catch((alertErr) => {
+          console.error(`transition(${id}): alert dispatch failed:`, alertErr);
+        });
+    });
+    return NextResponse.json({ error: "Failed to load order. Please retry." }, { status: 500 });
+  }
   if (!order) {
     return NextResponse.json({ error: "order not found" }, { status: 404 });
   }
 
   // Persist tracking + carrier before the status change, so downstream
   // consumers (email sender) see the final-form row.
-  if (to === "shipped") {
-    if (!tracking || tracking.trim().length === 0) {
-      return NextResponse.json(
-        { error: "tracking number is required to mark shipped" },
-        { status: 400 }
-      );
+  try {
+    if (to === "shipped") {
+      if (!tracking || tracking.trim().length === 0) {
+        return NextResponse.json(
+          { error: "tracking number is required to mark shipped" },
+          { status: 400 }
+        );
+      }
+      await updateOrderFields(id, {
+        tracking_number: tracking.trim(),
+        carrier: carrier?.trim() || null,
+      });
     }
-    await updateOrderFields(id, {
-      tracking_number: tracking.trim(),
-      carrier: carrier?.trim() || null,
+
+    await updateOrderStatus(id, to as OrderStatus, { actor: session.email });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`transition(${id} -> ${to}) db failure (actor=${session.email}):`, err);
+    after(() => {
+      getDispatcher()
+        .send(
+          systemErrorAlert(`transition(${id} -> ${to}) state change (actor=${session.email})`, msg)
+        )
+        .catch((alertErr) => {
+          console.error(`transition(${id}): alert dispatch failed:`, alertErr);
+        });
     });
+    return NextResponse.json(
+      { error: "Failed to transition order. Please retry." },
+      { status: 500 }
+    );
   }
 
-  await updateOrderStatus(id, to as OrderStatus, { actor: session.email });
-
   if (to === "shipped") {
-    // Track C exports `sendShippedNotification(order)`. Import lazily so a
-    // Track-C outage doesn't block the status change.
+    // Re-read so the email sees the just-written tracking_number + carrier.
+    // Wrapped in try/catch (runSafely pattern): an email failure must not
+    // roll back a successful status change. On failure we log + write an
+    // audit entry so we can resend later.
     try {
-      // Resolved at runtime so type resolution here doesn't break when Track
-      // C hasn't shipped yet. TODO: drop the dynamic import once Track C's
-      // module is stable and the types are exported.
-      const mod = (await import("@/lib/email/send").catch(() => null)) as {
-        sendShippedNotification?: (o: unknown) => Promise<void>;
-      } | null;
-      if (mod?.sendShippedNotification) {
-        const refreshed = await getOrderById(id);
-        if (refreshed) await mod.sendShippedNotification(refreshed);
+      const refreshed = await getOrderById(id);
+      if (refreshed) {
+        await sendShippedNotification(refreshed);
       }
     } catch (err) {
-      // Don't fail the status change on email errors - log only.
-      console.error(
-        `transition(${id}): sendShippedNotification failed: ${err instanceof Error ? err.message : String(err)}`
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`transition(${id}): sendShippedNotification failed: ${msg}`);
       await audit({
         orderId: id,
         actor: session.email,
         action: "email_send_failed",
-        meta: { kind: "shipped_notification" },
+        meta: {
+          kind: "shipped_notification",
+          error: msg,
+        },
+      });
+      after(() => {
+        getDispatcher()
+          .send(systemErrorAlert(`transition(${id}) shipped email (actor=${session.email})`, msg))
+          .catch((alertErr) => {
+            console.error(`transition(${id}): alert dispatch failed:`, alertErr);
+          });
       });
     }
   }

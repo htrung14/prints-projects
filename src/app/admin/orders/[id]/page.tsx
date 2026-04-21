@@ -29,10 +29,13 @@ function formatDateTime(iso: string): string {
   return d.toISOString().replace("T", " ").slice(0, 16) + " UTC";
 }
 
-function stripeDashboardUrl(pi: string | null): string | null {
+function stripeDashboardUrl(pi: string | null, sessionId: string | null): string | null {
   if (!pi) return null;
-  // Default to test mode; admins can swap to live in the URL bar if needed.
-  return `https://dashboard.stripe.com/test/payments/${encodeURIComponent(pi)}`;
+  // Detect live vs test from the session ID prefix so admins land on the
+  // correct dashboard without manual URL surgery.
+  const isLive = sessionId?.startsWith("cs_live_") ?? false;
+  const base = isLive ? "https://dashboard.stripe.com" : "https://dashboard.stripe.com/test";
+  return `${base}/payments/${encodeURIComponent(pi)}`;
 }
 
 export default async function OrderDetailPage({ params }: PageProps<"/admin/orders/[id]">) {
@@ -48,7 +51,7 @@ export default async function OrderDetailPage({ params }: PageProps<"/admin/orde
   ]);
 
   const addr = order.shippingAddress;
-  const piUrl = stripeDashboardUrl(order.stripePaymentIntentId);
+  const piUrl = stripeDashboardUrl(order.stripePaymentIntentId, order.stripeCheckoutSessionId);
   const tokenRevoked = order.fulfillmentTokenRevokedAt !== null;
 
   return (

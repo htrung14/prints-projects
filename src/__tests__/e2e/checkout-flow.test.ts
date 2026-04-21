@@ -234,7 +234,7 @@ describe("createCheckoutSession", () => {
     expect(session.url).toBe("https://checkout.stripe.com/test");
   });
 
-  it("offers flat-rate shipping only (no free shipping)", async () => {
+  it("offers free US shipping + $20 international", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE, { ...VALID_CART_LINE, photoSlug: "tyre-feb-2022" }],
@@ -242,14 +242,12 @@ describe("createCheckoutSession", () => {
     });
 
     const params = mockStripeCreate.mock.calls[0][0];
-    const freeOption = params.shipping_options.find(
-      (o: { shipping_rate_data: { display_name: string } }) =>
-        o.shipping_rate_data.display_name.includes("Free")
-    );
-    expect(freeOption).toBeUndefined();
     expect(params.shipping_options).toHaveLength(2);
-    expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(2000);
-    expect(params.shipping_options[1].shipping_rate_data.fixed_amount.amount).toBe(4500);
+    // Free US domestic
+    expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(0);
+    expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("Free");
+    // $20 international
+    expect(params.shipping_options[1].shipping_rate_data.fixed_amount.amount).toBe(2000);
   });
 
   it("test-1-dollar cart: flat $1, no fee, no shipping collection", async () => {

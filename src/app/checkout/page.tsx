@@ -113,7 +113,7 @@ export default function CheckoutPage() {
           </div>
           <div className="flex justify-between">
             <dt>Shipping</dt>
-            <dd className="text-ink-faint">$20 US / $45 international</dd>
+            <dd className="text-ink-faint">Free US / $20 international</dd>
           </div>
         </dl>
 
