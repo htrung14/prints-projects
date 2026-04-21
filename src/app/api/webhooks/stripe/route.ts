@@ -19,6 +19,8 @@ import type { NextRequest } from "next/server";
 import { after } from "next/server";
 import { stripeClient, webhookSecret } from "@/lib/stripe/client";
 import { dispatchWebhookEvent, runPostOrderSideEffects } from "@/lib/stripe/webhook";
+import { getDispatcher } from "@/lib/alerting/dispatcher";
+import { systemErrorAlert } from "@/lib/alerting";
 import type Stripe from "stripe";
 
 // Node runtime only - the Stripe SDK's signature verification uses the
@@ -65,7 +67,13 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     return new Response(null, { status: 200 });
   } catch (err) {
+    const msg = (err as Error).message ?? String(err);
     console.error(`Stripe webhook handler failed for event ${event.id} (${event.type}):`, err);
+    after(() => {
+      getDispatcher()
+        .send(systemErrorAlert(`Stripe webhook: ${event.type} (${event.id})`, msg))
+        .catch(() => {});
+    });
     return new Response("Internal error", { status: 500 });
   }
 }

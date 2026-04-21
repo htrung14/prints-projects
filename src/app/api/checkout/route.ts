@@ -14,10 +14,12 @@
  *   500 { error: string } - Stripe SDK or upstream failure
  */
 
-import type { NextRequest } from "next/server";
+import { after, type NextRequest } from "next/server";
 import type { CartLine } from "@/lib/types";
 import { createCheckoutSession } from "@/lib/stripe/checkout";
 import { softInventoryCheck } from "@/lib/stripe/inventory-check";
+import { getDispatcher } from "@/lib/alerting/dispatcher";
+import { systemErrorAlert } from "@/lib/alerting";
 
 // Force the Node runtime - the Stripe SDK and Supabase service-role client
 // rely on Node-only APIs (crypto, Buffer). Edge would silently fail at runtime.
@@ -105,6 +107,11 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
 
     console.error("POST /api/checkout failed:", err);
+    after(() => {
+      getDispatcher()
+        .send(systemErrorAlert("POST /api/checkout", msg))
+        .catch(() => {});
+    });
     return Response.json(
       { error: "Checkout session creation failed. Please retry." },
       { status: 500 }
