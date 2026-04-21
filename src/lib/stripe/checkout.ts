@@ -288,24 +288,31 @@ export async function createCheckoutSession(
 
   const lineItems = resolved.map(buildLineItem);
 
-  const printSubtotalCents = resolved.reduce(
-    (sum, r) => sum + r.unitPriceCents * r.line.quantity,
-    0
-  );
-  const processingFeeCents = Math.ceil(printSubtotalCents * 0.03);
-  lineItems.push({
-    quantity: 1,
-    price_data: {
-      currency: "usd",
-      unit_amount: processingFeeCents,
-      product_data: {
-        name: "Processing fee (3%)",
-        tax_code: "txcd_00000000",
-      },
-    },
-  });
+  // Test-mode cart: only the hidden `test-1-dollar` item is present.
+  // Skip processing fee and shipping so the charge is a clean flat $1.
+  const isTestCart =
+    resolved.length > 0 && resolved.every((r) => r.line.photoSlug === "test-1-dollar");
 
-  const shippingOptions = buildShippingOptions(args.lines);
+  if (!isTestCart) {
+    const printSubtotalCents = resolved.reduce(
+      (sum, r) => sum + r.unitPriceCents * r.line.quantity,
+      0
+    );
+    const processingFeeCents = Math.ceil(printSubtotalCents * 0.03);
+    lineItems.push({
+      quantity: 1,
+      price_data: {
+        currency: "usd",
+        unit_amount: processingFeeCents,
+        product_data: {
+          name: "Processing fee (3%)",
+          tax_code: "txcd_00000000",
+        },
+      },
+    });
+  }
+
+  const shippingOptions = isTestCart ? undefined : buildShippingOptions(args.lines);
 
   const origin = args.origin ?? siteOrigin();
   const successUrl = `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`;
@@ -320,11 +327,15 @@ export async function createCheckoutSession(
     automatic_tax: { enabled: false },
     tax_id_collection: { enabled: false },
     billing_address_collection: "required",
-    phone_number_collection: { enabled: true },
-    shipping_address_collection: {
-      allowed_countries: [...ALLOWED_COUNTRIES],
-    },
-    shipping_options: shippingOptions,
+    phone_number_collection: { enabled: !isTestCart },
+    ...(isTestCart
+      ? {}
+      : {
+          shipping_address_collection: {
+            allowed_countries: [...ALLOWED_COUNTRIES],
+          },
+          shipping_options: shippingOptions,
+        }),
     // Guest checkout: don't pass `customer`. Stripe groups sessions under a
     // "guest customer" entity in the dashboard without us creating a
     // permanent Customer record.
