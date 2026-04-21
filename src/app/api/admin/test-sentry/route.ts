@@ -10,6 +10,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  const client = Sentry.getClient();
+  const dsnOptions = client?.getOptions?.();
+  const dsn = dsnOptions?.dsn || "(no dsn)";
+  const dsnHead = typeof dsn === "string" ? dsn.slice(0, 60) + "..." : "(non-string dsn)";
+
   const err = new Error(
     "TEST — verifying Sentry → /api/alerts/sentry → dispatcher path. No action needed."
   );
@@ -20,11 +25,20 @@ export async function POST(req: Request) {
     level: "error",
   });
 
-  await Sentry.flush(2000);
+  const flushed = await Sentry.flush(5000);
 
   return NextResponse.json({
     ok: true,
     eventId,
-    note: "Sentry should create a new issue within ~30s; the alert rule will POST to /api/alerts/sentry → dispatcher → Telegram + email.",
+    flushed,
+    clientReady: !!client,
+    dsnHead,
+    env: {
+      hasServerDsn: !!process.env.SENTRY_DSN,
+      hasPublicDsn: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
+      publicDsnHead: (process.env.NEXT_PUBLIC_SENTRY_DSN ?? "").slice(0, 60) + "...",
+      vercelEnv: process.env.VERCEL_ENV,
+      nodeEnv: process.env.NODE_ENV,
+    },
   });
 }
