@@ -15,7 +15,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import DemoBanner from "@/components/DemoBanner";
 import { useCart } from "@/lib/cart";
 import { getAllPhotos } from "@/lib/photos";
 import { formatUsd, priceCents } from "@/lib/pricing";
@@ -58,101 +57,101 @@ export default function CheckoutPage() {
 
   if (lines.length === 0) {
     return (
-      <>
-        <DemoBanner />
-        <div className="border-t border-ink-line px-6 py-16 md:px-8">
-          <div className="mx-auto max-w-xl space-y-5">
-            <span className="label-caps">Checkout</span>
-            <h1 className="h-display text-3xl">Your cart is empty.</h1>
-            <p className="text-sm leading-relaxed text-ink">
-              Add a print from the catalog and come back here to check out.
-            </p>
-            <div className="flex flex-wrap gap-3 pt-2">
-              <Link href="/" className="btn-ghost">
-                Back to editions →
-              </Link>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  return (
-    <>
-      <DemoBanner />
       <div className="border-t border-ink-line px-6 py-16 md:px-8">
-        <div className="mx-auto max-w-2xl space-y-8">
-          <header className="space-y-2">
-            <span className="label-caps">Checkout</span>
-            <h1 className="h-display text-3xl">Review your cart and continue to payment.</h1>
-          </header>
-
-          <ul className="divide-y divide-ink-line border-y border-ink-line">
-            {lines.map((line, i) => {
-              const photo = photos.find((p) => p.slug === line.photoSlug);
-              if (!photo) return null;
-              return (
-                <CheckoutLine
-                  key={`${line.photoSlug}-${line.sizeId}-${line.paperId}-${i}`}
-                  index={i}
-                  photo={photo}
-                  line={{ ...line }}
-                  disabled={pending}
-                  onRemove={() => remove(i)}
-                  onUpgrade={(paperId) => updatePaper(i, paperId)}
-                />
-              );
-            })}
-          </ul>
-
-          <dl className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <dt>Items</dt>
-              <dd className="text-ink-strong">{itemCount}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt>Subtotal</dt>
-              <dd className="text-ink-strong">{formatUsd(subtotalCents)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt>Shipping</dt>
-              <dd className="text-ink-faint">calculated at checkout</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt>Tax</dt>
-              <dd className="text-ink-faint">calculated at checkout</dd>
-            </div>
-          </dl>
-
-          <div className="space-y-3">
-            <button
-              type="button"
-              className="btn-ink w-full"
-              disabled={pending || lines.length === 0}
-              onClick={proceed}
-            >
-              <span>{pending ? "Redirecting…" : "Proceed to checkout"}</span>
-              <span className="btn-ink-price">{formatUsd(subtotalCents)}</span>
-            </button>
-            {error ? (
-              <p role="alert" className="text-sm text-ink-strong">
-                {error}
-              </p>
-            ) : null}
-            <p className="text-[11px] text-ink-faint">
-              Payment is processed securely by Stripe. We never see or store card details.
-            </p>
-          </div>
-
-          <div>
-            <Link href="/" className="text-sm text-ink-faint underline">
-              ← Continue browsing
+        <div className="mx-auto max-w-xl space-y-5">
+          <span className="label-caps">Checkout</span>
+          <h1 className="h-display text-3xl">Your cart is empty.</h1>
+          <p className="text-sm leading-relaxed text-ink">
+            Add a print from the catalog and come back here to check out.
+          </p>
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Link href="/" className="btn-ghost">
+              Back to editions →
             </Link>
           </div>
         </div>
       </div>
-    </>
+    );
+  }
+
+  const processingFeeCents = Math.ceil(subtotalCents * 0.03);
+
+  return (
+    <div className="border-t border-ink-line px-6 py-16 md:px-8">
+      <div className="mx-auto max-w-2xl space-y-8">
+        <header className="space-y-2">
+          <span className="label-caps">Checkout</span>
+          <h1 className="h-display text-3xl">Review your cart and continue to payment.</h1>
+        </header>
+
+        <ul className="divide-y divide-ink-line border-y border-ink-line">
+          {lines.map((line, i) => {
+            const photo = photos.find((p) => p.slug === line.photoSlug);
+            if (!photo) return null;
+            return (
+              <CheckoutLine
+                key={`${line.photoSlug}-${line.sizeId}-${line.paperId}-${i}`}
+                index={i}
+                photo={photo}
+                line={{ ...line }}
+                disabled={pending}
+                onRemove={() => remove(i)}
+                onUpgrade={(paperId) => updatePaper(i, paperId)}
+              />
+            );
+          })}
+        </ul>
+
+        <dl className="space-y-1 text-sm">
+          <div className="flex justify-between">
+            <dt>Items</dt>
+            <dd className="text-ink-strong">{itemCount}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt>Subtotal</dt>
+            <dd className="text-ink-strong">{formatUsd(subtotalCents)}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt>Processing fee (3%)</dt>
+            <dd className="text-ink-strong">{formatUsd(processingFeeCents)}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt>Shipping</dt>
+            <dd className="text-ink-faint">$20 US / $45 international</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt>Tax</dt>
+            <dd className="text-ink-faint">calculated at checkout</dd>
+          </div>
+        </dl>
+
+        <div className="space-y-3">
+          <button
+            type="button"
+            className="btn-ink w-full"
+            disabled={pending || lines.length === 0}
+            onClick={proceed}
+          >
+            <span>{pending ? "Redirecting…" : "Proceed to checkout"}</span>
+            <span className="btn-ink-price">{formatUsd(subtotalCents + processingFeeCents)}</span>
+          </button>
+          {error ? (
+            <p role="alert" className="text-sm text-ink-strong">
+              {error}
+            </p>
+          ) : null}
+          <p className="text-[11px] text-ink-faint">
+            Payment is processed securely by Stripe. We never see or store card details.
+          </p>
+        </div>
+
+        <div>
+          <Link href="/" className="text-sm text-ink-faint underline">
+            ← Continue browsing
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -230,11 +229,7 @@ function CheckoutLine({
         </div>
       </div>
 
-      {/* Row 2 - details concatenated on their own dedicated line, full-width
-          so the phrase never breaks mid-paper-name on narrow viewports. */}
-      <p className="text-[13px] leading-snug text-ink-faint">
-        {size?.label} · {paper?.name}
-      </p>
+      <p className="text-[13px] leading-snug text-ink-faint">{size?.label} · Archival pigment</p>
 
       {/* Row 3 - qty + remove + upsell */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-ink-faint">
@@ -242,32 +237,6 @@ function CheckoutLine({
         <button type="button" onClick={onRemove} className="underline" disabled={disabled}>
           Remove
         </button>
-        {upgrade ? (
-          <button
-            type="button"
-            onClick={() => onUpgrade(upgrade.id)}
-            disabled={disabled}
-            className="upsell-chip"
-            title={`Switch this print to ${upgrade.name}`}
-          >
-            Upgrade to {upgrade.name}
-            <span className="upsell-delta">+{formatUsd(upgradeDeltaPerUnit * line.quantity)}</span>
-          </button>
-        ) : null}
-        {downgrade ? (
-          <button
-            type="button"
-            onClick={() => onUpgrade(downgrade.id)}
-            disabled={disabled}
-            className="upsell-chip upsell-chip--revert"
-            title={`Switch this print to ${downgrade.name}`}
-          >
-            Revert to {downgrade.name}
-            <span className="upsell-delta">
-              −{formatUsd(downgradeDeltaPerUnit * line.quantity)}
-            </span>
-          </button>
-        ) : null}
       </div>
 
       <style>{`

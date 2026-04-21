@@ -54,9 +54,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-full">
         <CartProvider>
-          {/* DemoBanner now lives only on the checkout page so the rest of
-              the site (landing, product detail, essay) can be reviewed as it
-              will be seen in production, without the preview nag. */}
           <div className="app-shell flex min-h-screen flex-col">
             <Header />
             <main className="flex-1">{children}</main>

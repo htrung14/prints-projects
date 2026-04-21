@@ -27,11 +27,6 @@ export type PostPurchaseTouchNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type PostPurchaseProps = {
   order: Order;
   touchNumber: PostPurchaseTouchNumber;
-  /**
-   * Referral code for touch 5. TODO:referral_code_system - when we wire a
-   * real referral code generator, populate this from there. For now, leave
-   * it as the placeholder string.
-   */
   referralCode?: string;
 };
 
@@ -79,15 +74,13 @@ function contentForTouch(
         subject: `Caring for your print`,
         body: "A few notes on care. Keep the print out of direct sunlight. Frame behind UV glass or acrylic when possible. Handle by the edges; cotton gloves are ideal but clean hands are fine. Avoid mounting with adhesive - use archival photo corners or a reversible hinge.",
       };
-    case 5: {
-      const code = referralCode ?? "TODO:referral_code_system";
+    case 5:
       return {
         preview: `A small thank-you, if you care to share.`,
         subject: `A small thank-you`,
-        body: `If you know someone who might like the work, share this code: ${code}. They get twenty dollars off; you get twenty dollars back against a future print. No pressure.`,
+        body: `If you know someone who might appreciate the work, feel free to share the catalogue. Word of mouth means more than anything.`,
         cta: { label: "View the catalogue", href: `${base}/` },
       };
-    }
     case 6:
       return {
         preview: `Living with your print.`,

@@ -51,7 +51,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
 
         .h-arabic {
           font-family: var(--font-arabic), "Noto Naskh Arabic", serif;
-          font-size: clamp(32px, 3.4vw, 48px);
+          font-size: clamp(48px, 5.5vw, 80px);
           font-weight: 700;
           color: #fff;
           line-height: 1;
@@ -59,7 +59,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
         }
         .h-title {
           font-family: var(--font-serif);
-          font-size: clamp(22px, 2vw, 28px);
+          font-size: clamp(28px, 3vw, 44px);
           font-weight: 600;
           color: #fff;
           letter-spacing: -0.005em;

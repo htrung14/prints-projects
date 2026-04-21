@@ -95,14 +95,6 @@ const TAX_CODE_FALLBACK = "txcd_99999999";
 const FALLBACK_DOMESTIC_CENTS = 2000; // $20 US non-qualifying
 const FALLBACK_INTL_CENTS = 4500; // $45 international
 
-/**
- * Free-shipping qualifier: US shipping address AND 2+ units across the cart.
- * Evaluated over the line items before we build the session.
- */
-function qualifiesForFreeUsShipping(totalUnits: number): boolean {
-  return totalUnits >= 2;
-}
-
 function totalUnits(lines: CartLine[]): number {
   return lines.reduce((n, l) => n + Math.max(0, l.quantity), 0);
 }
@@ -242,23 +234,7 @@ function buildLineItem(r: ResolvedCartLine): LineItemParam {
  */
 function buildShippingOptions(lines: CartLine[]): ShippingOptionParam[] {
   const options: ShippingOptionParam[] = [];
-  const units = totalUnits(lines);
 
-  if (qualifiesForFreeUsShipping(units)) {
-    options.push({
-      shipping_rate_data: {
-        type: "fixed_amount",
-        fixed_amount: { amount: 0, currency: "usd" },
-        display_name: "Free US shipping (2+ prints)",
-        tax_behavior: "exclusive",
-      },
-    });
-  }
-
-  // TODO: split into domestic vs international once we have Rob's real rates.
-  // For now a single flat USD rate so the Checkout page always has at least
-  // one shipping option (Stripe will reject sessions with shipping collection
-  // enabled but no rates when the customer's country forces a choice).
   options.push({
     shipping_rate_data: {
       type: "fixed_amount",
@@ -330,6 +306,24 @@ export async function createCheckoutSession(
   const resolved = await resolveCartLines(args.lines);
 
   const lineItems = resolved.map(buildLineItem);
+
+  const printSubtotalCents = resolved.reduce(
+    (sum, r) => sum + r.unitPriceCents * r.line.quantity,
+    0
+  );
+  const processingFeeCents = Math.ceil(printSubtotalCents * 0.03);
+  lineItems.push({
+    quantity: 1,
+    price_data: {
+      currency: "usd",
+      unit_amount: processingFeeCents,
+      product_data: {
+        name: "Processing fee (3%)",
+        tax_code: "txcd_00000000",
+      },
+    },
+  });
+
   const shippingOptions = buildShippingOptions(args.lines);
 
   const origin = args.origin ?? siteOrigin();
@@ -339,7 +333,7 @@ export async function createCheckoutSession(
   const params: SessionCreateParams = {
     mode: "payment",
     line_items: lineItems,
-    automatic_tax: { enabled: false },
+    automatic_tax: { enabled: true },
     tax_id_collection: { enabled: false },
     billing_address_collection: "required",
     phone_number_collection: { enabled: true },

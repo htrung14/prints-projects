@@ -7,16 +7,14 @@ import type { PaperType, Photo } from "@/lib/types";
 
 type DiscKey = "shipping" | "care";
 
-// Placeholder: each print is a single size. Stakeholder to confirm.
-// Falls back to the first fixture size if the expected id is absent so
-// cart/Stripe flow keeps working while the size is finalized.
 const FIXED_SIZE_ID = "8x10";
 const FIXED_SIZE_LABEL = "8 × 10 in";
+const FIXED_PAPER_ID: PaperType = "photo-rag";
 
 export default function BuyUI({ photo }: { photo: Photo }) {
   const { add, drawerOpen } = useCart();
-  const [paperId] = useState<PaperType>(photo.papers[0].id);
-  const [qty] = useState(1);
+  const paperId = FIXED_PAPER_ID;
+  const qty = 1;
 
   // Post-Lemaire restructure (2026-04-20): two of the previous four accordions
   // (Paper, Description) flattened into always-visible blocks so the page
@@ -192,6 +190,8 @@ export default function BuyUI({ photo }: { photo: Photo }) {
         >
           Signed and numbered by the artist. Limited edition of 10.
           <br />
+          Certificate of authenticity included.
+          <br />
           Ships within 7 business days.
         </p>
       </div>
@@ -238,7 +238,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
       >
         <div style={{ fontSize: 16, lineHeight: 1.65, color: "var(--ink)", maxWidth: "58ch" }}>
           <p style={{ marginBottom: 12 }}>
-            Ships in a flat waterproof package within 14 business days.
+            Ships in a flat waterproof package within 7 business days.
           </p>
           <p>
             Dispatched worldwide via insured courier. A replacement can be arranged if the package

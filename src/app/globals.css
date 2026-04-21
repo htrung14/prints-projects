@@ -296,8 +296,8 @@ em {
   font-weight: 400;
   letter-spacing: 0.06em;
   background-color: transparent;
-  color: var(--ink-strong);
-  border: 1px solid var(--ink-strong);
+  color: var(--btn-accent);
+  border: 1px solid var(--btn-accent);
   transition:
     background-color 200ms ease,
     color 200ms ease,
@@ -305,18 +305,19 @@ em {
 }
 .btn-ghost.is-secondary {
   background-color: transparent;
-  color: var(--ink-faint);
-  border-color: var(--ink-line);
+  color: var(--btn-accent);
+  border-color: var(--btn-accent);
+  opacity: 0.6;
 }
 .btn-ghost:hover {
-  background-color: var(--ink-strong);
-  color: var(--bg);
+  background-color: var(--btn-accent);
+  color: #fff;
   opacity: 1;
 }
 .btn-ghost.is-secondary:hover {
-  background-color: transparent;
-  color: var(--ink-strong);
-  border-color: var(--ink-strong);
+  background-color: var(--btn-accent);
+  color: #fff;
+  border-color: var(--btn-accent);
   opacity: 1;
 }
 .btn-ghost:active:not(:disabled) {

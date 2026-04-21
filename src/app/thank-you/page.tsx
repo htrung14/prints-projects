@@ -62,6 +62,60 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Sea
           .toUpperCase()
       : null;
 
+  if (!sessionId) {
+    return (
+      <div className="px-6 py-20 md:px-8">
+        <div className="mx-auto max-w-xl space-y-5">
+          <span className="label-caps">Order</span>
+          <h1 className="h-display text-3xl">Something went wrong.</h1>
+          <p className="text-sm leading-relaxed text-ink">
+            We couldn&rsquo;t find your order details. If you completed a purchase, check your email
+            for a confirmation — or contact us at info@thaliabassim.com.
+          </p>
+          <Link href="/" className="btn-ghost inline-block">
+            Back to editions →
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (session && session.payment_status !== "paid") {
+    return (
+      <div className="px-6 py-20 md:px-8">
+        <div className="mx-auto max-w-xl space-y-5">
+          <span className="label-caps">Payment</span>
+          <h1 className="h-display text-3xl">Payment not completed.</h1>
+          <p className="text-sm leading-relaxed text-ink">
+            Your payment has not been confirmed yet. If you believe this is an error, please try
+            again or contact us at info@thaliabassim.com.
+          </p>
+          <Link href="/checkout" className="btn-ghost inline-block">
+            Return to checkout →
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session && !order) {
+    return (
+      <div className="px-6 py-20 md:px-8">
+        <div className="mx-auto max-w-xl space-y-5">
+          <span className="label-caps">Order</span>
+          <h1 className="h-display text-3xl">We couldn&rsquo;t retrieve your order.</h1>
+          <p className="text-sm leading-relaxed text-ink">
+            This may be a temporary issue. If you completed a purchase, you&rsquo;ll receive a
+            confirmation email shortly. Contact info@thaliabassim.com if you need help.
+          </p>
+          <Link href="/" className="btn-ghost inline-block">
+            Back to editions →
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-6 py-20 md:px-8">
       <ClearCart />

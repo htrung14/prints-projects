@@ -1,29 +1,28 @@
 [
   {
-    "slug": "north-lebanon-2-oct-2020",
-    "referenceNumber": "AT-016",
-    "title": "North Lebanon (2)",
-    "titleItalic": "October 2020",
-    "subtitle": "North Lebanon, Lebanon",
-    "year": 2020,
+    "slug": "bekaa-feb-2025",
+    "referenceNumber": "AT-001",
+    "title": "Bekaa",
+    "titleItalic": "February 2025",
+    "subtitle": "Bekaa, Lebanon",
+    "year": 2025,
     "description": [
-      "A winding road carves through the northern mountains, disappearing into a landscape painted in the muted, earthy tones of October.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
     ],
-    "imageUrl": "/images/catalog/north-lebanon-2-oct-2020.jpg",
-    "imageAlt": "Documentary photograph: North Lebanon (2), October 2020. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "imageUrl": "/images/catalog/bekaa-feb-2025.jpg",
+    "imageAlt": "Documentary photograph: Bekaa, February 2025. Bekaa, Lebanon. Archival pigment print by Thalia Bassim.",
     "basePriceCents": 30000,
     "sizes": [
       {
         "id": "8x10",
-        "label": "8 \u00d7 10 in",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
     "papers": [
       {
         "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
+        "name": "Hahnemühle Photo Rag",
         "surchargeCents": 0
       },
       {
@@ -33,217 +32,12 @@
       },
       {
         "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
+        "name": "Hahnemühle Bamboo",
         "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
     "editionSold": 2
-  },
-  {
-    "slug": "north-lebanon-oct-2020",
-    "referenceNumber": "AT-023",
-    "title": "North Lebanon",
-    "titleItalic": "October 2020",
-    "subtitle": "North Lebanon, Lebanon",
-    "year": 2020,
-    "description": [
-      "In the crisp October air of North Lebanon, the landscape settles into a quiet, rugged beauty, its contours sharpened by the autumn light.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/north-lebanon-oct-2020.jpg",
-    "imageAlt": "Documentary photograph: North Lebanon, October 2020. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 2
-  },
-  {
-    "slug": "north-lebanon-2-jul-2021",
-    "referenceNumber": "AT-013",
-    "title": "North Lebanon (2)",
-    "titleItalic": "July 2021",
-    "subtitle": "North Lebanon, Lebanon",
-    "year": 2021,
-    "description": [
-      "Summer heat presses down on the northern valleys, the terraced hillsides alive with the drone of cicadas and the scent of wild thyme.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/north-lebanon-2-jul-2021.jpg",
-    "imageAlt": "Documentary photograph: North Lebanon (2), July 2021. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 3
-  },
-  {
-    "slug": "north-lebanon-jul-2021",
-    "referenceNumber": "AT-021",
-    "title": "North Lebanon",
-    "titleItalic": "July 2021",
-    "subtitle": "North Lebanon, Lebanon",
-    "year": 2021,
-    "description": [
-      "July light falls hard across the Qadisha Valley, casting the ancient cedars and stone villages into sharp, unforgiving relief.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/north-lebanon-jul-2021.jpg",
-    "imageAlt": "Documentary photograph: North Lebanon, July 2021. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 3
-  },
-  {
-    "slug": "tyre-feb-2022",
-    "referenceNumber": "AT-002",
-    "title": "Tyre",
-    "titleItalic": "February 2022",
-    "subtitle": "Tyre, Lebanon",
-    "year": 2022,
-    "description": [
-      "Winter light washes over Tyre's ancient stones, where the sea whispers stories to a city that has seen millennia pass.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/tyre-feb-2022.jpg",
-    "imageAlt": "Documentary photograph: Tyre, February 2022. Tyre, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 1
-  },
-  {
-    "slug": "north-lebanon-apr-2022",
-    "referenceNumber": "AT-019",
-    "title": "North Lebanon",
-    "titleItalic": "April 2022",
-    "subtitle": "North Lebanon, Lebanon",
-    "year": 2022,
-    "description": [
-      "Spring arrives tentatively in the north, the first wildflowers emerging between the rocks as the mountains shed their winter grey.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/north-lebanon-apr-2022.jpg",
-    "imageAlt": "Documentary photograph: North Lebanon, April 2022. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 1
   },
   {
     "slug": "north-lebanon-jul-2022",
@@ -253,8 +47,7 @@
     "subtitle": "North Lebanon, Lebanon",
     "year": 2022,
     "description": [
-      "The long days of July stretch across the northern plateau, where the horizon shimmers in the afternoon heat.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
     ],
     "imageUrl": "/images/catalog/north-lebanon-jul-2022.jpg",
     "imageAlt": "Documentary photograph: North Lebanon, July 2022. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
@@ -262,14 +55,14 @@
     "sizes": [
       {
         "id": "8x10",
-        "label": "8 \u00d7 10 in",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
     "papers": [
       {
         "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
+        "name": "Hahnemühle Photo Rag",
         "surchargeCents": 0
       },
       {
@@ -279,7 +72,7 @@
       },
       {
         "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
+        "name": "Hahnemühle Bamboo",
         "surchargeCents": 0
       }
     ],
@@ -294,8 +87,7 @@
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2023,
     "description": [
-      "March snow still clings to the peaks of Mount Lebanon, while below, the first green shoots push through the thawing earth.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
     ],
     "imageUrl": "/images/catalog/mount-lebanon-mar-2023.jpg",
     "imageAlt": "Documentary photograph: Mount Lebanon, March 2023. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
@@ -303,14 +95,14 @@
     "sizes": [
       {
         "id": "8x10",
-        "label": "8 \u00d7 10 in",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
     "papers": [
       {
         "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
+        "name": "Hahnemühle Photo Rag",
         "surchargeCents": 0
       },
       {
@@ -320,335 +112,7 @@
       },
       {
         "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 2
-  },
-  {
-    "slug": "mount-lebanon-jan-2025",
-    "referenceNumber": "AT-010",
-    "title": "Mount Lebanon",
-    "titleItalic": "January 2025",
-    "subtitle": "Mount Lebanon, Lebanon",
-    "year": 2025,
-    "description": [
-      "The January cold wraps Mount Lebanon in silence, the bare branches and muted sky holding a stark, contemplative beauty.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/mount-lebanon-jan-2025.jpg",
-    "imageAlt": "Documentary photograph: Mount Lebanon, January 2025. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 2
-  },
-  {
-    "slug": "bekaa-feb-2025",
-    "referenceNumber": "AT-001",
-    "title": "Bekaa",
-    "titleItalic": "February 2025",
-    "subtitle": "Bekaa, Lebanon",
-    "year": 2025,
-    "description": [
-      "The vast plain of the Bekaa lies dormant in February's grip, awaiting the first rains that will stir the soil back to life.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/bekaa-feb-2025.jpg",
-    "imageAlt": "Documentary photograph: Bekaa, February 2025. Bekaa, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 2
-  },
-  {
-    "slug": "mount-lebanon-2-feb-2025",
-    "referenceNumber": "AT-004",
-    "title": "Mount Lebanon (2)",
-    "titleItalic": "February 2025",
-    "subtitle": "Mount Lebanon, Lebanon",
-    "year": 2025,
-    "description": [
-      "A detail of weathered stone in Mount Lebanon, where the patina of time reveals itself in layers of moss and erosion.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/mount-lebanon-2-feb-2025.jpg",
-    "imageAlt": "Documentary photograph: Mount Lebanon (2), February 2025. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 0
-  },
-  {
-    "slug": "mount-lebanon-3-feb-2025",
-    "referenceNumber": "AT-006",
-    "title": "Mount Lebanon (3)",
-    "titleItalic": "February 2025",
-    "subtitle": "Mount Lebanon, Lebanon",
-    "year": 2025,
-    "description": [
-      "From a high ridge, the terraces of Mount Lebanon descend toward the coast, their ancient geometry softened by winter fog.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/mount-lebanon-3-feb-2025.jpg",
-    "imageAlt": "Documentary photograph: Mount Lebanon (3), February 2025. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 1
-  },
-  {
-    "slug": "mount-lebanon-4-feb-2025",
-    "referenceNumber": "AT-008",
-    "title": "Mount Lebanon (4)",
-    "titleItalic": "February 2025",
-    "subtitle": "Mount Lebanon, Lebanon",
-    "year": 2025,
-    "description": [
-      "Late afternoon light catches the western face of Mount Lebanon, turning the limestone cliffs to gold against a bruised winter sky.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/mount-lebanon-4-feb-2025.jpg",
-    "imageAlt": "Documentary photograph: Mount Lebanon (4), February 2025. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 2
-  },
-  {
-    "slug": "mount-lebanon-feb-2025",
-    "referenceNumber": "AT-009",
-    "title": "Mount Lebanon",
-    "titleItalic": "February 2025",
-    "subtitle": "Mount Lebanon, Lebanon",
-    "year": 2025,
-    "description": [
-      "February in Mount Lebanon \u2014 the world reduced to its essentials: stone, sky, and the patient endurance of rooted things.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/mount-lebanon-feb-2025.jpg",
-    "imageAlt": "Documentary photograph: Mount Lebanon, February 2025. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 0
-  },
-  {
-    "slug": "north-lebanon-2-feb-2025",
-    "referenceNumber": "AT-014",
-    "title": "North Lebanon (2)",
-    "titleItalic": "February 2025",
-    "subtitle": "North Lebanon, Lebanon",
-    "year": 2025,
-    "description": [
-      "The villages of North Lebanon huddle against the February cold, smoke rising from rooftops in thin columns against the grey.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/north-lebanon-2-feb-2025.jpg",
-    "imageAlt": "Documentary photograph: North Lebanon (2), February 2025. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 2
-  },
-  {
-    "slug": "north-lebanon-feb-2025",
-    "referenceNumber": "AT-020",
-    "title": "North Lebanon",
-    "titleItalic": "February 2025",
-    "subtitle": "North Lebanon, Lebanon",
-    "year": 2025,
-    "description": [
-      "A quiet February morning in the north, where the landscape holds its breath between the last frost and the coming spring.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/north-lebanon-feb-2025.jpg",
-    "imageAlt": "Documentary photograph: North Lebanon, February 2025. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
+        "name": "Hahnemühle Bamboo",
         "surchargeCents": 0
       }
     ],
@@ -663,8 +127,7 @@
     "subtitle": "Keserwan, Lebanon",
     "year": 2026,
     "description": [
-      "The pine forests of Keserwan stand sentinel in the winter mist, their dark forms softening the harsh mountain contours.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
     ],
     "imageUrl": "/images/catalog/keserwan-feb-2026.jpg",
     "imageAlt": "Documentary photograph: Keserwan, Lebanon, February 2026. Keserwan, Lebanon. Archival pigment print by Thalia Bassim.",
@@ -672,14 +135,14 @@
     "sizes": [
       {
         "id": "8x10",
-        "label": "8 \u00d7 10 in",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
     "papers": [
       {
         "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
+        "name": "Hahnemühle Photo Rag",
         "surchargeCents": 0
       },
       {
@@ -689,7 +152,7 @@
       },
       {
         "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
+        "name": "Hahnemühle Bamboo",
         "surchargeCents": 0
       }
     ],
@@ -697,30 +160,29 @@
     "editionSold": 2
   },
   {
-    "slug": "north-lebanon-2-feb-2026",
-    "referenceNumber": "AT-015",
+    "slug": "north-lebanon-2-oct-2020",
+    "referenceNumber": "AT-016",
     "title": "North Lebanon (2)",
-    "titleItalic": "February 2026",
+    "titleItalic": "October 2020",
     "subtitle": "North Lebanon, Lebanon",
-    "year": 2026,
+    "year": 2020,
     "description": [
-      "In the deep of February, North Lebanon reveals its most intimate face \u2014 bare orchards, empty roads, smoke from distant hearths.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
     ],
-    "imageUrl": "/images/catalog/north-lebanon-2-feb-2026.jpg",
-    "imageAlt": "Documentary photograph: North Lebanon (2), February 2026. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "imageUrl": "/images/catalog/north-lebanon-2-oct-2020.jpg",
+    "imageAlt": "Documentary photograph: North Lebanon (2), October 2020. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
     "basePriceCents": 30000,
     "sizes": [
       {
         "id": "8x10",
-        "label": "8 \u00d7 10 in",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
     "papers": [
       {
         "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
+        "name": "Hahnemühle Photo Rag",
         "surchargeCents": 0
       },
       {
@@ -730,38 +192,37 @@
       },
       {
         "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
+        "name": "Hahnemühle Bamboo",
         "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
-    "editionSold": 3
+    "editionSold": 2
   },
   {
-    "slug": "north-lebanon-3-feb-2026",
-    "referenceNumber": "AT-017",
-    "title": "North Lebanon (3)",
-    "titleItalic": "February 2026",
-    "subtitle": "North Lebanon, Lebanon",
-    "year": 2026,
+    "slug": "mount-lebanon-jan-2025",
+    "referenceNumber": "AT-010",
+    "title": "Mount Lebanon",
+    "titleItalic": "January 2025",
+    "subtitle": "Mount Lebanon, Lebanon",
+    "year": 2025,
     "description": [
-      "The northern coast in winter, where the grey Mediterranean meets the grey sky and only the fishing boats add color.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
     ],
-    "imageUrl": "/images/catalog/north-lebanon-3-feb-2026.jpg",
-    "imageAlt": "Documentary photograph: North Lebanon (3), February 2026. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "imageUrl": "/images/catalog/mount-lebanon-jan-2025.jpg",
+    "imageAlt": "Documentary photograph: Mount Lebanon, January 2025. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
     "basePriceCents": 30000,
     "sizes": [
       {
         "id": "8x10",
-        "label": "8 \u00d7 10 in",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
     "papers": [
       {
         "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
+        "name": "Hahnemühle Photo Rag",
         "surchargeCents": 0
       },
       {
@@ -771,12 +232,52 @@
       },
       {
         "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
+        "name": "Hahnemühle Bamboo",
         "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
-    "editionSold": 4
+    "editionSold": 2
+  },
+  {
+    "slug": "tyre-feb-2022",
+    "referenceNumber": "AT-002",
+    "title": "Tyre",
+    "titleItalic": "February 2022",
+    "subtitle": "Tyre, Lebanon",
+    "year": 2022,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/tyre-feb-2022.jpg",
+    "imageAlt": "Documentary photograph: Tyre, February 2022. Tyre, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 1
   },
   {
     "slug": "north-lebanon-feb-2026",
@@ -786,8 +287,7 @@
     "subtitle": "North Lebanon, Lebanon",
     "year": 2026,
     "description": [
-      "February stillness in the north. The land rests, the houses rest, everything waits for the wheel of seasons to turn again.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
     ],
     "imageUrl": "/images/catalog/north-lebanon-feb-2026.jpg",
     "imageAlt": "Documentary photograph: North Lebanon, February 2026. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
@@ -795,14 +295,14 @@
     "sizes": [
       {
         "id": "8x10",
-        "label": "8 \u00d7 10 in",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
     "papers": [
       {
         "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
+        "name": "Hahnemühle Photo Rag",
         "surchargeCents": 0
       },
       {
@@ -812,7 +312,7 @@
       },
       {
         "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
+        "name": "Hahnemühle Bamboo",
         "surchargeCents": 0
       }
     ],
@@ -827,8 +327,7 @@
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2026,
     "description": [
-      "Early March in Mount Lebanon, where the almond trees are the first to break the winter silence with their pale blossoms.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
     ],
     "imageUrl": "/images/catalog/mount-lebanon-2-mar-2026.jpg",
     "imageAlt": "Documentary photograph: Mount Lebanon (2), March 2026. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
@@ -836,14 +335,14 @@
     "sizes": [
       {
         "id": "8x10",
-        "label": "8 \u00d7 10 in",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
     "papers": [
       {
         "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
+        "name": "Hahnemühle Photo Rag",
         "surchargeCents": 0
       },
       {
@@ -853,12 +352,212 @@
       },
       {
         "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
+        "name": "Hahnemühle Bamboo",
         "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
     "editionSold": 0
+  },
+  {
+    "slug": "north-lebanon-2-jul-2021",
+    "referenceNumber": "AT-013",
+    "title": "North Lebanon (2)",
+    "titleItalic": "July 2021",
+    "subtitle": "North Lebanon, Lebanon",
+    "year": 2021,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/north-lebanon-2-jul-2021.jpg",
+    "imageAlt": "Documentary photograph: North Lebanon (2), July 2021. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 3
+  },
+  {
+    "slug": "mount-lebanon-mar-2021",
+    "referenceNumber": "AT-025",
+    "title": "Mount Lebanon",
+    "titleItalic": "March 2021",
+    "subtitle": "Mount Lebanon, Lebanon",
+    "year": 2021,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/mount-lebanon-mar-2021.jpg",
+    "imageAlt": "Documentary photograph: Mount Lebanon, March 2021. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 0
+  },
+  {
+    "slug": "mount-lebanon-4-feb-2025",
+    "referenceNumber": "AT-008",
+    "title": "Mount Lebanon (4)",
+    "titleItalic": "February 2025",
+    "subtitle": "Mount Lebanon, Lebanon",
+    "year": 2025,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/mount-lebanon-4-feb-2025.jpg",
+    "imageAlt": "Documentary photograph: Mount Lebanon (4), February 2025. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 2
+  },
+  {
+    "slug": "north-lebanon-oct-2020",
+    "referenceNumber": "AT-023",
+    "title": "North Lebanon",
+    "titleItalic": "October 2020",
+    "subtitle": "North Lebanon, Lebanon",
+    "year": 2020,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/north-lebanon-oct-2020.jpg",
+    "imageAlt": "Documentary photograph: North Lebanon, October 2020. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 2
+  },
+  {
+    "slug": "north-lebanon-apr-2022",
+    "referenceNumber": "AT-019",
+    "title": "North Lebanon",
+    "titleItalic": "April 2022",
+    "subtitle": "North Lebanon, Lebanon",
+    "year": 2022,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/north-lebanon-apr-2022.jpg",
+    "imageAlt": "Documentary photograph: North Lebanon, April 2022. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 1
   },
   {
     "slug": "mount-lebanon-3-mar-2026",
@@ -868,8 +567,7 @@
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2026,
     "description": [
-      "A mountain village waking to spring \u2014 laundry on lines, doors propped open, the first tentative warmth on old stone walls.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
     ],
     "imageUrl": "/images/catalog/mount-lebanon-3-mar-2026.jpg",
     "imageAlt": "Documentary photograph: Mount Lebanon (3), March 2026. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
@@ -877,14 +575,14 @@
     "sizes": [
       {
         "id": "8x10",
-        "label": "8 \u00d7 10 in",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
     "papers": [
       {
         "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
+        "name": "Hahnemühle Photo Rag",
         "surchargeCents": 0
       },
       {
@@ -894,12 +592,132 @@
       },
       {
         "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
+        "name": "Hahnemühle Bamboo",
         "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
     "editionSold": 1
+  },
+  {
+    "slug": "north-lebanon-jul-2021",
+    "referenceNumber": "AT-021",
+    "title": "North Lebanon",
+    "titleItalic": "July 2021",
+    "subtitle": "North Lebanon, Lebanon",
+    "year": 2021,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/north-lebanon-jul-2021.jpg",
+    "imageAlt": "Documentary photograph: North Lebanon, July 2021. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 3
+  },
+  {
+    "slug": "mount-lebanon-2-feb-2025",
+    "referenceNumber": "AT-004",
+    "title": "Mount Lebanon (2)",
+    "titleItalic": "February 2025",
+    "subtitle": "Mount Lebanon, Lebanon",
+    "year": 2025,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/mount-lebanon-2-feb-2025.jpg",
+    "imageAlt": "Documentary photograph: Mount Lebanon (2), February 2025. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 0
+  },
+  {
+    "slug": "north-lebanon-2-feb-2026",
+    "referenceNumber": "AT-015",
+    "title": "North Lebanon (2)",
+    "titleItalic": "February 2026",
+    "subtitle": "North Lebanon, Lebanon",
+    "year": 2026,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/north-lebanon-2-feb-2026.jpg",
+    "imageAlt": "Documentary photograph: North Lebanon (2), February 2026. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 3
   },
   {
     "slug": "mount-lebanon-mar-2026",
@@ -909,8 +727,7 @@
     "subtitle": "Mount Lebanon, Lebanon",
     "year": 2026,
     "description": [
-      "The transition of March in Mount Lebanon, caught between winter's last breath and the green tide of spring rising from below.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
     ],
     "imageUrl": "/images/catalog/mount-lebanon-mar-2026.jpg",
     "imageAlt": "Documentary photograph: Mount Lebanon, March 2026. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
@@ -918,14 +735,14 @@
     "sizes": [
       {
         "id": "8x10",
-        "label": "8 \u00d7 10 in",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
     "papers": [
       {
         "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
+        "name": "Hahnemühle Photo Rag",
         "surchargeCents": 0
       },
       {
@@ -935,12 +752,212 @@
       },
       {
         "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
+        "name": "Hahnemühle Bamboo",
         "surchargeCents": 0
       }
     ],
     "editionTotal": 10,
     "editionSold": 0
+  },
+  {
+    "slug": "north-lebanon-feb-2025",
+    "referenceNumber": "AT-020",
+    "title": "North Lebanon",
+    "titleItalic": "February 2025",
+    "subtitle": "North Lebanon, Lebanon",
+    "year": 2025,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/north-lebanon-feb-2025.jpg",
+    "imageAlt": "Documentary photograph: North Lebanon, February 2025. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 2
+  },
+  {
+    "slug": "mount-lebanon-3-feb-2025",
+    "referenceNumber": "AT-006",
+    "title": "Mount Lebanon (3)",
+    "titleItalic": "February 2025",
+    "subtitle": "Mount Lebanon, Lebanon",
+    "year": 2025,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/mount-lebanon-3-feb-2025.jpg",
+    "imageAlt": "Documentary photograph: Mount Lebanon (3), February 2025. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 1
+  },
+  {
+    "slug": "north-lebanon-3-feb-2026",
+    "referenceNumber": "AT-017",
+    "title": "North Lebanon (3)",
+    "titleItalic": "February 2026",
+    "subtitle": "North Lebanon, Lebanon",
+    "year": 2026,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/north-lebanon-3-feb-2026.jpg",
+    "imageAlt": "Documentary photograph: North Lebanon (3), February 2026. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 4
+  },
+  {
+    "slug": "mount-lebanon-feb-2025",
+    "referenceNumber": "AT-009",
+    "title": "Mount Lebanon",
+    "titleItalic": "February 2025",
+    "subtitle": "Mount Lebanon, Lebanon",
+    "year": 2025,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/mount-lebanon-feb-2025.jpg",
+    "imageAlt": "Documentary photograph: Mount Lebanon, February 2025. Mount Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 0
+  },
+  {
+    "slug": "north-lebanon-2-feb-2025",
+    "referenceNumber": "AT-014",
+    "title": "North Lebanon (2)",
+    "titleItalic": "February 2025",
+    "subtitle": "North Lebanon, Lebanon",
+    "year": 2025,
+    "description": [
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
+    ],
+    "imageUrl": "/images/catalog/north-lebanon-2-feb-2025.jpg",
+    "imageAlt": "Documentary photograph: North Lebanon (2), February 2025. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
+    "basePriceCents": 30000,
+    "sizes": [
+      {
+        "id": "8x10",
+        "label": "8 × 10 in",
+        "multiplier": 1
+      }
+    ],
+    "papers": [
+      {
+        "id": "photo-rag",
+        "name": "Hahnemühle Photo Rag",
+        "surchargeCents": 0
+      },
+      {
+        "id": "baryta",
+        "name": "Canson Baryta",
+        "surchargeCents": 0
+      },
+      {
+        "id": "bamboo",
+        "name": "Hahnemühle Bamboo",
+        "surchargeCents": 0
+      }
+    ],
+    "editionTotal": 10,
+    "editionSold": 2
   },
   {
     "slug": "north-lebanon-3-mar-2026",
@@ -950,8 +967,7 @@
     "subtitle": "North Lebanon, Lebanon",
     "year": 2026,
     "description": [
-      "Terraced agriculture emerging from winter dormancy in the north, the geometric patterns of human labor etched into the hillside.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
+      "Signed and numbered by the artist. Limited edition of 10. Printed to order on archival pigment paper with a 1 inch border for handling."
     ],
     "imageUrl": "/images/catalog/north-lebanon-3-mar-2026.jpg",
     "imageAlt": "Documentary photograph: North Lebanon (3), March 2026. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
@@ -959,14 +975,14 @@
     "sizes": [
       {
         "id": "8x10",
-        "label": "8 \u00d7 10 in",
+        "label": "8 × 10 in",
         "multiplier": 1
       }
     ],
     "papers": [
       {
         "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
+        "name": "Hahnemühle Photo Rag",
         "surchargeCents": 0
       },
       {
@@ -976,48 +992,7 @@
       },
       {
         "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
-        "surchargeCents": 0
-      }
-    ],
-    "editionTotal": 10,
-    "editionSold": 3
-  },
-  {
-    "slug": "north-lebanon-4-oct-2020",
-    "referenceNumber": "AT-025",
-    "title": "North Lebanon (4)",
-    "titleItalic": "October 2020",
-    "subtitle": "North Lebanon, Lebanon",
-    "year": 2020,
-    "description": [
-      "The quiet solitude of North Lebanon in autumn, where a forgotten corner of the landscape holds a silent, enduring story.",
-      "Printed to order on archival pigment paper with a 1 inch border for handling."
-    ],
-    "imageUrl": "/images/catalog/north-lebanon-oct-2020.jpg",
-    "imageAlt": "Documentary photograph: North Lebanon (4), October 2020. North Lebanon, Lebanon. Archival pigment print by Thalia Bassim.",
-    "basePriceCents": 30000,
-    "sizes": [
-      {
-        "id": "8x10",
-        "label": "8 \u00d7 10 in",
-        "multiplier": 1
-      }
-    ],
-    "papers": [
-      {
-        "id": "photo-rag",
-        "name": "Hahnem\u00fchle Photo Rag",
-        "surchargeCents": 0
-      },
-      {
-        "id": "baryta",
-        "name": "Canson Baryta",
-        "surchargeCents": 0
-      },
-      {
-        "id": "bamboo",
-        "name": "Hahnem\u00fchle Bamboo",
+        "name": "Hahnemühle Bamboo",
         "surchargeCents": 0
       }
     ],
