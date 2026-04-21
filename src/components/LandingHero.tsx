@@ -30,10 +30,13 @@ export default function LandingHero({ lead }: { lead: Photo }) {
         <div className="hfb-text">
           <div className="hfb-inner">
             <p className="h-pull">
-              Small domestic rituals that repeat across distance and never quite translate.
+              The photographs in this series are part of an ongoing body of work that I am
+              developing into my first book, spanning the years 2018 to 2026. They move between
+              landscapes, people, and gestures, focusing less on events and more on presence, on
+              what it feels like to be there, to witness, and to continue.
             </p>
             <Link href="/essay" className="h-essay">
-              Read the essay <span aria-hidden="true">→</span>
+              Read the introduction <span aria-hidden="true">→</span>
             </Link>
           </div>
         </div>
@@ -126,6 +129,14 @@ export default function LandingHero({ lead }: { lead: Photo }) {
           right: 0;
           bottom: 0;
         }
+        .hfb-fig::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.18);
+          pointer-events: none;
+          z-index: 1;
+        }
         .hfb-fig img {
           display: block;
           width: 100%;
@@ -162,7 +173,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
           display: flex;
           flex-direction: column;
           gap: 12px;
-          max-width: 560px;
+          max-width: 880px;
         }
         .hfb-inner .h-pull {
           margin-top: 16px;
