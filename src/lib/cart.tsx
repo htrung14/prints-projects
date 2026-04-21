@@ -20,12 +20,6 @@ type CartContextValue = {
   closeDrawer: () => void;
   add: (line: CartLine) => void;
   remove: (index: number) => void;
-  /**
-   * Swap the paper on an existing line (used by the checkout-page paper
-   * upsell). If the resulting variant collides with another line, quantities
-   * merge; otherwise the line is replaced in-place so the order is stable.
-   */
-  updatePaper: (index: number, paperId: PaperType) => void;
   clear: () => void;
   subtotalCents: number;
   itemCount: number;
@@ -144,39 +138,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [setLines]
   );
 
-  const updatePaper = useCallback(
-    (index: number, paperId: PaperType) => {
-      const current = readLines();
-      const target = current[index];
-      if (!target) return;
-      if (target.paperId === paperId) return;
-      const swapped: CartLine = { ...target, paperId };
-      // Check if an existing line at a different index already has this
-      // exact variant - if so, merge quantities; otherwise replace in place.
-      const collision = current.findIndex(
-        (l, i) =>
-          i !== index &&
-          l.photoSlug === swapped.photoSlug &&
-          l.sizeId === swapped.sizeId &&
-          l.paperId === swapped.paperId
-      );
-      if (collision === -1) {
-        const next = current.slice();
-        next[index] = swapped;
-        setLines(next);
-        return;
-      }
-      const next = current.slice();
-      next[collision] = {
-        ...next[collision],
-        quantity: next[collision].quantity + swapped.quantity,
-      };
-      next.splice(index, 1);
-      setLines(next);
-    },
-    [setLines]
-  );
-
   const clear = useCallback(() => setLines([]), [setLines]);
 
   const subtotalCents = useMemo(() => {
@@ -198,13 +159,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       closeDrawer: () => setDrawerOpen(false),
       add,
       remove,
-      updatePaper,
       clear,
       subtotalCents,
       itemCount,
       addedAt,
     }),
-    [lines, drawerOpen, add, remove, updatePaper, clear, subtotalCents, itemCount, addedAt]
+    [lines, drawerOpen, add, remove, clear, subtotalCents, itemCount, addedAt]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

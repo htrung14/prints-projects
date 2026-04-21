@@ -8,9 +8,6 @@
  * already surfaces Apple Pay, Google Pay, and Link natively; no extra
  * integration needed.
  *
- * Paper upsell: if a line is on a paper that has a more expensive sibling
- * available in that photo's `papers[]`, show an inline "Upgrade to …" chip
- * that calls `updatePaper(index, paperId)` on the cart context.
  */
 
 import Link from "next/link";

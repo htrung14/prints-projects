@@ -211,41 +211,6 @@ em {
   font-weight: 700;
 }
 
-.marquee {
-  overflow: hidden;
-  padding: 8px 0;
-  color: var(--ink);
-}
-.marquee-track {
-  display: flex;
-  width: fit-content;
-  gap: 0;
-  animation: marquee-scroll 44s linear infinite;
-}
-.marquee:hover .marquee-track {
-  animation-play-state: paused;
-}
-.marquee-line {
-  flex: none;
-  white-space: nowrap;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-}
-@keyframes marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
-    transform: translateX(0);
-  }
-}
-
 .h-display-xl {
   font-family: var(--font-serif);
   color: white;
@@ -277,16 +242,6 @@ em {
   padding: 0.05em 0.12em 0 0;
   color: var(--ink-strong);
   font-weight: 400;
-}
-
-.add-to-cart-btn {
-  transition:
-    background-color 200ms ease,
-    color 200ms ease,
-    transform 120ms cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-.add-to-cart-btn:active:not(:disabled) {
-  transform: scale(0.97);
 }
 
 .btn-ghost {
@@ -374,37 +329,6 @@ em {
      the default image download affordances via drag + callout above. */
 }
 
-/* ─── Double-rule mat (gallery frame) ────────────────────────── */
-/* max-width:100% + box-sizing:border-box keeps the frame from pushing past
-   its parent column on desktop when the image's natural width exceeds the
-   available space. Pair with min-width:0 on the grid column so the column
-   doesn't auto-expand to the image's intrinsic width. */
-.mat-o {
-  border: 1px solid var(--rule);
-  padding: 20px; /* overridden on mobile to 14px */
-  background: var(--bg);
-  width: max-content;
-  max-width: 100%;
-  box-sizing: border-box;
-  display: inline-block;
-}
-.mat-i {
-  border: 1px solid var(--rule);
-  overflow: hidden;
-  line-height: 0;
-  display: block;
-  max-width: 100%;
-}
-.mat-i > img {
-  max-width: 100%;
-  height: auto;
-}
-@media (max-width: 700px) {
-  .mat-o {
-    padding: 10px;
-  }
-}
-
 /* ─── Disclosure (Paper / Size / Description / Shipping / Care) ── */
 .disc {
   display: block;
@@ -481,70 +405,6 @@ em {
 }
 .d-inner-pad {
   padding: 2px 0 22px;
-}
-
-/* Option rows inside a disclosure */
-.disc-opt {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 18px;
-  padding: 14px 0;
-  font-family: "Favorit", var(--font-sans);
-  font-size: 16px;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  color: var(--ink);
-  cursor: pointer;
-  text-align: left;
-  border-bottom: 1px solid var(--i1);
-  transition:
-    padding-left 200ms,
-    color 180ms;
-}
-.disc-opt:last-child {
-  border-bottom: 0;
-}
-.disc-opt:hover {
-  padding-left: 4px;
-}
-.disc-opt .opt-meta {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--i5);
-  letter-spacing: 0.01em;
-}
-.disc-opt[aria-pressed="true"] {
-  color: var(--ink);
-  /* Selected row - warm translucent ink wash handles the "selected" state
-     on its own; no dot marker. Row gets a pulled-in horizontal padding so
-     the highlight reads as a band that spans the full disclosure width. */
-  background: rgba(12, 11, 10, 0.055);
-  padding-left: 12px;
-  padding-right: 12px;
-  margin: 0 -12px;
-  width: calc(100% + 24px);
-}
-.disc-opt[aria-pressed="true"] .opt-meta {
-  color: var(--ink);
-  font-weight: 500;
-}
-.disc-opt[aria-pressed="true"]:hover {
-  padding-left: 12px;
-}
-.disc-opt[disabled] {
-  color: var(--i3);
-  cursor: not-allowed;
-}
-.disc-opt[disabled]:hover {
-  padding-left: 0;
-}
-.disc-opt[disabled] .opt-meta {
-  text-decoration: line-through;
 }
 
 /* ─── Solid-ink CTA (Add to cart) ─────────────────────────────── */

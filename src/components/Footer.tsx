@@ -42,6 +42,9 @@ export default function Footer() {
         >
           Instagram ↗
         </Link>
+        <Link href="/essay" style={{ color: fg, transition: "color 180ms" }}>
+          Essay
+        </Link>
         <Link href="/info" style={{ color: fg, transition: "color 180ms" }}>
           Info
         </Link>
