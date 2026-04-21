@@ -10,7 +10,7 @@
  * - Guest checkout only - no `customer` param
  * - Currency: USD. Adaptive Pricing is a dashboard-level setting.
  * - Shipping address collected by Stripe (not pre-filled from us) ← Pastel #5 "shipping at checkout"
- * - Free US shipping when 2+ prints and US address; otherwise flat rate
+ * - Flat-rate shipping: $20 domestic, $45 international
  * - `cart_lines_json` stored on session metadata so the webhook can rebuild
  *   the cart server-side without trusting the Stripe line-item echo.
  *
@@ -220,17 +220,7 @@ function buildLineItem(r: ResolvedCartLine): LineItemParam {
 /**
  * Build the `shipping_options` array for this session.
  *
- * We can't know the customer's country at session-creation time (Stripe
- * collects it on the Checkout page). So we expose two options:
- *   - Free US shipping (if 2+ units) - Stripe only offers it when the
- *     shipping address resolves to US. If address is non-US, Stripe falls
- *     through to the flat rate.
- *   - A flat-rate fallback that covers domestic-non-qualifying + intl.
- *
- * Stripe applies the first applicable option; customers on US addresses with
- * 2+ units will see $0; everyone else pays the flat rate Rob covers.
- *
- * TODO(coordinator): replace with real per-country rates or a shipping API.
+ * Two flat-rate options: $20 domestic (US), $45 international.
  */
 function buildShippingOptions(lines: CartLine[]): ShippingOptionParam[] {
   const options: ShippingOptionParam[] = [];

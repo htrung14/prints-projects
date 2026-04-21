@@ -54,7 +54,7 @@ function contentForTouch(
       return {
         preview: `A short note on your order ${ref}.`,
         subject: `A short note on your order ${ref}`,
-        body: "A quick note while your print is being made. Each one is produced by hand on archival pigment paper - Hahnemühle or Canson, depending on what you chose. Expect three to four weeks before dispatch. We'll write again when tracking is attached.",
+        body: "A quick note while your print is being made. Each one is produced by hand on archival pigment paper. Please allow up to 7 business days before dispatch. We'll write again when tracking is attached.",
       };
     case 2:
       return {

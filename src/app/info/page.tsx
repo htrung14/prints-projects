@@ -183,7 +183,7 @@ export default function InfoPage() {
                   marginBottom: 28,
                 }}
               >
-                <Link href="mailto:thalia@bassim.studio" style={{ color: "#fff" }}>
+                <Link href="mailto:info@thaliabassim.com" style={{ color: "#fff" }}>
                   Email
                 </Link>
                 <Link

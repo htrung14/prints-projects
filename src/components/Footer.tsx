@@ -31,7 +31,7 @@ export default function Footer() {
       }}
     >
       <div className="flex flex-wrap items-baseline" style={{ gap: "28px 32px" }}>
-        <Link href="mailto:thalia@bassim.studio" style={{ color: fg, transition: "color 180ms" }}>
+        <Link href="mailto:info@thaliabassim.com" style={{ color: fg, transition: "color 180ms" }}>
           Contact
         </Link>
         <Link

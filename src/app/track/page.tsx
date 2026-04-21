@@ -106,8 +106,8 @@ export default async function TrackPage({ searchParams }: { searchParams: Search
             <p className="text-lg text-ink">No orders found for that email.</p>
             <p className="text-base text-ink-faint">
               Double-check the address or contact us at{" "}
-              <a href="mailto:thalia@bassim.studio" className="underline">
-                thalia@bassim.studio
+              <a href="mailto:info@thaliabassim.com" className="underline">
+                info@thaliabassim.com
               </a>
               .
             </p>
