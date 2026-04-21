@@ -68,7 +68,12 @@ export async function triageAlert(alert: Alert): Promise<TriageResult> {
           contents: [
             { parts: [{ text: `Triage this alert:\n${JSON.stringify(alert, null, 2)}` }] },
           ],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 300 },
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 500,
+            responseMimeType: "application/json",
+            thinkingConfig: { thinkingBudget: 0 },
+          },
         }),
       }
     );
