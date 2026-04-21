@@ -18,10 +18,10 @@ import { useState } from "react";
 import { useCart } from "@/lib/cart";
 import { getAllPhotos } from "@/lib/photos";
 import { formatUsd, priceCents } from "@/lib/pricing";
-import type { PaperType, PaperOption, Photo } from "@/lib/types";
+import type { PaperType, Photo } from "@/lib/types";
 
 export default function CheckoutPage() {
-  const { lines, subtotalCents, itemCount, remove, updatePaper } = useCart();
+  const { lines, subtotalCents, itemCount, remove } = useCart();
   const photos = getAllPhotos();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,7 +96,6 @@ export default function CheckoutPage() {
                 line={{ ...line }}
                 disabled={pending}
                 onRemove={() => remove(i)}
-                onUpgrade={(paperId) => updatePaper(i, paperId)}
               />
             );
           })}
@@ -136,7 +135,7 @@ export default function CheckoutPage() {
             <span className="btn-ink-price">{formatUsd(subtotalCents + processingFeeCents)}</span>
           </button>
           {error ? (
-            <p role="alert" className="text-sm text-ink-strong">
+            <p role="alert" className="text-sm" style={{ color: "#b91c1c" }}>
               {error}
             </p>
           ) : null}
@@ -163,7 +162,6 @@ function CheckoutLine({
   line,
   disabled,
   onRemove,
-  onUpgrade,
 }: {
   index: number;
   photo: Photo;
@@ -175,7 +173,6 @@ function CheckoutLine({
   };
   disabled: boolean;
   onRemove: () => void;
-  onUpgrade: (paperId: PaperType) => void;
 }) {
   // Unused but explicit: keeps the signature stable if we later need it
   // (e.g. "Line 2 of 4" labels).
@@ -184,22 +181,6 @@ function CheckoutLine({
   const size = photo.sizes.find((s) => s.id === line.sizeId);
   const paper = photo.papers.find((p) => p.id === line.paperId);
   const lineUnit = priceCents(photo, line.sizeId, line.paperId);
-
-  // Paper change chips - show both directions when available:
-  //   upgrade   → next more-expensive paper (adds cost)
-  //   downgrade → next cheaper paper (subtracts cost; lets user undo an
-  //               earlier upsell click without hunting through disclosures)
-  const currentPaperCents = paper?.surchargeCents ?? 0;
-  const upgrade: PaperOption | null =
-    photo.papers
-      .filter((p) => p.surchargeCents > currentPaperCents)
-      .sort((a, b) => a.surchargeCents - b.surchargeCents)[0] ?? null;
-  const downgrade: PaperOption | null =
-    photo.papers
-      .filter((p) => p.surchargeCents < currentPaperCents)
-      .sort((a, b) => b.surchargeCents - a.surchargeCents)[0] ?? null;
-  const upgradeDeltaPerUnit = upgrade ? upgrade.surchargeCents - currentPaperCents : 0;
-  const downgradeDeltaPerUnit = downgrade ? currentPaperCents - downgrade.surchargeCents : 0;
 
   return (
     <li className="flex flex-col gap-3 py-5">
@@ -238,35 +219,6 @@ function CheckoutLine({
           Remove
         </button>
       </div>
-
-      <style>{`
-        .upsell-chip {
-          display: inline-flex;
-          align-items: baseline;
-          gap: 8px;
-          padding: 6px 10px;
-          border: 1px solid var(--rule);
-          background: var(--bg);
-          color: var(--ink);
-          font-size: 12px;
-          letter-spacing: 0.04em;
-          cursor: pointer;
-          transition: background-color 160ms ease, border-color 160ms ease;
-        }
-        .upsell-chip:hover:not(:disabled) {
-          background: rgba(12, 11, 10, 0.04);
-          border-color: var(--i3);
-        }
-        .upsell-chip:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        .upsell-delta {
-          font-family: var(--font-mono);
-          color: var(--i5);
-          font-size: 11px;
-        }
-      `}</style>
     </li>
   );
 }

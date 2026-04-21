@@ -87,17 +87,8 @@ export const ALLOWED_COUNTRIES: ReadonlyArray<AllowedCountry> = [
  */
 const TAX_CODE_FALLBACK = "txcd_99999999";
 
-/**
- * Flat-rate shipping fallbacks (placeholder pending Rob's real rates).
- * These fire only when the free-shipping rule doesn't apply.
- * TODO(coordinator): replace with real Rob-covered rates per size class.
- */
-const FALLBACK_DOMESTIC_CENTS = 2000; // $20 US non-qualifying
+const FALLBACK_DOMESTIC_CENTS = 2000; // $20 US
 const FALLBACK_INTL_CENTS = 4500; // $45 international
-
-function totalUnits(lines: CartLine[]): number {
-  return lines.reduce((n, l) => n + Math.max(0, l.quantity), 0);
-}
 
 // ---------------------------------------------------------------------------
 // Line-item construction

@@ -241,9 +241,8 @@ export default function BuyUI({ photo }: { photo: Photo }) {
             Ships in a flat waterproof package within 7 business days.
           </p>
           <p>
-            Dispatched worldwide via insured courier. A replacement can be arranged if the package
-            arrives damaged or with the seal broken - just email a photo of the outer package and
-            the print within 48 hours of delivery.
+            Dispatched worldwide via insured courier. If your print arrives damaged, email a photo
+            of the damage within 48 hours of delivery and we will arrange a replacement at no cost.
           </p>
         </div>
       </Disclosure>

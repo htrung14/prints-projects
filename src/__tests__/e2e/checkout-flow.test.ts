@@ -225,15 +225,16 @@ describe("createCheckoutSession", () => {
     expect(mockStripeCreate).toHaveBeenCalledOnce();
     const params = mockStripeCreate.mock.calls[0][0];
     expect(params.mode).toBe("payment");
-    expect(params.line_items).toHaveLength(1);
+    expect(params.line_items).toHaveLength(2);
     expect(params.line_items[0].price_data.unit_amount).toBe(30000);
     expect(params.line_items[0].price_data.currency).toBe("usd");
-    expect(params.automatic_tax.enabled).toBe(process.env.NODE_ENV === "production");
+    expect(params.line_items[1].price_data.product_data.name).toBe("Processing fee (3%)");
+    expect(params.automatic_tax.enabled).toBe(true);
     expect(params.metadata.cart_lines_json).toBe(JSON.stringify([VALID_CART_LINE]));
     expect(session.url).toBe("https://checkout.stripe.com/test");
   });
 
-  it("includes free US shipping when 2+ prints", async () => {
+  it("offers flat-rate shipping only (no free shipping)", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE, { ...VALID_CART_LINE, photoSlug: "tyre-feb-2022" }],
@@ -243,24 +244,12 @@ describe("createCheckoutSession", () => {
     const params = mockStripeCreate.mock.calls[0][0];
     const freeOption = params.shipping_options.find(
       (o: { shipping_rate_data: { display_name: string } }) =>
-        o.shipping_rate_data.display_name.includes("Free US")
-    );
-    expect(freeOption).toBeDefined();
-    expect(freeOption.shipping_rate_data.fixed_amount.amount).toBe(0);
-  });
-
-  it("does not include free shipping for single unit", async () => {
-    await createCheckoutSession({
-      lines: [VALID_CART_LINE],
-      origin: "http://localhost:3000",
-    });
-
-    const params = mockStripeCreate.mock.calls[0][0];
-    const freeOption = params.shipping_options.find(
-      (o: { shipping_rate_data: { display_name: string } }) =>
-        o.shipping_rate_data.display_name.includes("Free US")
+        o.shipping_rate_data.display_name.includes("Free")
     );
     expect(freeOption).toBeUndefined();
+    expect(params.shipping_options).toHaveLength(2);
+    expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(2000);
+    expect(params.shipping_options[1].shipping_rate_data.fixed_amount.amount).toBe(4500);
   });
 });
 

@@ -40,7 +40,7 @@ export default function Toast() {
     <button
       type="button"
       onClick={openDrawer}
-      className="fixed left-1/2 z-[65] flex items-center gap-3 border border-ink bg-bg px-4 py-2 text-xs text-ink-strong"
+      className="fixed left-1/2 z-[90] flex items-center gap-3 border border-ink bg-bg px-4 py-2 text-xs text-ink-strong"
       style={{
         bottom: "24px",
         transform: `translateX(-50%) translateY(${visible ? "0" : "12px"})`,

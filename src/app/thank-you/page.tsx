@@ -122,8 +122,11 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Sea
       <div className="mx-auto max-w-xl space-y-8">
         <div className="space-y-3">
           <span className="label-caps">Order confirmation</span>
-          <h1 className="h-display text-4xl md:text-5xl">
-            Your order is <em>in</em>.
+          <h1
+            className="font-serif italic"
+            style={{ fontSize: "clamp(32px, 4vw, 48px)", lineHeight: 1.15, margin: 0 }}
+          >
+            Your order is in.
           </h1>
           {customerName ? <p className="text-lg text-ink">Thank you, {customerName}.</p> : null}
           {orderRef ? (

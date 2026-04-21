@@ -106,7 +106,7 @@ export function PostPurchase({ order, touchNumber, referralCode }: PostPurchaseP
       <Preview>{content.preview}</Preview>
       <Body
         style={{
-          backgroundColor: "#ffffff",
+          backgroundColor: colors.bg,
           color: colors.ink,
           fontFamily,
           margin: 0,

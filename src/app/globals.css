@@ -2,7 +2,7 @@
 
 /*
   Design tokens - editorial refinement.
-  Three voices: Favorit (commerce), EB Garamond (art), Geist Mono (data).
+  Two voices: Favorit (commerce + body), Suisse Intl (headings + data).
   Warm palette inspired by Lemaire's #fdfbf9/#100a0d.
 */
 :root {
@@ -46,7 +46,7 @@
   --color-ink-faint: var(--ink-faint);
   --font-sans: var(--font-favorit), -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-suisse-intl), "Suisse Intl", -apple-system, sans-serif;
-  --font-serif: var(--font-eb-garamond), -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-suisse-intl), "Suisse Intl", -apple-system, sans-serif;
 }
 
 @font-face {
@@ -545,64 +545,6 @@ em {
 }
 .disc-opt[disabled] .opt-meta {
   text-decoration: line-through;
-}
-
-/* ─── Paper pills (always-visible selector) ───────────────────────
-   Replaces the Paper disclosure on the PDP per the Lemaire-inspired
-   BuyUI pass (2026-04-20). Three options fit comfortably inline;
-   surcharge reads inside the pill so the delta is never hidden.
-   Selected state flips to inked background for strong read; unselected
-   keeps a fine 1px hairline so the group reads as a set, not as a row
-   of ghost buttons. */
-.pp-group {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.pp-opt {
-  appearance: none;
-  flex: 1 1 0;
-  min-width: 96px;
-  padding: 12px 14px;
-  background: transparent;
-  color: var(--ink);
-  border: 1px solid var(--i3);
-  border-radius: 0;
-  font-family: "Favorit", var(--font-sans);
-  font-size: 14px;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  text-align: left;
-  transition:
-    background 180ms ease,
-    color 180ms ease,
-    border-color 180ms ease;
-}
-.pp-opt:hover {
-  border-color: var(--ink);
-}
-.pp-opt[data-active="true"] {
-  background: var(--ink);
-  color: var(--bg);
-  border-color: var(--ink);
-}
-.pp-opt-name {
-  font-size: 14px;
-  letter-spacing: 0.02em;
-}
-.pp-opt-delta {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--i5);
-}
-.pp-opt[data-active="true"] .pp-opt-delta {
-  color: rgba(255, 255, 255, 0.72);
 }
 
 /* ─── Solid-ink CTA (Add to cart) ─────────────────────────────── */

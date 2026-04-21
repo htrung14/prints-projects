@@ -77,12 +77,14 @@ export default async function TrackPage({ searchParams }: { searchParams: Search
   let orders: Order[] = [];
   let searched = false;
 
+  let lookupError = false;
   if (email) {
     searched = true;
     try {
       orders = await getOrdersByEmail(email);
     } catch {
       orders = [];
+      lookupError = true;
     }
   }
 
@@ -101,7 +103,18 @@ export default async function TrackPage({ searchParams }: { searchParams: Search
 
         <TrackForm defaultEmail={email ?? ""} />
 
-        {searched && orders.length === 0 ? (
+        {searched && lookupError ? (
+          <div className="space-y-4 border-t border-ink-line pt-10">
+            <p className="text-lg text-ink">Something went wrong.</p>
+            <p className="text-base text-ink-faint">
+              Please try again, or contact us at{" "}
+              <a href="mailto:info@thaliabassim.com" className="underline">
+                info@thaliabassim.com
+              </a>
+              .
+            </p>
+          </div>
+        ) : searched && orders.length === 0 ? (
           <div className="space-y-4 border-t border-ink-line pt-10">
             <p className="text-lg text-ink">No orders found for that email.</p>
             <p className="text-base text-ink-faint">

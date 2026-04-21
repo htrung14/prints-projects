@@ -210,8 +210,6 @@ export default function EssayPage() {
           </p>
         </section>
 
-        {/* Signature block */}
-
         {/* Quiet CTA back to prints */}
         <div className="essay-cta">
           <Link href="/#prints" className="essay-cta-link font-serif">
