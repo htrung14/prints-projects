@@ -119,13 +119,6 @@ export default function OrderActions({
     });
   }
 
-  function handleResendPrintJob() {
-    startTransition(async () => {
-      await post(`/api/email/retry/${orderId}?kind=print_job`);
-      // No router.refresh(); email send doesn't change DB state we render.
-    });
-  }
-
   function handleResendConfirmation() {
     startTransition(async () => {
       await post(`/api/email/retry/${orderId}?kind=confirmation`);
@@ -231,15 +224,11 @@ export default function OrderActions({
           >
             Resend confirmation
           </button>
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={handleResendPrintJob}
-            className="border border-ink-line px-3 py-1.5 text-sm hover:bg-bg-soft disabled:opacity-50"
-          >
-            Resend print job
-          </button>
         </div>
+        <p className="text-xs text-ink-faint">
+          To re-send the print-job email, use &ldquo;Regenerate + resend&rdquo; above — it issues a
+          fresh dispatch link and emails it in one step.
+        </p>
       </section>
 
       {msg ? (

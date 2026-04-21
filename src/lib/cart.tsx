@@ -12,6 +12,7 @@ import {
 import type { CartLine, PaperType } from "./types";
 import { getAllPhotos } from "./photos";
 import { priceCents } from "./pricing";
+import { healLines } from "./cart-heal";
 
 type CartContextValue = {
   lines: CartLine[];
@@ -57,19 +58,14 @@ function readLines(): CartLine[] {
     return cachedLines;
   }
   try {
-    const parsed = JSON.parse(raw) as CartLine[];
-    if (!Array.isArray(parsed)) {
-      cachedLines = SERVER_SNAPSHOT;
-      return cachedLines;
-    }
+    const parsed: unknown = JSON.parse(raw);
     // Self-heal: drop any lines whose photoSlug no longer exists in the
     // catalog (fixture changed, photo unpublished, legacy bookmark, etc.).
     // Without this, a stale cart crashes checkout with "unknown photo …".
     const validSlugs = new Set(getAllPhotos().map((p) => p.slug));
-    const filtered = parsed.filter(
-      (l) => l && typeof l.photoSlug === "string" && validSlugs.has(l.photoSlug)
-    );
-    if (filtered.length !== parsed.length) {
+    const filtered = healLines(parsed, validSlugs);
+    const originalLength = Array.isArray(parsed) ? parsed.length : -1;
+    if (filtered.length !== originalLength) {
       const cleaned = JSON.stringify(filtered);
       window.localStorage.setItem(STORAGE_KEY, cleaned);
       cachedRaw = cleaned;

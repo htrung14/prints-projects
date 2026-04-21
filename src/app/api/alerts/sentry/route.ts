@@ -9,10 +9,10 @@
 
 import type { NextRequest } from "next/server";
 import { after } from "next/server";
-import crypto from "node:crypto";
 import * as Sentry from "@sentry/nextjs";
 import { getDispatcher } from "@/lib/alerting/dispatcher";
 import { systemErrorAlert } from "@/lib/alerting";
+import { verifySignature, timingSafeStringEq } from "@/lib/alerting/sentry-sig";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,31 +33,6 @@ type SentryIssuePayload = {
     };
   };
 };
-
-function verifySignature(body: string, signature: string | null, secret: string): boolean {
-  if (!signature) return false;
-  const expectedHex = crypto.createHmac("sha256", secret).update(body).digest("hex");
-  // Decode hex → bytes on both sides so timing-safe compares real HMAC bytes,
-  // not UTF-8 codepoints of hex chars. Odd-length/invalid hex will produce a
-  // length mismatch, handled below.
-  let sig: Buffer;
-  let expected: Buffer;
-  try {
-    sig = Buffer.from(signature, "hex");
-    expected = Buffer.from(expectedHex, "hex");
-  } catch {
-    return false;
-  }
-  if (sig.length !== expected.length || sig.length === 0) return false;
-  return crypto.timingSafeEqual(sig, expected);
-}
-
-function timingSafeStringEq(a: string, b: string): boolean {
-  const ab = Buffer.from(a, "utf8");
-  const bb = Buffer.from(b, "utf8");
-  if (ab.length !== bb.length) return false;
-  return crypto.timingSafeEqual(ab, bb);
-}
 
 export async function POST(req: NextRequest): Promise<Response> {
   const secret = process.env.SENTRY_WEBHOOK_SECRET;

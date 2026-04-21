@@ -1,95 +1,57 @@
 /**
- * Unit test for the cart self-heal behaviour:
- * when localStorage contains a CartLine whose photoSlug is no longer in the
- * fixture, the reader drops it and rewrites storage with the cleaned value.
- *
- * We replicate the self-heal logic inline to avoid React/client-boot
- * complexity — this is the same algorithm in src/lib/cart.tsx#readLines.
+ * Unit tests for the shared cart self-heal helper. Imports the real
+ * production code so a regression in `healLines` shows up here.
  */
-import { describe, it, expect, beforeEach } from "vitest";
-import { getAllPhotos } from "@/lib/photos";
+import { describe, it, expect } from "vitest";
+import { healLines } from "@/lib/cart-heal";
 
-const STORAGE_KEY = "prints-projects.cart.v1";
+const VALID = new Set(["bekaa-feb-2025", "north-lebanon-oct-2020"]);
 
-type CartLine = {
-  photoSlug: string;
-  sizeId: string;
-  paperId: string;
-  quantity: number;
-};
-
-function readAndHeal(store: Map<string, string>): CartLine[] {
-  const raw = store.get(STORAGE_KEY);
-  if (!raw) return [];
-  const parsed = JSON.parse(raw) as CartLine[];
-  if (!Array.isArray(parsed)) return [];
-  const validSlugs = new Set(getAllPhotos().map((p) => p.slug));
-  const filtered = parsed.filter(
-    (l) => l && typeof l.photoSlug === "string" && validSlugs.has(l.photoSlug)
-  );
-  if (filtered.length !== parsed.length) {
-    store.set(STORAGE_KEY, JSON.stringify(filtered));
-  }
-  return filtered;
-}
-
-describe("cart self-heal on read", () => {
-  let store: Map<string, string>;
-
-  beforeEach(() => {
-    store = new Map();
-  });
-
+describe("healLines", () => {
   it("drops a line whose slug is not in the catalog", () => {
-    const realSlug = getAllPhotos()[0].slug;
-    store.set(
-      STORAGE_KEY,
-      JSON.stringify([
+    const out = healLines(
+      [
         { photoSlug: "pl-6604-11", sizeId: "8x10", paperId: "photo-rag", quantity: 1 },
-        { photoSlug: realSlug, sizeId: "8x10", paperId: "photo-rag", quantity: 1 },
-      ])
+        { photoSlug: "bekaa-feb-2025", sizeId: "8x10", paperId: "photo-rag", quantity: 1 },
+      ],
+      VALID
     );
-
-    const lines = readAndHeal(store);
-    expect(lines).toHaveLength(1);
-    expect(lines[0].photoSlug).toBe(realSlug);
-    // Storage was rewritten with cleaned contents so the next read short-circuits.
-    expect(JSON.parse(store.get(STORAGE_KEY)!)).toEqual(lines);
+    expect(out).toHaveLength(1);
+    expect(out[0].photoSlug).toBe("bekaa-feb-2025");
   });
 
-  it("leaves a clean cart untouched (no write)", () => {
-    const realSlug = getAllPhotos()[0].slug;
-    const original = JSON.stringify([
-      { photoSlug: realSlug, sizeId: "8x10", paperId: "photo-rag", quantity: 2 },
-    ]);
-    store.set(STORAGE_KEY, original);
-
-    const lines = readAndHeal(store);
-    expect(lines).toHaveLength(1);
-    expect(store.get(STORAGE_KEY)).toBe(original);
+  it("leaves a fully-valid cart untouched", () => {
+    const input = [
+      { photoSlug: "bekaa-feb-2025", sizeId: "8x10", paperId: "photo-rag", quantity: 2 },
+      { photoSlug: "north-lebanon-oct-2020", sizeId: "8x10", paperId: "photo-rag", quantity: 1 },
+    ];
+    const out = healLines(input, VALID);
+    expect(out).toHaveLength(2);
+    expect(out).toEqual(input);
   });
 
-  it("empties entirely when no lines survive", () => {
-    store.set(
-      STORAGE_KEY,
-      JSON.stringify([
+  it("empties when no lines survive", () => {
+    const out = healLines(
+      [
         { photoSlug: "ghost-a", sizeId: "8x10", paperId: "photo-rag", quantity: 1 },
         { photoSlug: "ghost-b", sizeId: "8x10", paperId: "photo-rag", quantity: 1 },
-      ])
+      ],
+      VALID
     );
-
-    const lines = readAndHeal(store);
-    expect(lines).toHaveLength(0);
-    expect(store.get(STORAGE_KEY)).toBe("[]");
+    expect(out).toEqual([]);
   });
 
-  it("drops malformed entries (non-string slug, null)", () => {
-    store.set(
-      STORAGE_KEY,
-      JSON.stringify([null, { photoSlug: 42, sizeId: "8x10", paperId: "photo-rag", quantity: 1 }])
+  it("drops malformed entries (non-string slug, null, undefined, numbers)", () => {
+    const out = healLines(
+      [null, undefined, 42, { photoSlug: 42, quantity: 1 }, { noSlug: "yes" }],
+      VALID
     );
+    expect(out).toHaveLength(0);
+  });
 
-    const lines = readAndHeal(store);
-    expect(lines).toHaveLength(0);
+  it("returns an empty array when the payload is not an array", () => {
+    expect(healLines(null, VALID)).toEqual([]);
+    expect(healLines("oops", VALID)).toEqual([]);
+    expect(healLines({ photoSlug: "bekaa-feb-2025" }, VALID)).toEqual([]);
   });
 });

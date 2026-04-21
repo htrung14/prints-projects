@@ -1,34 +1,17 @@
 /**
- * Unit tests for the HMAC signature verification in /api/alerts/sentry.
- *
- * We re-implement the exact same verifier in-test rather than importing,
- * because the route module pulls `@sentry/nextjs` + dispatcher, which we
- * don't want to boot in a unit test. This is acceptable because the
- * logic under test is pure (body, signature, secret) → boolean.
+ * Unit tests for the shared HMAC signature helpers used by
+ * /api/alerts/sentry. Imports the real production code so a regression
+ * like "someone re-drops the `hex` encoding" will fail here.
  */
 import { describe, it, expect } from "vitest";
 import crypto from "node:crypto";
+import { verifySignature, timingSafeStringEq } from "@/lib/alerting/sentry-sig";
 
-function verifySignature(body: string, signature: string | null, secret: string): boolean {
-  if (!signature) return false;
-  const expectedHex = crypto.createHmac("sha256", secret).update(body).digest("hex");
-  let sig: Buffer;
-  let expected: Buffer;
-  try {
-    sig = Buffer.from(signature, "hex");
-    expected = Buffer.from(expectedHex, "hex");
-  } catch {
-    return false;
-  }
-  if (sig.length !== expected.length || sig.length === 0) return false;
-  return crypto.timingSafeEqual(sig, expected);
-}
+const SECRET = "57ce67b63d645f654fe7a3e9effa3015f57d5e74631a01ddf2fc5663e4f80bf9";
+const BODY = '{"action":"created","data":{"issue":{"id":"1","title":"test"}}}';
+const CORRECT_SIG = crypto.createHmac("sha256", SECRET).update(BODY).digest("hex");
 
-describe("Sentry webhook signature verification", () => {
-  const SECRET = "57ce67b63d645f654fe7a3e9effa3015f57d5e74631a01ddf2fc5663e4f80bf9";
-  const BODY = '{"action":"created","data":{"issue":{"id":"1","title":"test"}}}';
-  const CORRECT_SIG = crypto.createHmac("sha256", SECRET).update(BODY).digest("hex");
-
+describe("verifySignature", () => {
   it("accepts a valid HMAC-SHA256 signature", () => {
     expect(verifySignature(BODY, CORRECT_SIG, SECRET)).toBe(true);
   });
@@ -46,8 +29,12 @@ describe("Sentry webhook signature verification", () => {
     expect(verifySignature(BODY, "", SECRET)).toBe(false);
   });
 
-  it("rejects an odd-length (invalid hex) signature without throwing", () => {
+  it("rejects an odd-length hex signature without throwing", () => {
     expect(verifySignature(BODY, "abc", SECRET)).toBe(false);
+  });
+
+  it("rejects a signature made of non-hex characters (decodes to 0 bytes)", () => {
+    expect(verifySignature(BODY, "zzzzzzzz", SECRET)).toBe(false);
   });
 
   it("rejects a signature computed with a different secret", () => {
@@ -57,5 +44,28 @@ describe("Sentry webhook signature verification", () => {
 
   it("rejects when the body has been tampered with", () => {
     expect(verifySignature(BODY + " ", CORRECT_SIG, SECRET)).toBe(false);
+  });
+});
+
+describe("timingSafeStringEq", () => {
+  it("returns true for equal strings", () => {
+    expect(timingSafeStringEq("abc", "abc")).toBe(true);
+  });
+
+  it("returns false for different strings of equal length", () => {
+    expect(timingSafeStringEq("abc", "abd")).toBe(false);
+  });
+
+  it("returns false for different lengths without throwing", () => {
+    expect(timingSafeStringEq("abc", "abcd")).toBe(false);
+  });
+
+  it("returns false for empty vs non-empty", () => {
+    expect(timingSafeStringEq("", "a")).toBe(false);
+  });
+
+  it("handles multi-byte characters by comparing UTF-8 byte length", () => {
+    // 'é' encodes to 2 bytes in UTF-8, so "éa" has 3 bytes and "ab" has 2.
+    expect(timingSafeStringEq("éa", "ab")).toBe(false);
   });
 });
