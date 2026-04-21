@@ -3,8 +3,10 @@
 /**
  * Client actions for the order detail page.
  *
- * Status transitions, token regenerate/revoke, resend print job, resend order
- * confirmation. All POST to admin-gated API routes that re-check the session.
+ * Status transitions, token regenerate/revoke, resend order confirmation.
+ * (Print-job re-send is handled by "Regenerate + resend" in the token
+ * section — that flow mints a fresh dispatch URL and emails it atomically.)
+ * All POST to admin-gated API routes that re-check the session.
  * Backward transitions require a confirm dialog per the Track E spec.
  *
  * Visual rhythm follows the rest of the app: underline-only affordances,
