@@ -20,7 +20,7 @@
 import * as React from "react";
 import { Body, Container, Head, Html, Link, Preview, Text } from "@react-email/components";
 import type { Order } from "@/lib/types";
-import { baseTextStyle, fontFamily, formatOrderReference, textColor } from "./_shared";
+import { baseTextStyle, colors, fontFamily, formatOrderReference } from "./_shared";
 
 export type PostPurchaseTouchNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
@@ -107,7 +107,7 @@ export function PostPurchase({ order, touchNumber, referralCode }: PostPurchaseP
       <Body
         style={{
           backgroundColor: "#ffffff",
-          color: textColor,
+          color: colors.ink,
           fontFamily,
           margin: 0,
           padding: 0,

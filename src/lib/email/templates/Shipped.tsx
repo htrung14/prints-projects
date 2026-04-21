@@ -11,7 +11,7 @@
 import * as React from "react";
 import { Body, Container, Head, Hr, Html, Preview, Section, Text } from "@react-email/components";
 import type { Order } from "@/lib/types";
-import { baseTextStyle, fontFamily, formatOrderReference, labelStyle, textColor } from "./_shared";
+import { baseTextStyle, colors, fontFamily, formatOrderReference, labelStyle } from "./_shared";
 
 export type ShippedProps = {
   order: Order;
@@ -30,7 +30,7 @@ export function Shipped({ order }: ShippedProps) {
       <Body
         style={{
           backgroundColor: "#ffffff",
-          color: textColor,
+          color: colors.ink,
           fontFamily,
           margin: 0,
           padding: 0,
@@ -49,7 +49,7 @@ export function Shipped({ order }: ShippedProps) {
 
           <Text style={{ ...baseTextStyle, marginBottom: 24 }}>Reference {ref}</Text>
 
-          <Hr style={{ borderColor: textColor, opacity: 0.3, margin: "24px 0" }} />
+          <Hr style={{ borderColor: colors.ink, opacity: 0.3, margin: "24px 0" }} />
 
           <Section style={{ marginBottom: 24 }}>
             <Text style={labelStyle}>Tracking</Text>

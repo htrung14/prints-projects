@@ -13,7 +13,7 @@
 import * as React from "react";
 import { Body, Container, Head, Html, Link, Preview, Text } from "@react-email/components";
 import type { Order, OrderItem } from "@/lib/types";
-import { baseTextStyle, fontFamily, formatOrderReference, textColor } from "./_shared";
+import { baseTextStyle, colors, fontFamily, formatOrderReference } from "./_shared";
 
 export type PrintJobProps = {
   order: Order;
@@ -37,7 +37,7 @@ export function PrintJob({ order, items, dispatchUrl }: PrintJobProps) {
       <Body
         style={{
           backgroundColor: "#ffffff",
-          color: textColor,
+          color: colors.ink,
           fontFamily,
           margin: 0,
           padding: 0,

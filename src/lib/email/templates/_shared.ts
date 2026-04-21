@@ -7,36 +7,49 @@
 
 import type { Order } from "@/lib/types";
 
-// Email clients cannot reliably load a web font. We fall back to a universal
-// system stack, bold everywhere to echo the Cargo reference's uniform weight.
-export const fontFamily = 'Helvetica, Arial, "Liberation Sans", system-ui, sans-serif';
+export const fontFamily =
+  '"Helvetica Neue", Helvetica, Arial, "Liberation Sans", system-ui, sans-serif';
 
-export const textColor = "rgba(0,0,0,0.6)";
+export const serifFamily = 'Georgia, "Times New Roman", Times, serif';
+
+export const colors = {
+  bg: "#faf9f6",
+  ink: "rgba(12, 11, 10, 1)",
+  inkSoft: "rgba(12, 11, 10, 0.7)",
+  inkFaint: "rgba(12, 11, 10, 0.45)",
+  rule: "rgba(12, 11, 10, 0.15)",
+  blue: "#0072BB",
+  white: "#ffffff",
+} as const;
 
 export const baseTextStyle = {
-  color: textColor,
+  color: colors.ink,
   fontFamily,
-  fontWeight: 900 as const,
+  fontWeight: 400 as const,
   fontSize: "14px",
-  lineHeight: "1.4",
+  lineHeight: "1.6",
   margin: 0,
 } as const;
 
 export const labelStyle = {
   ...baseTextStyle,
+  color: colors.inkFaint,
   marginBottom: 8,
   textTransform: "uppercase" as const,
-  fontSize: "12px",
-  letterSpacing: "0.04em",
+  fontSize: "10px",
+  letterSpacing: "0.1em",
+  fontWeight: 600 as const,
+};
+
+export const serifStyle = {
+  fontFamily: serifFamily,
+  fontWeight: 400 as const,
+  fontStyle: "italic" as const,
+  color: colors.ink,
 };
 
 /**
  * Render a customer-facing order reference like `TB-2026-0418`.
- *
- * Format: `TB-YYYY-NNNN`, YYYY from `order.createdAt`, NNNN from the last
- * four hex digits of the order UUID (lossy but deterministic and non-PII).
- *
- * When Track A later adds a sequential `order_number` column, swap this.
  */
 export function formatOrderReference(order: Order): string {
   const created = order.createdAt ? new Date(order.createdAt) : new Date();
@@ -61,7 +74,6 @@ export function formatUsdFromCents(cents: number, currency: string = "usd"): str
       maximumFractionDigits: 2,
     }).format(cents / 100);
   } catch {
-    // Unknown currency code - fall back to USD formatting with suffix.
     return `$${(cents / 100).toFixed(2)} ${currencyUpper}`;
   }
 }

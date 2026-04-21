@@ -75,7 +75,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
         }
         .h-pull {
           font-family: var(--font-serif);
-          font-size: clamp(17px, 1.35vw, 20px);
+          font-size: clamp(22px, 2vw, 28px);
           font-weight: 500;
           line-height: 1.55;
           color: #fff;
@@ -83,7 +83,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
         }
         .h-essay {
           font-family: var(--font-serif);
-          font-size: 15px;
+          font-size: clamp(17px, 1.4vw, 20px);
           font-weight: 500;
           color: #fff;
           text-decoration: underline;
@@ -98,7 +98,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
         }
         .h-vp {
           font-family: var(--font-sans);
-          font-size: 13px;
+          font-size: clamp(14px, 1.1vw, 16px);
           font-weight: 600;
           letter-spacing: 0.04em;
           color: #fff;
