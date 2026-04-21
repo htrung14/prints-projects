@@ -98,7 +98,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
         }
         .h-vp {
           font-family: var(--font-sans);
-          font-size: clamp(14px, 1.1vw, 16px);
+          font-size: clamp(15px, 1.3vw, 18px);
           font-weight: 600;
           letter-spacing: 0.04em;
           color: #fff;
@@ -149,7 +149,7 @@ export default function LandingHero({ lead }: { lead: Photo }) {
           position: absolute;
           top: 50%;
           left: 50%;
-          transform: translate(-50%, -65%);
+          transform: translate(-50%, -85%);
           z-index: 2;
           display: flex;
           flex-direction: column;
