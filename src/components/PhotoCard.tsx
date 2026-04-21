@@ -23,7 +23,7 @@ export default function PhotoCard({ photo }: { photo: Photo }) {
           src={photo.imageUrl}
           alt={photo.imageAlt}
           fill
-          sizes="(max-width: 768px) 50vw, 33vw"
+          sizes="(max-width: 700px) 100vw, (max-width: 1400px) 50vw, 33vw"
           className="img-protected object-cover transition-transform duration-[640ms] group-hover:scale-[1.015]"
           style={{ transitionTimingFunction: "cubic-bezier(.2,.6,.2,1)" }}
         />
