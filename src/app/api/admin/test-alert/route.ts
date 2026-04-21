@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { systemErrorAlert } from "@/lib/alerting";
 import { triageAlert } from "@/lib/alerting/triage";
 import { createTelegramChannel } from "@/lib/alerting/channels/telegram";
 import { createEmailChannel } from "@/lib/alerting/channels/email";
@@ -11,10 +10,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const alert = systemErrorAlert(
-    "Test alert — verifying all channels are working",
-    "test-alert endpoint"
-  );
+  const alert = {
+    type: "system_error" as const,
+    severity: "info" as const,
+    title: "TEST — no action needed",
+    whatHappened: "Test alert verifying all channels are working.",
+    autoHandled: "Nothing to handle — this is a test.",
+    actionRequired: false,
+    actionInstructions: "None — this is a test.",
+    timestamp: new Date().toISOString(),
+  };
 
   let triageResult;
   try {
