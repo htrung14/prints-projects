@@ -20,11 +20,14 @@ import { adminServerClient } from "@/lib/supabase/admin";
  * (browser) and the callback route (server). Falls back to a sensible dev
  * value when the env is missing so the build doesn't fail locally.
  */
-export function magicLinkRedirectUrl(nextPath?: string): string {
+export function magicLinkRedirectUrl(_nextPath?: string): string {
+  // Intentionally no query string. Supabase's redirect-URL allowlist matcher
+  // is strict: a URL with `?next=…` does not match an allowlist entry of
+  // `/admin/auth/callback`, so Supabase silently falls back to Site URL and
+  // the magic link lands on `/` instead of the callback. Callback route
+  // defaults to `/admin` when `next` is absent.
   const base = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
-  const safeNext = nextPath && nextPath.startsWith("/") ? nextPath : "/admin";
-  const query = `?next=${encodeURIComponent(safeNext)}`;
-  return `${base}/admin/auth/callback${query}`;
+  return `${base}/admin/auth/callback`;
 }
 
 /**
