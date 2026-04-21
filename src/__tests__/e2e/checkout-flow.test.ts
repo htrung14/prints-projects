@@ -422,14 +422,12 @@ describe("dispatchWebhookEvent", () => {
 });
 
 describe("Alerting system", () => {
-  it("dispatches alerts to filtered channels", async () => {
-    const notionSend = vi.fn().mockResolvedValue(undefined);
+  it("dispatches info alerts to telegram only", async () => {
     const emailSend = vi.fn().mockResolvedValue(undefined);
     const telegramSend = vi.fn().mockResolvedValue(undefined);
 
     const dispatcher = createAlertDispatcher({
       channels: [
-        { name: "notion", send: notionSend },
         { name: "email", send: emailSend },
         { name: "telegram", send: telegramSend },
       ],
@@ -438,19 +436,16 @@ describe("Alerting system", () => {
     const infoAlert = orderCompletedAlert("order-001", "Test Buyer", "Edition 9/10");
     await dispatcher.send(infoAlert);
 
-    expect(notionSend).toHaveBeenCalledOnce();
     expect(emailSend).not.toHaveBeenCalled();
-    expect(telegramSend).not.toHaveBeenCalled();
+    expect(telegramSend).toHaveBeenCalledOnce();
   });
 
   it("sends critical alerts to all channels", async () => {
-    const notionSend = vi.fn().mockResolvedValue(undefined);
     const emailSend = vi.fn().mockResolvedValue(undefined);
     const telegramSend = vi.fn().mockResolvedValue(undefined);
 
     const dispatcher = createAlertDispatcher({
       channels: [
-        { name: "notion", send: notionSend },
         { name: "email", send: emailSend },
         { name: "telegram", send: telegramSend },
       ],
@@ -459,27 +454,26 @@ describe("Alerting system", () => {
     const criticalAlert = editionSoldOutAlert("North Lebanon (4)", "north-lebanon-oct-2020");
     await dispatcher.send(criticalAlert);
 
-    expect(notionSend).toHaveBeenCalledOnce();
     expect(emailSend).toHaveBeenCalledOnce();
     expect(telegramSend).toHaveBeenCalledOnce();
   });
 
-  it("sends warning alerts to notion only by default", async () => {
-    const notionSend = vi.fn().mockResolvedValue(undefined);
+  it("sends warning alerts to telegram only by default", async () => {
     const emailSend = vi.fn().mockResolvedValue(undefined);
+    const telegramSend = vi.fn().mockResolvedValue(undefined);
 
     const dispatcher = createAlertDispatcher({
       channels: [
-        { name: "notion", send: notionSend },
         { name: "email", send: emailSend },
+        { name: "telegram", send: telegramSend },
       ],
     });
 
     const warningAlert = editionLowStockAlert("North Lebanon (4)", "north-lebanon-oct-2020", 2);
     await dispatcher.send(warningAlert);
 
-    expect(notionSend).toHaveBeenCalledOnce();
     expect(emailSend).not.toHaveBeenCalled();
+    expect(telegramSend).toHaveBeenCalledOnce();
   });
 
   it("edition_sold_out alert says no action needed (auto-handled)", () => {
@@ -518,13 +512,13 @@ describe("Alerting system", () => {
 
   it("continues sending if one channel fails", async () => {
     const failingChannel = { name: "email", send: vi.fn().mockRejectedValue(new Error("down")) };
-    const workingChannel = { name: "notion", send: vi.fn().mockResolvedValue(undefined) };
+    const workingChannel = { name: "telegram", send: vi.fn().mockResolvedValue(undefined) };
 
     const dispatcher = createAlertDispatcher({
       channels: [failingChannel, workingChannel],
       severityFilter: {
         email: ["critical", "warning", "info"],
-        notion: ["critical", "warning", "info"],
+        telegram: ["critical", "warning", "info"],
       },
     });
 

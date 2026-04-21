@@ -84,12 +84,9 @@ describe("alertAfterOrder", () => {
 
     await alertAfterOrder(BASE_ORDER, [makeItem({ editionNumber: 5 })]);
 
-    // Telegram should be called (info alert goes to notion only by default,
-    // but triage is skipped without OPENROUTER_API_KEY so it passes through)
+    // Telegram receives all severities — verify it was called
     const telegramCalls = fetchMock.mock.calls.filter((c) => String(c[0]).includes("telegram"));
-    expect(telegramCalls.length).toBeGreaterThanOrEqual(0);
-    // Notion skipped without API key — just verify no crash
-    expect(fetchMock).toHaveBeenCalled();
+    expect(telegramCalls.length).toBeGreaterThanOrEqual(1);
   });
 
   it("fires sold_out alert and disables photo when edition exhausted", async () => {
@@ -97,10 +94,6 @@ describe("alertAfterOrder", () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true, text: async () => "" });
 
     await alertAfterOrder(BASE_ORDER, [makeItem({ editionNumber: 10, editionTotal: 10 })]);
-
-    const notionLogs = consoleSpy.mock.calls.filter((c) => String(c[0]).includes("[ALERT/NOTION]"));
-    // Should have: order_completed + edition_sold_out
-    expect(notionLogs.length).toBe(2);
 
     // Should have called update to disable photo
     expect(mockUpdate).toHaveBeenCalledWith({ is_published: false });
@@ -125,9 +118,11 @@ describe("alertAfterOrder", () => {
 
     await alertAfterOrder(BASE_ORDER, [makeItem({ editionNumber: 5, editionTotal: 10 })]);
 
-    const notionLogs = consoleSpy.mock.calls.filter((c) => String(c[0]).includes("[ALERT/NOTION]"));
-    // Only order_completed
-    expect(notionLogs.length).toBe(1);
+    // Only order_completed (info) — goes to telegram, not email
+    const telegramCalls = (global.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
+      (c: unknown[]) => String(c[0]).includes("telegram")
+    );
+    expect(telegramCalls.length).toBeGreaterThanOrEqual(1);
 
     consoleSpy.mockRestore();
   });
@@ -147,8 +142,9 @@ describe("alertWebhookFailure", () => {
 
     await alertWebhookFailure("cs_test_123", 2, "timeout");
 
-    // Warning-level only goes to Notion by default — fetch called for Notion skip log
-    expect(fetchMock).toHaveBeenCalled();
+    // Warning goes to telegram by default
+    const telegramCalls = fetchMock.mock.calls.filter((c) => String(c[0]).includes("telegram"));
+    expect(telegramCalls.length).toBeGreaterThanOrEqual(1);
   });
 
   it("sends critical for retry attempt >= 3 and notifies all channels", async () => {

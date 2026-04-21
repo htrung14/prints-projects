@@ -7,7 +7,7 @@ export type AlertDispatcherConfig = {
 
 const DEFAULT_SEVERITY_FILTER: Record<string, AlertSeverity[]> = {
   email: ["critical"],
-  telegram: ["critical"],
+  telegram: ["critical", "warning", "info"],
 };
 
 export function createAlertDispatcher(config: AlertDispatcherConfig) {
