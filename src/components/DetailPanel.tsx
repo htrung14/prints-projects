@@ -18,7 +18,9 @@ export default function DetailPanel({ photo }: { photo: Photo }) {
           style={{ padding: "32px 20px 32px 44px", minWidth: 0 }}
         >
           <img
-            src={photo.imageUrl}
+            src={photo.imageUrl.replace("/catalog/", "/catalog-hires/")}
+            srcSet={`${photo.imageUrl} 2000w, ${photo.imageUrl.replace("/catalog/", "/catalog-hires/")} 3000w`}
+            sizes="(max-width: 900px) 100vw, 62vw"
             alt={photo.imageAlt}
             className="img-protected block object-contain"
             draggable={false}
