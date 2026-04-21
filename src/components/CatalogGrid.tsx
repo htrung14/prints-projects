@@ -4,7 +4,7 @@ import type { Photo } from "@/lib/types";
 export default function CatalogGrid({ photos }: { photos: Photo[] }) {
   return (
     <div
-      className="grid grid-cols-1 min-[700px]:grid-cols-2 min-[1400px]:grid-cols-3"
+      className="grid grid-cols-1 min-[700px]:grid-cols-2 min-[1100px]:grid-cols-3"
       style={{ gap: 0 }}
     >
       {photos.map((photo, i) => (
