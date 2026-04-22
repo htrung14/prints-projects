@@ -229,6 +229,16 @@ export async function handleCheckoutSessionCompleted(
   const cartLines = parseCartLinesFromMetadata(session.metadata);
   const resolved = await resolveCartLines(cartLines);
 
+  // ---- 1b. Skip test carts ----
+  // The hidden `test-1-dollar` item is used to validate the checkout flow
+  // without creating real order rows. Return idempotent so Stripe gets a
+  // 200 and stops retrying, but nothing persists in the DB.
+  const isTestCart = resolved.length > 0 && resolved.every((r) => r.photo.slug === "test-1-dollar");
+  if (isTestCart) {
+    console.info(`webhook: session ${session.id} is a test cart — skipping order creation`);
+    return { idempotent: true };
+  }
+
   // ---- 2. Gather session-level fields ----
   const address = extractShippingAddress(session);
   const email =
@@ -250,12 +260,11 @@ export async function handleCheckoutSessionCompleted(
   // "EU — $50" then shipped to Australia). Advisory only — the order still
   // persists; ops holds the shipment and collects the difference.
   //
-  // Test-mode carts (only `test-1-dollar` slug) intentionally skip shipping
-  // collection in checkout.ts, so shippingCents=0 is expected. Skip the
-  // guard for them to avoid a false-positive ops alert on every $1 test.
-  const isTestCart = resolved.length > 0 && resolved.every((r) => r.photo.slug === "test-1-dollar");
+  // Test carts are already short-circuited above (step 1b), so any cart
+  // reaching this point is a real order. No need for a second isTestCart
+  // check — the shipping-mismatch guard applies unconditionally.
   const expected = expectedShippingCentsFor(address.country);
-  if (!isTestCart && shippingCents < expected) {
+  if (shippingCents < expected) {
     const shortfall = expected - shippingCents;
     const msg =
       `Order ${session.id}: shipping country ${address.country} expects ${expected}¢ ` +
