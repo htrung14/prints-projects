@@ -507,6 +507,30 @@ export async function createCheckoutSession(
     // Tax: off for launch — no NY Certificate of Authority yet, and this
     // limited edition stays well under NY's economic-nexus thresholds.
     // Re-enable once the studio registers with NY state.
+    // ─────────────────────────────────────────────────────────────────────
+    // TODO(tax): Flip `automatic_tax.enabled` to `true` the moment the NY
+    // Certificate of Authority is issued.
+    //
+    // Why it's off right now:
+    //   - Thalia's studio is based in New York, so ORIGIN-state rules
+    //     apply. Every sale shipped to a NY address is subject to NY
+    //     state + local sales tax (NYC combined rate: 8.875%). The
+    //     economic-nexus thresholds only matter for OUT-of-state sellers,
+    //     not for a NY-resident business — the older comment that said
+    //     otherwise was wrong.
+    //   - Collecting NY sales tax without a Certificate of Authority is
+    //     illegal, worse than not collecting. Cert must come first.
+    //
+    // To turn on once registered:
+    //   1. Enable Stripe Tax in the dashboard (Settings → Tax).
+    //   2. Flip the line below to `enabled: true`.
+    //   3. (Optional) subscribe to Stripe Tax Filings OR hand the Stripe
+    //      tax report to a CPA for quarterly filing.
+    //
+    // Any NY-shipped orders that closed BEFORE this flag flips carry a
+    // tax liability that you still owe the state — pay from your gross
+    // at filing time rather than trying to backfill-charge customers.
+    // ─────────────────────────────────────────────────────────────────────
     automatic_tax: { enabled: false },
     tax_id_collection: { enabled: false },
     billing_address_collection: "required",
