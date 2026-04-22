@@ -157,10 +157,14 @@ export default function LandingHero({ lead }: { lead: Photo }) {
           );
         }
         .hfb-center {
+          /* Anchor to the TOP of the hero with a clamped offset so the title
+             stays firmly in the upper trees regardless of viewport height.
+             Earlier version used top: 50% + translate(-85%) which collided
+             with the bottom paragraph on short/wide viewports. */
           position: absolute;
-          top: 50%;
+          top: clamp(88px, 18vh, 200px);
           left: 50%;
-          transform: translate(-50%, -85%);
+          transform: translateX(-50%);
           z-index: 2;
           display: flex;
           flex-direction: column;
