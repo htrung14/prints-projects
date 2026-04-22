@@ -292,6 +292,27 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Sea
                 </dd>
               </div>
             ) : null}
+            {(() => {
+              // Processing fee surfaces as the gap between subtotal+shipping+tax
+              // and total, since the webhook stores subtotalCents as
+              // prints-only. Only render when > 0.
+              const feeCents = Math.max(
+                0,
+                order.totalCents - order.subtotalCents - order.shippingCents - order.taxCents
+              );
+              if (feeCents === 0) return null;
+              return (
+                <div className="flex justify-between">
+                  <dt className="text-ink-faint">Processing fee (3%)</dt>
+                  <dd
+                    className="font-mono text-ink-strong"
+                    style={{ fontVariantNumeric: "tabular-nums" }}
+                  >
+                    {formatCents(feeCents, currency)}
+                  </dd>
+                </div>
+              );
+            })()}
             <div className="flex justify-between border-t border-ink-line pt-2">
               <dt className="text-ink-strong">Total</dt>
               <dd

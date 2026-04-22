@@ -54,6 +54,15 @@ export function OrderConfirmation({ order, items }: OrderConfirmationProps) {
   const shipping = formatUsdFromCents(order.shippingCents, order.currency);
   const tax = formatUsdFromCents(order.taxCents, order.currency);
   const total = formatUsdFromCents(order.totalCents, order.currency);
+  // Processing fee (3%) is passed through to the customer at checkout as a
+  // separate Stripe line item. The webhook stores subtotalCents as the
+  // prints-only amount, so the fee shows up as the gap between (subtotal +
+  // shipping + tax) and total. Compute + display it as its own row.
+  const processingFeeCents = Math.max(
+    0,
+    order.totalCents - order.subtotalCents - order.shippingCents - order.taxCents
+  );
+  const processingFee = formatUsdFromCents(processingFeeCents, order.currency);
   const address = formatAddress(order.shippingAddress);
   const customerName = order.shippingAddress?.name ?? order.customerName ?? "";
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://thaliabassim.com";
@@ -196,6 +205,18 @@ export function OrderConfirmation({ order, items }: OrderConfirmationProps) {
               </Column>
               <Column align="right">
                 <Text style={{ ...baseTextStyle, fontSize: "13px" }}>{shipping}</Text>
+              </Column>
+            </Row>
+          ) : null}
+          {processingFeeCents > 0 ? (
+            <Row style={{ marginBottom: 4 }}>
+              <Column>
+                <Text style={{ ...baseTextStyle, fontSize: "13px", color: colors.inkSoft }}>
+                  Processing fee (3%)
+                </Text>
+              </Column>
+              <Column align="right">
+                <Text style={{ ...baseTextStyle, fontSize: "13px" }}>{processingFee}</Text>
               </Column>
             </Row>
           ) : null}
