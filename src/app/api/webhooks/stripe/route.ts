@@ -102,21 +102,24 @@ export async function POST(req: NextRequest): Promise<Response> {
   try {
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret());
   } catch (err) {
-    // Signature verification failures are either attacker probes (noise) or
-    // a rotated webhook secret (real ops issue). We send to Sentry so the
-    // pattern is visible, and log a throttled audit row so we can detect
-    // "surge of failures in a short window" — that's the signal that the
-    // STRIPE_WEBHOOK_SECRET env was rotated without our env being updated.
+    // Every sig-verify failure fires an immediate warning alert so ops
+    // always knows something bounced — even a single one. The surge
+    // detector (recordAndMaybeAlertOnSignatureFailure) then escalates to
+    // critical if ≥3 pile up in 5 min, which is the "secret rotated"
+    // signal. We don't suppress the per-event warning because the
+    // 2026-04-22 post-mortem showed a single silent failure is enough to
+    // miss a real delivery problem.
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(`Stripe webhook signature verification failed: ${msg}`);
     Sentry.captureException(err, { tags: { pipeline: "stripe-webhook:signature" } });
 
-    // Record + rate-check inside after() so it doesn't slow the 400
-    // response. If >= SIG_FAIL_THRESHOLD rows exist within
-    // SIG_FAIL_WINDOW_MINUTES, fire a critical alert. Dedupe via an
-    // "already-alerted" audit row so we don't spam on every subsequent
-    // failure during an active incident.
     after(() => {
+      alertSystemError(
+        "Stripe webhook: signature verification failed",
+        `A webhook delivery was rejected (400) because signature verification failed: ${msg}. ` +
+          `If this is a one-off, it may be an attacker probe — no action needed. ` +
+          `If you see multiple of these, check that STRIPE_WEBHOOK_SECRET in Vercel matches the signing secret in Stripe Dashboard.`
+      );
       void recordAndMaybeAlertOnSignatureFailure(msg);
     });
     return new Response(`Webhook signature verification failed: ${msg}`, {
