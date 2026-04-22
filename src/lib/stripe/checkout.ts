@@ -560,5 +560,19 @@ export async function createCheckoutSession(
   };
 
   const stripe = stripeClient();
-  return stripe.checkout.sessions.create(params);
+  // Idempotency key: hash of the sorted cart + country so a double-click
+  // from the browser reuses the same Stripe session instead of creating
+  // ghost sessions. The key is deterministic per cart composition; a
+  // genuine new checkout (different item, different country) gets a fresh
+  // key. Stripe's idempotency window is 24h.
+  const cartFingerprint = JSON.stringify(
+    [...args.lines].sort((a, b) => a.photoSlug.localeCompare(b.photoSlug))
+  );
+  const { createHash } = await import("node:crypto");
+  const idempotencyKey = createHash("sha256")
+    .update(`checkout:${args.country ?? ""}:${cartFingerprint}`)
+    .digest("hex")
+    .slice(0, 48);
+
+  return stripe.checkout.sessions.create(params, { idempotencyKey });
 }

@@ -14,7 +14,7 @@
  */
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { track } from "@vercel/analytics";
 import { useCart } from "@/lib/cart";
 import { getAllPhotos } from "@/lib/photos";
@@ -22,65 +22,12 @@ import { formatUsd, priceCents } from "@/lib/pricing";
 import type { PaperType, Photo } from "@/lib/types";
 import { COUNTRY_OPTIONS } from "@/lib/countries";
 
-// Per-tier rate in cents, inlined for the UI summary line. Kept in sync with
-// src/lib/stripe/checkout.ts's SHIPPING_CENTS_* constants and tierForCountry().
-const TIER_CENTS: Record<"US" | "CA" | "EU_UK" | "AU_ROW", number> = {
-  US: 1000,
-  CA: 3500,
-  EU_UK: 5000,
-  AU_ROW: 6500,
-};
-
-const EU_UK_CODES = new Set([
-  "GB",
-  "IE",
-  "DE",
-  "FR",
-  "NL",
-  "BE",
-  "LU",
-  "IT",
-  "ES",
-  "PT",
-  "AT",
-  "DK",
-  "SE",
-  "FI",
-  "NO",
-  "CH",
-  "IS",
-  "PL",
-  "CZ",
-  "GR",
-  "HU",
-  "SK",
-  "SI",
-  "HR",
-  "EE",
-  "LV",
-  "LT",
-  "RO",
-  "BG",
-  "CY",
-  "MT",
-]);
-
-function shippingCentsFor(country: string): number {
-  const c = country.toUpperCase();
-  if (c === "US") return TIER_CENTS.US;
-  if (c === "CA") return TIER_CENTS.CA;
-  if (EU_UK_CODES.has(c)) return TIER_CENTS.EU_UK;
-  return TIER_CENTS.AU_ROW;
-}
-
 export default function CheckoutPage() {
   const { lines, subtotalCents, itemCount, remove } = useCart();
   const photos = getAllPhotos();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [country, setCountry] = useState<string>("US");
-
-  const shippingCents = useMemo(() => shippingCentsFor(country), [country]);
 
   // Fire one funnel event per checkout-page view, with cart snapshot so
   // the Vercel Analytics funnel can compare "entered checkout" to "paid".
@@ -141,8 +88,10 @@ export default function CheckoutPage() {
   }
 
   const processingFeeCents = Math.ceil(subtotalCents * 0.03);
-  const totalCents = subtotalCents + processingFeeCents + shippingCents;
-  const shippingLabel = `${formatUsd(shippingCents)} (${country})`;
+  // Display total excludes shipping — Stripe's hosted checkout adds
+  // shipping as its own line after the customer confirms their address.
+  // Showing shipping here then having Stripe show it again was confusing.
+  const totalCents = subtotalCents + processingFeeCents;
 
   return (
     <div className="border-t border-ink-line px-6 py-16 md:px-8">
@@ -206,9 +155,9 @@ export default function CheckoutPage() {
             <dt>Processing fee (3%)</dt>
             <dd className="text-ink-strong">{formatUsd(processingFeeCents)}</dd>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between text-ink-faint">
             <dt>Shipping</dt>
-            <dd className="text-ink-strong">{shippingLabel}</dd>
+            <dd>Added at next step</dd>
           </div>
         </dl>
 
