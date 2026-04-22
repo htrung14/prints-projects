@@ -22,6 +22,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isAllowlistedEmail } from "@/lib/auth/allowlist";
+import { isAllowlistedAdminEmail } from "@/lib/supabase/queries/settings";
+
+// Node runtime so we can hit the service-role-backed settings query for
+// the DB allowlist merge. Edge runtime can't reach server-only modules.
+export const runtime = "nodejs";
 
 // Paths that must always be reachable even when the visitor has no session.
 const PUBLIC_ADMIN_PATHS = new Set<string>(["/admin/sign-in", "/admin/auth/callback"]);
@@ -86,7 +91,18 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const email = user?.email ?? null;
-  const isAuthorized = user !== null && isAllowlistedEmail(email);
+  // Env-first (fast, no DB round-trip); fall back to DB allowlist for
+  // emails added via /admin/settings.
+  let isAuthorized = user !== null && isAllowlistedEmail(email);
+  if (user !== null && !isAuthorized) {
+    try {
+      isAuthorized = await isAllowlistedAdminEmail(email);
+    } catch {
+      // DB unreachable — fail closed so the admin panel isn't accidentally
+      // open. Env-based admins still get through above.
+      isAuthorized = false;
+    }
+  }
 
   if (isPublicAdminPath(pathname)) {
     // If an allowlisted admin visits /admin/sign-in while already signed in,

@@ -15,6 +15,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { adminServerClient } from "@/lib/supabase/admin";
 import { isAllowlistedEmail } from "@/lib/auth/allowlist";
+import { isAllowlistedAdminEmail } from "@/lib/supabase/queries/settings";
 
 export type AdminSession = {
   email: string;
@@ -38,8 +39,12 @@ export async function getAdminSession(): Promise<AdminSession | null> {
 
   if (error || !user) return null;
   const email = user.email ?? null;
-  if (!isAllowlistedEmail(email)) return null;
-  return { email: email as string };
+  // Check env-first for the cheap sync path; fall back to the DB allowlist
+  // for entries added via /admin/settings. Env stays authoritative so a
+  // wiped settings row can't lock bootstrap admins out.
+  if (isAllowlistedEmail(email)) return { email: email as string };
+  if (await isAllowlistedAdminEmail(email)) return { email: email as string };
+  return null;
 }
 
 /**
