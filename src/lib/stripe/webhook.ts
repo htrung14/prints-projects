@@ -712,7 +712,7 @@ async function handleRefundWithoutMatchingOrder(
       line2: fallback.line2 ?? null,
       city: fallback.city ?? "",
       state: fallback.state ?? null,
-      postalCode: fallback.postal_code ?? "",
+      postalCode: fallback.postal_code || null,
       country: fallback.country ?? "",
     };
   }
