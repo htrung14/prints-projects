@@ -21,9 +21,16 @@ import { useCart } from "@/lib/cart";
 import { getAllPhotos } from "@/lib/photos";
 import { formatUsd, priceCents } from "@/lib/pricing";
 import type { PaperType, Photo } from "@/lib/types";
-import { COUNTRY_OPTIONS, SUPPORTED_COUNTRY_CODES } from "@/lib/countries";
+import { tierForCountryCode } from "@/lib/countries";
 
-const TZ_COUNTRY: Record<string, string> = {
+const REGION_OPTIONS = [
+  { value: "US", label: "United States" },
+  { value: "CA", label: "Canada" },
+  { value: "GB", label: "Europe & United Kingdom" },
+  { value: "AU", label: "Rest of world" },
+] as const;
+
+const TZ_TIER: Record<string, string> = {
   "America/New_York": "US",
   "America/Chicago": "US",
   "America/Denver": "US",
@@ -42,76 +49,84 @@ const TZ_COUNTRY: Record<string, string> = {
   "America/St_Johns": "CA",
   "America/Regina": "CA",
   "Europe/London": "GB",
-  "Europe/Dublin": "IE",
-  "Europe/Berlin": "DE",
-  "Europe/Paris": "FR",
-  "Europe/Amsterdam": "NL",
-  "Europe/Brussels": "BE",
-  "Europe/Luxembourg": "LU",
-  "Europe/Rome": "IT",
-  "Europe/Madrid": "ES",
-  "Europe/Lisbon": "PT",
-  "Europe/Vienna": "AT",
-  "Europe/Copenhagen": "DK",
-  "Europe/Stockholm": "SE",
-  "Europe/Helsinki": "FI",
-  "Europe/Oslo": "NO",
-  "Europe/Zurich": "CH",
-  "Atlantic/Reykjavik": "IS",
-  "Europe/Warsaw": "PL",
-  "Europe/Prague": "CZ",
-  "Europe/Athens": "GR",
-  "Europe/Budapest": "HU",
-  "Europe/Bratislava": "SK",
-  "Europe/Ljubljana": "SI",
-  "Europe/Zagreb": "HR",
-  "Europe/Tallinn": "EE",
-  "Europe/Riga": "LV",
-  "Europe/Vilnius": "LT",
-  "Europe/Bucharest": "RO",
-  "Europe/Sofia": "BG",
-  "Asia/Nicosia": "CY",
-  "Europe/Malta": "MT",
+  "Europe/Dublin": "GB",
+  "Europe/Berlin": "GB",
+  "Europe/Paris": "GB",
+  "Europe/Amsterdam": "GB",
+  "Europe/Brussels": "GB",
+  "Europe/Luxembourg": "GB",
+  "Europe/Rome": "GB",
+  "Europe/Madrid": "GB",
+  "Europe/Lisbon": "GB",
+  "Europe/Vienna": "GB",
+  "Europe/Copenhagen": "GB",
+  "Europe/Stockholm": "GB",
+  "Europe/Helsinki": "GB",
+  "Europe/Oslo": "GB",
+  "Europe/Zurich": "GB",
+  "Atlantic/Reykjavik": "GB",
+  "Europe/Warsaw": "GB",
+  "Europe/Prague": "GB",
+  "Europe/Athens": "GB",
+  "Europe/Budapest": "GB",
+  "Europe/Bratislava": "GB",
+  "Europe/Ljubljana": "GB",
+  "Europe/Zagreb": "GB",
+  "Europe/Tallinn": "GB",
+  "Europe/Riga": "GB",
+  "Europe/Vilnius": "GB",
+  "Europe/Bucharest": "GB",
+  "Europe/Sofia": "GB",
+  "Asia/Nicosia": "GB",
+  "Europe/Malta": "GB",
   "Australia/Sydney": "AU",
   "Australia/Melbourne": "AU",
   "Australia/Brisbane": "AU",
   "Australia/Perth": "AU",
   "Australia/Adelaide": "AU",
-  "Pacific/Auckland": "NZ",
-  "Asia/Tokyo": "JP",
-  "Asia/Singapore": "SG",
-  "Asia/Hong_Kong": "HK",
-  "Asia/Seoul": "KR",
-  "Asia/Taipei": "TW",
-  "Asia/Bangkok": "TH",
-  "Asia/Kuala_Lumpur": "MY",
-  "Asia/Jerusalem": "IL",
-  "Asia/Dubai": "AE",
-  "Asia/Riyadh": "SA",
-  "America/Mexico_City": "MX",
-  "America/Monterrey": "MX",
-  "America/Sao_Paulo": "BR",
-  "America/Argentina/Buenos_Aires": "AR",
-  "America/Santiago": "CL",
-  "America/Bogota": "CO",
-  "Africa/Johannesburg": "ZA",
-  "Asia/Kolkata": "IN",
-  "Asia/Calcutta": "IN",
-  "Asia/Manila": "PH",
+  "Pacific/Auckland": "AU",
+  "Asia/Tokyo": "AU",
+  "Asia/Singapore": "AU",
+  "Asia/Hong_Kong": "AU",
+  "Asia/Seoul": "AU",
+  "Asia/Taipei": "AU",
+  "Asia/Bangkok": "AU",
+  "Asia/Kuala_Lumpur": "AU",
+  "Asia/Jerusalem": "AU",
+  "Asia/Dubai": "AU",
+  "Asia/Riyadh": "AU",
+  "America/Mexico_City": "AU",
+  "America/Monterrey": "AU",
+  "America/Sao_Paulo": "AU",
+  "America/Argentina/Buenos_Aires": "AU",
+  "America/Santiago": "AU",
+  "America/Bogota": "AU",
+  "Africa/Johannesburg": "AU",
+  "Asia/Kolkata": "AU",
+  "Asia/Calcutta": "AU",
+  "Asia/Manila": "AU",
 };
 
-function detectCountry(): string {
+const TIER_TO_VALUE: Record<string, string> = {
+  US: "US",
+  CA: "CA",
+  EU_UK: "GB",
+  AU_ROW: "AU",
+};
+
+function detectRegion(): string {
   if (typeof window === "undefined") return "US";
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
-    const code = TZ_COUNTRY[tz];
-    if (code && SUPPORTED_COUNTRY_CODES.includes(code)) return code;
+    const val = TZ_TIER[tz];
+    if (val) return val;
   } catch {}
   try {
     const parts = (navigator.language ?? "").split("-");
     if (parts.length >= 2) {
       const region = parts[parts.length - 1].toUpperCase();
-      if (/^[A-Z]{2}$/.test(region) && SUPPORTED_COUNTRY_CODES.includes(region)) return region;
+      const tier = tierForCountryCode(region);
+      if (tier) return TIER_TO_VALUE[tier] ?? "US";
     }
   } catch {}
   return "US";
@@ -122,7 +137,7 @@ export default function CheckoutPage() {
   const photos = getAllPhotos();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [country, setCountry] = useState<string>(detectCountry);
+  const [country, setCountry] = useState<string>(detectRegion);
 
   // Fire one funnel event per checkout-page view, with cart snapshot so
   // the Vercel Analytics funnel can compare "entered checkout" to "paid".
@@ -225,15 +240,14 @@ export default function CheckoutPage() {
             disabled={pending}
             className="w-full border border-ink-line bg-transparent px-4 py-3 text-base text-ink focus:border-ink focus:outline-none"
           >
-            {COUNTRY_OPTIONS.map((opt) => (
-              <option key={opt.code} value={opt.code}>
-                {opt.flag} {opt.name}
+            {REGION_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
               </option>
             ))}
           </select>
           <p className="text-xs text-ink-faint">
-            Shipping is calculated from the country you select. At the next step Stripe collects
-            your full address.
+            Stripe collects your full address at the next step.
           </p>
         </div>
 
