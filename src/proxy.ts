@@ -24,9 +24,10 @@ import { createServerClient } from "@supabase/ssr";
 import { isAllowlistedEmail } from "@/lib/auth/allowlist";
 import { isAllowlistedAdminEmail } from "@/lib/supabase/queries/settings";
 
-// Node runtime so we can hit the service-role-backed settings query for
-// the DB allowlist merge. Edge runtime can't reach server-only modules.
-export const runtime = "nodejs";
+// Next 16's proxy always runs on the Node.js runtime — no runtime
+// directive is allowed here (build fails with
+// "Route segment config is not allowed in Proxy file"). We rely on
+// that default so the service-role-backed settings query below works.
 
 // Paths that must always be reachable even when the visitor has no session.
 const PUBLIC_ADMIN_PATHS = new Set<string>(["/admin/sign-in", "/admin/auth/callback"]);
