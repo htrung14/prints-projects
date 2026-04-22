@@ -18,7 +18,7 @@ import { z } from "zod";
 import { getAdminSession } from "@/lib/auth/session";
 import { getOrderById, updateOrderStatus } from "@/lib/supabase/queries/orders";
 import { audit } from "@/lib/supabase/queries/audit";
-import { sendShippedNotification } from "@/lib/email/send";
+import { sendShippedNotification, sendDeliveredNotification } from "@/lib/email/send";
 import { updateOrderFields } from "@/app/admin/_data";
 import { getDispatcher } from "@/lib/alerting/dispatcher";
 import { systemErrorAlert } from "@/lib/alerting";
@@ -130,6 +130,34 @@ export async function POST(
       after(() => {
         getDispatcher()
           .send(systemErrorAlert(`transition(${id}) shipped email (actor=${session.email})`, msg))
+          .catch((alertErr) => {
+            console.error(`transition(${id}): alert dispatch failed:`, alertErr);
+          });
+      });
+    }
+  }
+
+  if (to === "delivered") {
+    try {
+      const refreshed = await getOrderById(id);
+      if (refreshed) {
+        await sendDeliveredNotification(refreshed);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`transition(${id}): sendDeliveredNotification failed: ${msg}`);
+      await audit({
+        orderId: id,
+        actor: session.email,
+        action: "email_send_failed",
+        meta: {
+          kind: "delivered_notification",
+          error: msg,
+        },
+      });
+      after(() => {
+        getDispatcher()
+          .send(systemErrorAlert(`transition(${id}) delivered email (actor=${session.email})`, msg))
           .catch((alertErr) => {
             console.error(`transition(${id}): alert dispatch failed:`, alertErr);
           });

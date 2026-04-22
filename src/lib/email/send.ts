@@ -18,6 +18,8 @@ import * as React from "react";
 import type { Order, OrderItem } from "@/lib/types";
 import { fromAddress, getResend } from "./client";
 import { getPrinterEmail } from "@/lib/supabase/queries/settings";
+import AbandonedCart from "./templates/AbandonedCart";
+import Delivered from "./templates/Delivered";
 import OrderConfirmation from "./templates/OrderConfirmation";
 import PrintJob from "./templates/PrintJob";
 import Refunded from "./templates/Refunded";
@@ -127,6 +129,40 @@ export async function sendShippedNotification(order: Order): Promise<void> {
       { name: "email_kind", value: "shipped" },
       { name: "order_ref", value: ref },
     ],
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Delivered notification (to customer)
+// ---------------------------------------------------------------------------
+
+export async function sendDeliveredNotification(order: Order): Promise<void> {
+  const ref = formatOrderReference(order);
+  await sendRenderedEmail({
+    to: order.customerEmail,
+    subject: `Order ${ref} delivered — please inspect your print`,
+    node: React.createElement(Delivered, { order }),
+    tags: [
+      { name: "email_kind", value: "delivered" },
+      { name: "order_ref", value: ref },
+    ],
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Abandoned cart recovery (to customer)
+// ---------------------------------------------------------------------------
+
+export async function sendAbandonedCartEmail(
+  to: string,
+  customerName: string | null,
+  cartSummary: string | null
+): Promise<void> {
+  await sendRenderedEmail({
+    to,
+    subject: "You left a print behind",
+    node: React.createElement(AbandonedCart, { customerName, cartSummary }),
+    tags: [{ name: "email_kind", value: "abandoned_cart" }],
   });
 }
 

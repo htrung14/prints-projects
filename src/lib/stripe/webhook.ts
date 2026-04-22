@@ -796,6 +796,119 @@ async function handleDisputeCreated(dispute: Stripe.Dispute): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Handle checkout.session.expired — abandoned cart recovery
+// ---------------------------------------------------------------------------
+
+async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session): Promise<void> {
+  const email = session.customer_details?.email ?? session.customer_email ?? null;
+  if (!email) {
+    console.info(
+      `webhook: checkout.session.expired ${session.id} — no email on session, skipping recovery`
+    );
+    return;
+  }
+
+  // Suppression 1: already purchased (same email has a paid/shipped/delivered order)
+  const db = await import("@/lib/supabase/server").then((m) => m.serverClient());
+  const { data: existingOrder } = await db
+    .from("orders")
+    .select("id")
+    .eq("customer_email", email)
+    .in("status", ["paid", "queued_for_print", "sent_to_print", "printed", "shipped", "delivered"])
+    .limit(1)
+    .maybeSingle();
+  if (existingOrder) {
+    console.info(
+      `webhook: checkout.session.expired ${session.id} — ${email} already has a paid order, suppressing recovery email`
+    );
+    return;
+  }
+
+  // Suppression 2: already sent a recovery email in the last 7 days
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: recentRecovery } = await db
+    .from("audit_log")
+    .select("id")
+    .eq("action", "abandoned_cart_email_sent")
+    .gte("created_at", weekAgo)
+    .limit(1)
+    .maybeSingle();
+  if (recentRecovery) {
+    // Check if it was for the SAME email — the audit meta stores it.
+    // If not the same email, allow the send. Use a broader query with
+    // meta filter if Supabase supports it, else check in-memory.
+    // For simplicity: query all recent recovery audit rows and check.
+    const { data: recentRows } = await db
+      .from("audit_log")
+      .select("meta")
+      .eq("action", "abandoned_cart_email_sent")
+      .gte("created_at", weekAgo);
+    const alreadySent = (recentRows ?? []).some((row) => {
+      const meta = (row.meta ?? null) as { email?: unknown } | null;
+      return typeof meta?.email === "string" && meta.email.toLowerCase() === email.toLowerCase();
+    });
+    if (alreadySent) {
+      console.info(
+        `webhook: checkout.session.expired ${session.id} — ${email} already received a recovery email in the last 7 days, suppressing`
+      );
+      return;
+    }
+  }
+
+  // Extract a cart summary for the email copy (e.g. "Bekaa print")
+  let cartSummary: string | null = null;
+  try {
+    const cartLines = parseCartLinesFromMetadata(session.metadata);
+    // Skip test carts
+    if (cartLines.every((l) => l.photoSlug === "test-1-dollar")) {
+      console.info(
+        `webhook: checkout.session.expired ${session.id} — test cart, skipping recovery`
+      );
+      return;
+    }
+    const titles = cartLines.map((l) => {
+      const slug = l.photoSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      return slug;
+    });
+    cartSummary = titles.length === 1 ? titles[0] : `${titles.length} prints`;
+  } catch {
+    // Metadata parse failed — send without cart summary
+  }
+
+  const customerName =
+    session.customer_details?.name ?? session.customer_details?.individual_name ?? null;
+
+  // Send the recovery email
+  const { sendAbandonedCartEmail } = await import("@/lib/email/send");
+  try {
+    await sendAbandonedCartEmail(email, customerName, cartSummary);
+    await audit({
+      orderId: null,
+      actor: "stripe_webhook",
+      action: "abandoned_cart_email_sent",
+      meta: {
+        sessionId: session.id,
+        email,
+        customerName,
+        cartSummary,
+      },
+    });
+    console.info(`webhook: abandoned cart recovery email sent to ${email} (session ${session.id})`);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`webhook: abandoned cart recovery email failed for ${email}: ${msg}`);
+    Sentry.captureException(err, {
+      tags: { pipeline: "stripe-webhook:abandoned-cart" },
+      extra: { sessionId: session.id, email },
+    });
+    await alertSystemError(
+      `abandoned cart email (session ${session.id})`,
+      `Recovery email to ${email} failed: ${msg}. Session ${session.id} expired without payment.`
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Auto-refund on EDITION_EXCEEDED
 // ---------------------------------------------------------------------------
 
@@ -1000,6 +1113,11 @@ export async function dispatchWebhookEvent(event: Stripe.Event): Promise<Dispatc
     }
     case "charge.dispute.created": {
       await handleDisputeCreated(event.data.object as Stripe.Dispute);
+      return null;
+    }
+    case "checkout.session.expired": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      await handleCheckoutSessionExpired(session);
       return null;
     }
     default:
