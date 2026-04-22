@@ -20,6 +20,7 @@ import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 import type { Address, CartLine, Order, OrderItem } from "@/lib/types";
 import { resolveCartLines, expectedShippingCentsFor } from "./checkout";
+import { stripeClient } from "./client";
 import { insertOrderWithItems, insertRefundedStub } from "@/lib/supabase/queries/orders";
 import { getPhotoIdMapBySlugs } from "@/lib/supabase/queries/photos";
 import { audit } from "@/lib/supabase/queries/audit";
@@ -170,6 +171,58 @@ export async function handleCheckoutSessionCompleted(
       `webhook: session ${session.id} has payment_status="${session.payment_status}" — skipping until paid`
     );
     return { idempotent: true };
+  }
+
+  // ---- 0b. Refund gate ----
+  // If the underlying PaymentIntent has already been refunded (full or
+  // partial) by the time we process this event, do NOT create a live
+  // paid order. This happens when a checkout.session.completed delivery
+  // fails (e.g. 2026-04-21 apex→www 307), ops refunds the charge
+  // manually, then the original event is replayed. Without this guard
+  // the replay creates an order in state "paid" that doesn't match
+  // Stripe — the exact drift that required the manual reconciliation of
+  // order 6a8c61e0 on 2026-04-22.
+  const piId = extractPaymentIntentId(session);
+  if (piId) {
+    try {
+      const stripe = stripeClient();
+      const pi = await stripe.paymentIntents.retrieve(piId, { expand: ["latest_charge"] });
+      const latestCharge =
+        typeof pi.latest_charge === "object" && pi.latest_charge !== null ? pi.latest_charge : null;
+      const refunded =
+        pi.status === "canceled" ||
+        (latestCharge as Stripe.Charge | null)?.refunded === true ||
+        ((latestCharge as Stripe.Charge | null)?.amount_refunded ?? 0) > 0;
+      if (refunded) {
+        console.info(
+          `webhook: session ${session.id} (PI ${piId}) is already refunded — skipping order creation`
+        );
+        Sentry.captureMessage("checkout.session.completed arrived post-refund", {
+          level: "warning",
+          tags: { pipeline: "stripe-webhook:post-refund-skip" },
+          extra: { sessionId: session.id, paymentIntentId: piId },
+        });
+        await alertSystemError(
+          `post-refund webhook skip (session ${session.id})`,
+          `checkout.session.completed for ${session.id} arrived after PI ${piId} was already refunded. ` +
+            `No order created (would have been drift). If this session was meant to be fulfilled, ` +
+            `reconcile manually: re-charge the customer and run the webhook again.`
+        );
+        return { idempotent: true };
+      }
+    } catch (err) {
+      // Don't fail the webhook if the PI lookup errors — log + alert and
+      // continue with order creation. Stripe's retry safety-net will
+      // re-trigger us if we actually 500, and an extra "paid" order is
+      // recoverable manually, whereas a hard failure here would block
+      // the entire webhook path.
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`webhook: PI refund lookup failed for ${piId}: ${msg}`);
+      Sentry.captureException(err, {
+        tags: { pipeline: "stripe-webhook:pi-refund-check" },
+        extra: { sessionId: session.id, paymentIntentId: piId },
+      });
+    }
   }
 
   // ---- 1. Rebuild cart + re-price defensively ----
