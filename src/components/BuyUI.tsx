@@ -169,7 +169,10 @@ export default function BuyUI({ photo }: { photo: Photo }) {
             letterSpacing: "0.04em",
           }}
         >
-          {FIXED_SIZE_LABEL} · Archival pigment · Ed. of {photo.editionTotal}
+          {FIXED_SIZE_LABEL} · Archival pigment ·{" "}
+          {photo.editionTotal - photo.editionSold <= 5
+            ? `${photo.editionTotal - photo.editionSold} of ${photo.editionTotal} remaining`
+            : `Ed. of ${photo.editionTotal}`}
         </p>
       </div>
 
@@ -249,7 +252,7 @@ export default function BuyUI({ photo }: { photo: Photo }) {
           </p>
           <p>
             Dispatched worldwide via insured courier. If your print arrives damaged, email a photo
-            of the damage within 48 hours of delivery and we will arrange a replacement at no cost.
+            of the damage within 72 hours of delivery and we will arrange a replacement at no cost.
           </p>
         </div>
       </Disclosure>
