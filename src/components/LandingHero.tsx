@@ -157,14 +157,15 @@ export default function LandingHero({ lead }: { lead: Photo }) {
           );
         }
         .hfb-center {
-          /* Anchor to the TOP of the hero with a clamped offset so the title
-             stays firmly in the upper trees regardless of viewport height.
-             Earlier version used top: 50% + translate(-85%) which collided
-             with the bottom paragraph on short/wide viewports. */
+          /* Default (tall viewports): sit in the mid-upper trees, ~15%
+             above the vertical midline — the position the studio likes.
+             On short viewports, the bottom paragraph grows tall enough
+             to crash into this position, so the media query below shifts
+             the title up out of its way. */
           position: absolute;
-          top: clamp(88px, 18vh, 200px);
+          top: 50%;
           left: 50%;
-          transform: translateX(-50%);
+          transform: translate(-50%, -85%);
           z-index: 2;
           display: flex;
           flex-direction: column;
@@ -172,6 +173,15 @@ export default function LandingHero({ lead }: { lead: Photo }) {
           gap: 10px;
           text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
           text-align: center;
+        }
+        /* Short viewports (laptop windows resized narrow-and-wide,
+           landscape phones): move the title into the upper third so the
+           bottom paragraph can't overlap it. */
+        @media (max-height: 720px) {
+          .hfb-center {
+            top: clamp(72px, 18vh, 160px);
+            transform: translateX(-50%);
+          }
         }
         .hfb-inner {
           display: flex;

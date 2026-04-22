@@ -20,6 +20,7 @@ import { fromAddress, getResend } from "./client";
 import { getPrinterEmail } from "@/lib/supabase/queries/settings";
 import OrderConfirmation from "./templates/OrderConfirmation";
 import PrintJob from "./templates/PrintJob";
+import Refunded from "./templates/Refunded";
 import ReprintOnTheWay from "./templates/ReprintOnTheWay";
 import Shipped from "./templates/Shipped";
 import PostPurchase, {
@@ -124,6 +125,28 @@ export async function sendShippedNotification(order: Order): Promise<void> {
     node: React.createElement(Shipped, { order }),
     tags: [
       { name: "email_kind", value: "shipped" },
+      { name: "order_ref", value: ref },
+    ],
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Refund notification (to customer)
+// ---------------------------------------------------------------------------
+
+/**
+ * Sent when a charge is refunded (Stripe `charge.refunded` or admin-issued).
+ * Called from the webhook's `handleChargeRefunded` after the order status
+ * has been flipped to `refunded`.
+ */
+export async function sendRefundedNotification(order: Order): Promise<void> {
+  const ref = formatOrderReference(order);
+  await sendRenderedEmail({
+    to: order.customerEmail,
+    subject: `Order ${ref} refunded`,
+    node: React.createElement(Refunded, { order }),
+    tags: [
+      { name: "email_kind", value: "refunded" },
       { name: "order_ref", value: ref },
     ],
   });

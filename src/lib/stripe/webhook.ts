@@ -23,7 +23,7 @@ import { resolveCartLines, expectedShippingCentsFor } from "./checkout";
 import { insertOrderWithItems, insertRefundedStub } from "@/lib/supabase/queries/orders";
 import { getPhotoIdMapBySlugs } from "@/lib/supabase/queries/photos";
 import { audit } from "@/lib/supabase/queries/audit";
-import { sendOrderConfirmation, schedulePostPurchaseSequence } from "@/lib/email/send";
+import { sendAndAlert, sendOrderConfirmation, sendRefundedNotification } from "@/lib/email/send";
 import { buildDispatchUrl } from "@/lib/dispatch/url";
 import { alertAfterOrder } from "@/lib/alerting/webhook-alerts";
 import { alertSafely, alertSystemError } from "@/lib/alerting/dispatcher";
@@ -335,11 +335,12 @@ export async function runPostOrderSideEffects(
   // would spam the printer with 5-10 messages/week for no workflow gain.
   // The dispatchUrl is still built above so it's audit-logged and
   // available for manual resend if ever needed.
-  await runSafely(
-    "schedulePostPurchaseSequence",
-    () => schedulePostPurchaseSequence(order),
-    order.id
-  );
+  //
+  // Post-purchase drip (PostPurchase.tsx × 7 touches) is intentionally
+  // NOT scheduled here. The scheduled_emails table + template code stay
+  // in the repo but no new rows are inserted and no cron sends them —
+  // the studio preferred to keep customer communication to the three
+  // transactional emails (order confirmation, shipped, delivered).
   await runSafely("alertAfterOrder", () => alertAfterOrder(order, items), order.id);
   await runSafely(
     "audit(paid)",
@@ -424,12 +425,29 @@ async function handleChargeRefunded(charge: Stripe.Charge): Promise<void> {
 
   if (data.status === "refunded") return;
 
-  await import("@/lib/supabase/queries/orders").then((m) =>
-    m.updateOrderStatus(data.id, "refunded", {
-      trigger: "stripe_charge.refunded",
-      chargeId: charge.id,
-    })
-  );
+  const ordersModule = await import("@/lib/supabase/queries/orders");
+  await ordersModule.updateOrderStatus(data.id, "refunded", {
+    trigger: "stripe_charge.refunded",
+    chargeId: charge.id,
+  });
+
+  // Fetch the full order so the customer email has customer_email, name,
+  // total, etc. — updateOrderStatus is void-returning.
+  const fullOrder = await ordersModule.getOrderById(data.id);
+  if (fullOrder) {
+    // sendAndAlert captures + alerts any Resend failure but never throws
+    // back into the dispatcher (Stripe would otherwise retry this event
+    // on every email hiccup).
+    await sendAndAlert("refunded", fullOrder.id, () => sendRefundedNotification(fullOrder));
+  } else {
+    console.warn(
+      `webhook(${data.id}): order lookup returned null after status flip; refund email NOT sent.`
+    );
+    await alertSystemError(
+      `refund email skipped (order ${data.id})`,
+      `Order ${data.id} flipped to 'refunded' but a follow-up getOrderById returned null. Refund email was not sent. Reconcile manually.`
+    );
+  }
 
   // Don't rethrow — we already updated the order status above, so a dispatcher
   // failure here shouldn't cause Stripe to retry and duplicate the update.
