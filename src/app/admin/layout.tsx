@@ -35,17 +35,17 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header
-        className="sticky top-0 z-40 border-b border-ink-line bg-bg px-6 py-4 md:px-10"
-        style={{ gridTemplateColumns: "1fr auto" }}
-      >
-        <div className="flex items-baseline justify-between gap-6">
-          <div className="flex items-baseline gap-6">
+      <header className="sticky top-0 z-40 border-b border-ink-line bg-bg px-6 py-4 md:px-10">
+        {/* flex-wrap lets the right-side chrome drop to a second row on narrow
+            viewports instead of overflowing. The email is hidden below md so
+            "Sign out" doesn't collide with the nav on phones. */}
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3">
+          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
             <Link href="/admin" className="text-ink-strong">
               Admin
             </Link>
             {session ? (
-              <nav className="flex items-baseline gap-5 text-sm">
+              <nav className="flex flex-wrap items-baseline gap-x-5 gap-y-2 text-sm">
                 <Link href="/admin/orders">Orders</Link>
                 <Link href="/admin/photos">Photos</Link>
                 <Link href="/admin/alerts">Alerts</Link>
@@ -55,7 +55,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
           </div>
           {session ? (
             <form action={signOutAction} className="flex items-baseline gap-4 text-sm">
-              <span className="text-ink-faint">{session.email}</span>
+              <span className="hidden text-ink-faint md:inline">{session.email}</span>
               <button type="submit" className="underline underline-offset-4 hover:opacity-70">
                 Sign out
               </button>

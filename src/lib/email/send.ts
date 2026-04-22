@@ -20,6 +20,7 @@ import { fromAddress, getResend } from "./client";
 import { getPrinterEmail } from "@/lib/supabase/queries/settings";
 import OrderConfirmation from "./templates/OrderConfirmation";
 import PrintJob from "./templates/PrintJob";
+import ReprintOnTheWay from "./templates/ReprintOnTheWay";
 import Shipped from "./templates/Shipped";
 import PostPurchase, {
   type PostPurchaseTouchNumber,
@@ -123,6 +124,29 @@ export async function sendShippedNotification(order: Order): Promise<void> {
     node: React.createElement(Shipped, { order }),
     tags: [
       { name: "email_kind", value: "shipped" },
+      { name: "order_ref", value: ref },
+    ],
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Reprint acknowledgement (to customer)
+// ---------------------------------------------------------------------------
+
+/**
+ * Sent when an admin creates a reprint for a customer's order. Closes the
+ * silent gap between "damage reported" and "tracking arrives". Addressed to
+ * the ORIGINAL order's customer; `originalOrder` must be the parent row, not
+ * the freshly created reprint clone.
+ */
+export async function sendReprintOnTheWay(originalOrder: Order): Promise<void> {
+  const ref = formatOrderReference(originalOrder);
+  await sendRenderedEmail({
+    to: originalOrder.customerEmail,
+    subject: `A replacement for order ${ref} is on the way`,
+    node: React.createElement(ReprintOnTheWay, { originalOrder }),
+    tags: [
+      { name: "email_kind", value: "reprint_ack" },
       { name: "order_ref", value: ref },
     ],
   });

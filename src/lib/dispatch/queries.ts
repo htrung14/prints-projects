@@ -199,17 +199,22 @@ export async function updateOrderTracking(
 }
 
 /**
- * Derive the list of orders visible on the batch dispatch page:
- * status in `('paid','sent_to_print')`, newest first.
+ * Derive the list of orders visible on the batch dispatch page: every order
+ * currently in Loupe's pipeline — `queued_for_print` (batch sent, not yet
+ * acknowledged) or `sent_to_print` (Michael has pressed "Mark as sent").
+ * Newest first.
+ *
+ * Includes `parent_order_id` so the batch page can flag reprints inline the
+ * same way the PrintBatch email does.
  */
 export async function listPendingDispatchOrders(): Promise<Order[]> {
   const db = serverClient();
   const { data, error } = await db
     .from("orders")
     .select(
-      "id, created_at, stripe_checkout_session_id, stripe_payment_intent_id, customer_email, customer_name, shipping_address, subtotal_cents, tax_cents, shipping_cents, total_cents, currency, status, fulfillment_token, fulfillment_token_revoked_at, print_job_email_sent_at, tracking_number, carrier, notes"
+      "id, created_at, stripe_checkout_session_id, stripe_payment_intent_id, customer_email, customer_name, shipping_address, subtotal_cents, tax_cents, shipping_cents, total_cents, currency, status, fulfillment_token, fulfillment_token_revoked_at, print_job_email_sent_at, tracking_number, carrier, notes, parent_order_id"
     )
-    .in("status", ["paid", "sent_to_print"])
+    .in("status", ["queued_for_print", "sent_to_print"])
     .order("created_at", { ascending: false });
   if (error) {
     throw new Error(`listPendingDispatchOrders failed: ${error.message}`);
@@ -234,6 +239,7 @@ export async function listPendingDispatchOrders(): Promise<Order[]> {
     tracking_number: string | null;
     carrier: string | null;
     notes: string | null;
+    parent_order_id: string | null;
   };
   const rows = (data ?? []) as Row[];
   return rows.map((r): Order => {
@@ -275,6 +281,7 @@ export async function listPendingDispatchOrders(): Promise<Order[]> {
       trackingNumber: r.tracking_number,
       carrier: r.carrier,
       notes: r.notes,
+      parentOrderId: r.parent_order_id,
     };
   });
 }

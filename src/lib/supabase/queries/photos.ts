@@ -141,3 +141,27 @@ export async function getPhotoById(id: string): Promise<Photo | null> {
   if (!data) return null;
   return rowToPhoto(data as PhotoRow);
 }
+
+/**
+ * Resolve a set of slugs to their DB UUIDs. Used by the Stripe webhook
+ * to translate fixture-derived cart lines (which carry slugs, not ids)
+ * into the `photo_id` values the `create_order_with_items` RPC requires.
+ *
+ * Returns a Map so callers can error on unmapped slugs deliberately.
+ */
+export async function getPhotoIdMapBySlugs(slugs: string[]): Promise<Map<string, string>> {
+  if (slugs.length === 0) return new Map();
+  const db = serverClient();
+  // Dedupe defensively — a malformed cart could ask us to look up the same
+  // slug twice; dedup avoids an oversized `in` clause.
+  const unique = Array.from(new Set(slugs));
+  const { data, error } = await db.from("photos").select("id, slug").in("slug", unique);
+  if (error) {
+    throw new Error(`getPhotoIdMapBySlugs failed: ${error.message}`);
+  }
+  const out = new Map<string, string>();
+  for (const row of (data ?? []) as Array<{ id: string; slug: string }>) {
+    out.set(row.slug, row.id);
+  }
+  return out;
+}

@@ -617,6 +617,119 @@ export async function getChildOrders(parentId: string): Promise<Order[]> {
   return rows.map(rowToOrder);
 }
 
+/**
+ * Cheap helper: return just the photo_ids on an order. Used by the reprint
+ * cluster detector without paying for the full item projection.
+ */
+export async function getOrderPhotoIds(orderId: string): Promise<string[]> {
+  const db = serverClient();
+  const { data, error } = await db.from("order_items").select("photo_id").eq("order_id", orderId);
+  if (error) {
+    throw new Error(`getOrderPhotoIds(${orderId}) failed: ${error.message}`);
+  }
+  return ((data ?? []) as Array<{ photo_id: string }>).map((r) => r.photo_id);
+}
+
+/**
+ * Count how many distinct reprint orders (parent_order_id IS NOT NULL) have
+ * been created within the last `withinDays` days that share any of the given
+ * photo_ids. Returns one entry per input photo_id with its observed title
+ * (empty string if the photo has no matching reprints).
+ *
+ * Used to surface cluster alerts when a single photo is being reprinted over
+ * and over — usually a packaging, paper, or image-prep issue.
+ */
+export async function countRecentReprintsByPhoto(
+  photoIds: string[],
+  withinDays: number
+): Promise<Array<{ photoId: string; photoTitle: string; reprintCount: number }>> {
+  if (photoIds.length === 0) return [];
+  const db = serverClient();
+  const cutoff = new Date(Date.now() - withinDays * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data: orderRows, error: ordersErr } = await db
+    .from("orders")
+    .select("id")
+    .not("parent_order_id", "is", null)
+    .gte("created_at", cutoff);
+  if (ordersErr) {
+    throw new Error(`countRecentReprintsByPhoto orders step failed: ${ordersErr.message}`);
+  }
+  const orderIds = ((orderRows ?? []) as Array<{ id: string }>).map((r) => r.id);
+  if (orderIds.length === 0) {
+    return photoIds.map((photoId) => ({ photoId, photoTitle: "", reprintCount: 0 }));
+  }
+
+  const { data: itemRows, error: itemsErr } = await db
+    .from("order_items")
+    .select("order_id, photo_id, photo_title")
+    .in("order_id", orderIds)
+    .in("photo_id", photoIds);
+  if (itemsErr) {
+    throw new Error(`countRecentReprintsByPhoto items step failed: ${itemsErr.message}`);
+  }
+  const byPhoto = new Map<string, Set<string>>();
+  const titles = new Map<string, string>();
+  for (const row of (itemRows ?? []) as Array<{
+    order_id: string;
+    photo_id: string;
+    photo_title: string;
+  }>) {
+    if (!byPhoto.has(row.photo_id)) byPhoto.set(row.photo_id, new Set());
+    byPhoto.get(row.photo_id)!.add(row.order_id);
+    titles.set(row.photo_id, row.photo_title);
+  }
+  return photoIds.map((photoId) => ({
+    photoId,
+    photoTitle: titles.get(photoId) ?? "",
+    reprintCount: byPhoto.get(photoId)?.size ?? 0,
+  }));
+}
+
+/**
+ * Count how many reprints in the last `withinDays` days had the same
+ * normalized reason phrase. "Normalized" = lowercased + stripped of
+ * non-alphanumerics + collapsed whitespace. Good enough for exact-ish
+ * matches ("damaged in transit", "Damaged in transit.") without pulling in
+ * a fuzzy-match library.
+ *
+ * Reads from the audit log (`reprint_created` rows) since the reason isn't
+ * persisted on the orders table itself.
+ */
+export async function countRecentReprintsByReason(
+  normalizedReason: string,
+  withinDays: number
+): Promise<number> {
+  if (!normalizedReason) return 0;
+  const db = serverClient();
+  const cutoff = new Date(Date.now() - withinDays * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data, error } = await db
+    .from("audit_log")
+    .select("meta")
+    .eq("action", "reprint_created")
+    .gte("created_at", cutoff);
+  if (error) {
+    throw new Error(`countRecentReprintsByReason failed: ${error.message}`);
+  }
+  let count = 0;
+  for (const row of (data ?? []) as Array<{ meta: unknown }>) {
+    const meta = (row.meta ?? null) as { reason?: unknown } | null;
+    const raw = typeof meta?.reason === "string" ? meta.reason : "";
+    if (normalizeReason(raw) === normalizedReason) count += 1;
+  }
+  return count;
+}
+
+/** Strip punctuation + collapse whitespace so "Damaged!" === "damaged". */
+export function normalizeReason(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 type ReprintItemRow = {
   photo_id: string;
   photo_slug: string;

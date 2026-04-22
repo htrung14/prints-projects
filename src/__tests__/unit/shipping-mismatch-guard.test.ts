@@ -3,7 +3,7 @@
  * `handleCheckoutSessionCompleted`.
  *
  * The UI picker + `allowed_countries` narrowing should already prevent a
- * buyer from paying the US (free) rate and shipping to e.g. Canada, but
+ * buyer from paying the US ($10) rate and shipping to e.g. Canada, but
  * Stripe's hosted page lets the address be edited in some edge cases. The
  * guard re-derives the expected shipping cost from the *actual* country on
  * the completed session and fires `alertSystemError("shipping/country

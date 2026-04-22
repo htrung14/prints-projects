@@ -2,28 +2,20 @@
  * Single-order dispatch page — the one Loupe clicks from the print-job email.
  *
  * Server component. Validates the HMAC token and renders the dispatch layout
- * with shipping address, line items, a "mark as sent to printer" button, and
- * a tracking submission form.
+ * with shipping address, line items, and a tracking submission form.
  *
- * IMPORTANT: The `paid → sent_to_print` transition is NOT triggered on GET.
- * Email security scanners (Microsoft SafeLinks, Gmail link prefetch, spam
- * filters) issue GETs on every link in every email — if GET advanced status,
- * Thalia sending the batch email would flip every order to `sent_to_print`
- * before Loupe ever opened the link. The transition now only happens when
- * the printer explicitly submits the `<form method="post">` below, which
- * scanners never trigger. Idempotent: a second submit on an already-advanced
- * order is a no-op.
+ * Flow: Michael prints + packages + ships, then enters tracking here.
+ * Submitting tracking is the ONLY explicit action — it flips the order
+ * directly to `shipped` regardless of current status. There is no
+ * intermediate "mark as printed" button; asking the printer to come back
+ * twice for essentially the same action was operational friction.
  *
  * Note on the drop-ship model: we show the CUSTOMER's shipping address here,
  * not a forwarding address. Loupe ships direct — no in-person pickup step.
  */
 
-import { notFound, redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { notFound } from "next/navigation";
 import { getOrderById } from "@/lib/supabase/queries/orders";
-import { updateOrderStatus } from "@/lib/supabase/queries/orders";
-import { audit } from "@/lib/supabase/queries/audit";
-import { alertSystemError } from "@/lib/alerting/dispatcher";
 import { verifyDispatchToken } from "@/lib/dispatch/token";
 import { getDispatchItemsForOrder } from "@/lib/dispatch/queries";
 import type { DispatchItem } from "@/lib/dispatch/queries";
@@ -69,9 +61,6 @@ export default async function DispatchOrderPage({
 
   const items = await getDispatchItemsForOrder(orderId);
 
-  const markedRaw = rawSearch.marked;
-  const justMarked = typeof markedRaw === "string" && markedRaw === "1";
-
   return (
     <div
       style={{
@@ -96,15 +85,13 @@ export default async function DispatchOrderPage({
           </ul>
         </section>
 
-        <MarkSentToPrint order={order} token={token} justMarked={justMarked} />
-
         <section className="mt-14 border-t border-ink-line pt-8">
           <h2 className="label-caps" style={{ marginBottom: 12 }}>
             Submit tracking
           </h2>
           <p className="text-sm" style={{ color: "rgba(0,0,0,0.6)", marginBottom: 18 }}>
-            Ship direct to the customer above. Submit one tracking number per order; notes are
-            internal to Thalia&apos;s inbox.
+            One tracking number per order. Notes stay internal — they land in Thalia&apos;s inbox,
+            not the customer&apos;s.
           </p>
           <TrackingForm
             orderId={order.id}
@@ -123,70 +110,6 @@ export default async function DispatchOrderPage({
 }
 
 // ---------------------------------------------------------------------------
-// Server action: explicit `paid → sent_to_print` transition (POST only).
-// ---------------------------------------------------------------------------
-
-async function markSentToPrintAction(formData: FormData) {
-  "use server";
-
-  const orderId = String(formData.get("orderId") ?? "");
-  const token = String(formData.get("token") ?? "");
-  if (!orderId || !token) {
-    throw new Error("markSentToPrintAction: missing orderId or token.");
-  }
-
-  // Re-verify the token inside the action. Form fields are user-supplied and
-  // the action is callable as a top-level POST endpoint, so we must not trust
-  // that the caller ever passed through the GET render.
-  const payload = verifyDispatchToken(token);
-  if (!payload || payload.kind !== "single" || payload.orderId !== orderId) {
-    throw new Error("markSentToPrintAction: token does not authorize this order.");
-  }
-
-  const order = await getOrderById(orderId);
-  if (!order) {
-    throw new Error(`markSentToPrintAction: order ${orderId} not found.`);
-  }
-  if (order.fulfillmentTokenRevokedAt) {
-    throw new Error(`markSentToPrintAction: order ${orderId} link revoked.`);
-  }
-
-  // Idempotent: if the order already advanced past `paid`, no-op and redirect
-  // back. This matters because email scanners can't hit POST, but a legitimate
-  // printer can click the button twice by accident (or refresh the post-submit
-  // page), and we must not double-audit.
-  if (order.status !== "paid") {
-    redirect(`/dispatch/${orderId}?token=${token}&marked=1`);
-  }
-
-  // Flat actor name matches the convention of sibling dispatch audit rows
-  // (dispatch_submit, dispatch_download, dispatch_batch). Order scoping is
-  // already captured by the audit row's order_id FK and meta.trigger.
-  const actor = "dispatch_mark_sent";
-
-  try {
-    await updateOrderStatus(order.id, "sent_to_print", { actor });
-    await audit({
-      orderId: order.id,
-      actor,
-      action: "status_change",
-      meta: { from: "paid", to: "sent_to_print", trigger: "dispatch_page_mark_sent" },
-    });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error(`dispatch page markSentToPrint: failed to advance order ${order.id}:`, err);
-    // Alert ops — the printer is sitting in front of a broken button.
-    // We rethrow after so Next renders the error boundary / default 500 and
-    // the printer knows to email Thalia instead of assuming it worked.
-    await alertSystemError(`POST dispatch mark-sent (order=${order.id})`, msg);
-    throw err;
-  }
-
-  revalidatePath(`/dispatch/${orderId}`);
-  redirect(`/dispatch/${orderId}?token=${token}&marked=1`);
-}
-
-// ---------------------------------------------------------------------------
 // Sub-components (server)
 // ---------------------------------------------------------------------------
 
@@ -198,13 +121,27 @@ function Header({ order }: { order: Order }) {
   });
   return (
     <header className="flex flex-col gap-2">
-      <span className="label-caps">Dispatch · Loupe</span>
+      <span className="label-caps" style={{ fontSize: 17, letterSpacing: "0.08em" }}>
+        Dispatch · Single order
+      </span>
       <h1
         className="h-display-xl"
         style={{ color: "rgba(0,0,0,0.95)", fontSize: "clamp(2rem, 4vw, 3rem)" }}
       >
         Order {shortId(order.id)}
       </h1>
+      <p
+        className="mt-3"
+        style={{
+          color: "rgba(0,0,0,0.7)",
+          maxWidth: "60ch",
+          fontSize: 17,
+          lineHeight: 1.55,
+        }}
+      >
+        Print and ship this order, then enter the tracking number below. Submitting marks it shipped
+        and emails the customer their tracking.
+      </p>
       <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
         <span style={{ color: "rgba(0,0,0,0.6)" }}>Placed {date}</span>
         <StatusPill status={order.status} />
@@ -216,7 +153,7 @@ function Header({ order }: { order: Order }) {
 function ShipTo({ address, customerName }: { address: Address; customerName: string }) {
   return (
     <section className="mt-10 grid gap-6 md:grid-cols-[200px_1fr]">
-      <h2 className="label-caps">Ship to (customer)</h2>
+      <h2 className="label-caps">Ship to</h2>
       <div className="text-sm" style={{ color: "rgba(0,0,0,0.78)" }}>
         <div style={{ color: "rgba(0,0,0,0.95)" }}>{address.name || customerName}</div>
         <div>{address.line1}</div>
@@ -324,61 +261,6 @@ function LineItem({ item, token, order }: { item: DispatchItem; token: string; o
         </div>
       </div>
     </li>
-  );
-}
-
-function MarkSentToPrint({
-  order,
-  token,
-  justMarked,
-}: {
-  order: Order;
-  token: string;
-  justMarked: boolean;
-}) {
-  const alreadyAdvanced = order.status !== "paid";
-  return (
-    <section className="mt-12 border-t border-ink-line pt-8">
-      <h2 className="label-caps" style={{ marginBottom: 12 }}>
-        Mark as sent to printer
-      </h2>
-      <p
-        className="text-sm"
-        style={{ color: "rgba(0,0,0,0.6)", marginBottom: 14, maxWidth: "62ch" }}
-      >
-        Click once Loupe has the order queued on the press. This moves the order to{" "}
-        <em>sent to print</em> in our system and lets Thalia see progress. COA or signature
-        decisions are handled out-of-band — reply to the print-job email if anything needs a call.
-      </p>
-      <form action={markSentToPrintAction}>
-        <input type="hidden" name="orderId" value={order.id} />
-        <input type="hidden" name="token" value={token} />
-        <button
-          type="submit"
-          className="btn-ghost"
-          style={{
-            padding: "10px 22px",
-            fontSize: 14,
-            opacity: alreadyAdvanced ? 0.5 : 1,
-            cursor: alreadyAdvanced ? "default" : "pointer",
-          }}
-          disabled={alreadyAdvanced}
-          aria-disabled={alreadyAdvanced}
-        >
-          {alreadyAdvanced ? "Already marked sent to printer" : "Mark as sent to printer"}
-        </button>
-      </form>
-      {justMarked ? (
-        <p
-          className="mt-3 text-sm"
-          style={{ color: "rgba(0,0,0,0.6)" }}
-          role="status"
-          aria-live="polite"
-        >
-          Recorded. Status is now <em>sent to print</em>.
-        </p>
-      ) : null}
-    </section>
   );
 }
 

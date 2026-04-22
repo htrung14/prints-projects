@@ -137,7 +137,8 @@ type PrinterEmailResult = {
 };
 
 async function sendPrinterBatchEmail(
-  orders: Array<{ order: Order; items: OrderItem[]; dispatchUrl: string }>
+  orders: Array<{ order: Order; items: OrderItem[]; dispatchUrl: string }>,
+  batchDispatchUrl: string
 ): Promise<PrinterEmailResult> {
   const printerEmail = await getPrinterEmail();
   if (!printerEmail) {
@@ -153,7 +154,7 @@ async function sendPrinterBatchEmail(
   }
 
   const count = orders.length;
-  const html = await render(React.createElement(PrintBatch, { orders }));
+  const html = await render(React.createElement(PrintBatch, { orders, batchDispatchUrl }));
   const resend = getResend();
 
   const { error } = await resend.emails.send({
@@ -300,7 +301,12 @@ export async function batchOrdersForPrint(actorEmail: string): Promise<{
       printerEmailSent = false;
       printerEmailError = "All batched orders had zero items — skipped printer email.";
     } else {
-      const result = await sendPrinterBatchEmail(ordersForEmail);
+      // Batch-kind dispatch URL (one link that loads `/dispatch/batch` with
+      // every pending order visible). Token is scoped to `kind: "batch"`;
+      // the orderId inside the token is semantically arbitrary for batch —
+      // the page ignores it and lists every paid/sent_to_print order.
+      const batchDispatchUrl = buildDispatchUrl(ordersForEmail[0].order.id, { kind: "batch" });
+      const result = await sendPrinterBatchEmail(ordersForEmail, batchDispatchUrl);
       printerEmailResolved = result.resolved;
       printerEmailSent = result.sent;
       printerEmailError = result.error;

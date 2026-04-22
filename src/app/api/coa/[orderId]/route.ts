@@ -1,10 +1,15 @@
 /**
  * GET /api/coa/[orderId]?token=...&itemId=...
  *
- * Streams a Certificate of Authenticity PDF for one order item. Gated by the
- * dispatch token (Track D) so only Rob (or anyone with the signed link) can
+ * Streams a Certificate of Authenticity PDF for a given order. Gated by the
+ * dispatch token so only the printer (or anyone with the signed link) can
  * fetch it. The COA is never publicly listed; losing the token is equivalent
  * to losing access.
+ *
+ * - With `itemId`: returns a single-page PDF for that item.
+ * - Without `itemId`: returns a multi-page PDF bundling every item in the
+ *   order (one COA per page). Used by the batch dispatch page so the printer
+ *   can grab all COAs for an order in one click.
  *
  * Node runtime - @react-pdf needs Node primitives, not the edge runtime.
  */
@@ -12,7 +17,7 @@
 import { after, NextResponse, type NextRequest } from "next/server";
 import { verifyDispatchToken } from "@/lib/dispatch/token";
 import { getOrderById } from "@/lib/supabase/queries/orders";
-import { generateCoaPdf } from "@/lib/coa/generate";
+import { generateCoaPdf, generateOrderCoasPdf } from "@/lib/coa/generate";
 import { serverClient } from "@/lib/supabase/server";
 import { getDispatcher } from "@/lib/alerting/dispatcher";
 import { systemErrorAlert } from "@/lib/alerting";
@@ -77,6 +82,19 @@ async function getOrderItem(orderId: string, itemId: string): Promise<OrderItem 
   return rowToOrderItem(data as OrderItemRow);
 }
 
+async function getOrderItems(orderId: string): Promise<OrderItem[]> {
+  const db = serverClient();
+  const { data, error } = await db
+    .from("order_items")
+    .select(ORDER_ITEM_COLUMNS)
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: true });
+  if (error) {
+    throw new Error(`getOrderItems failed: ${error.message}`);
+  }
+  return ((data as OrderItemRow[] | null) ?? []).map(rowToOrderItem);
+}
+
 export async function GET(request: NextRequest, ctx: { params: Promise<{ orderId: string }> }) {
   const { orderId } = await ctx.params;
   const { searchParams } = request.nextUrl;
@@ -86,17 +104,17 @@ export async function GET(request: NextRequest, ctx: { params: Promise<{ orderId
   if (!token) {
     return new NextResponse("Missing token", { status: 401 });
   }
-  if (!itemId) {
-    return new NextResponse("Missing itemId", { status: 400 });
-  }
 
   const payload = verifyDispatchToken(token);
   if (!payload) {
     return new NextResponse("Invalid or expired token", { status: 401 });
   }
-  // Single-order token must match the order in the URL. Batch tokens are
-  // scoped to `/dispatch/batch` only and should not unlock per-order COAs.
-  if (payload.kind !== "single" || payload.orderId !== orderId) {
+  // Accept either a single-order token matching this order, or a batch token
+  // (the batch dispatch page uses one shared token to download COAs for every
+  // order in the batch). Batch tokens are scoped to dispatch-only pages.
+  const tokenValid =
+    (payload.kind === "single" && payload.orderId === orderId) || payload.kind === "batch";
+  if (!tokenValid) {
     return new NextResponse("Token not valid for this order", { status: 403 });
   }
 
@@ -108,7 +126,9 @@ export async function GET(request: NextRequest, ctx: { params: Promise<{ orderId
     console.error(`coa(${orderId}) getOrderById failure:`, err);
     after(() => {
       getDispatcher()
-        .send(systemErrorAlert(`GET /api/coa/${orderId} order lookup (item=${itemId})`, msg))
+        .send(
+          systemErrorAlert(`GET /api/coa/${orderId} order lookup (item=${itemId ?? "all"})`, msg)
+        )
         .catch((alertErr) => {
           console.error(`coa(${orderId}): alert dispatch failed:`, alertErr);
         });
@@ -122,6 +142,59 @@ export async function GET(request: NextRequest, ctx: { params: Promise<{ orderId
     return new NextResponse("Token revoked", { status: 403 });
   }
 
+  const reference = formatOrderReference(order);
+
+  // --- Multi-item bundle --------------------------------------------------
+  if (!itemId) {
+    let items: OrderItem[];
+    try {
+      items = await getOrderItems(orderId);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`coa(${orderId}) getOrderItems failure:`, err);
+      after(() => {
+        getDispatcher()
+          .send(systemErrorAlert(`GET /api/coa/${orderId} items lookup`, msg))
+          .catch((alertErr) => {
+            console.error(`coa(${orderId}): alert dispatch failed:`, alertErr);
+          });
+      });
+      return new NextResponse("Failed to load order items.", { status: 500 });
+    }
+    if (items.length === 0) {
+      return new NextResponse("Order has no items", { status: 404 });
+    }
+
+    let pdf: Buffer;
+    try {
+      pdf = await generateOrderCoasPdf(order, items);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "COA render failed";
+      console.error(`COA bundle render failed for order=${orderId}:`, err);
+      after(() => {
+        getDispatcher()
+          .send(systemErrorAlert(`GET /api/coa/${orderId} bundle`, msg))
+          .catch((alertErr) => {
+            console.error(`coa(${orderId}): alert dispatch failed:`, alertErr);
+          });
+      });
+      return new NextResponse(msg, { status: 500 });
+    }
+
+    const filename = items.length > 1 ? `COAs-${reference}.pdf` : `COA-${reference}.pdf`;
+    const body = new Uint8Array(pdf);
+    return new NextResponse(body, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="${filename}"`,
+        "Content-Length": String(pdf.byteLength),
+        "Cache-Control": "private, no-store",
+      },
+    });
+  }
+
+  // --- Single-item path ---------------------------------------------------
   let item;
   try {
     item = await getOrderItem(orderId, itemId);
@@ -157,10 +230,7 @@ export async function GET(request: NextRequest, ctx: { params: Promise<{ orderId
     return new NextResponse(msg, { status: 500 });
   }
 
-  const reference = formatOrderReference(order);
   const filename = `COA-${reference}.pdf`;
-
-  // Convert Node Buffer to Uint8Array for Web Response BodyInit compat.
   const body = new Uint8Array(pdf);
   return new NextResponse(body, {
     status: 200,

@@ -3,27 +3,38 @@
 /**
  * Client-interactive table for the batch dispatch page.
  *
- * Lets the printer fill per-row tracking, optionally apply a single carrier/tracking
- * across all empty rows, and submit every row in one round-trip to
- * /api/dispatch/batch.
+ * Each row gets its own carrier + tracking inputs. Submit-all POSTs every
+ * non-empty row to /api/dispatch/batch in one round trip; that route flips
+ * every submitted order to `shipped` and fires customer emails.
+ *
+ * Carrier defaults to USPS per row; Michael can change it if he uses a
+ * different carrier on a specific order. There's no "same tracking for all"
+ * affordance — each package has its own number.
  */
 
 import { useMemo, useState } from "react";
-import type { Address, OrderStatus } from "@/lib/types";
+import type { Address } from "@/lib/types";
 
 const CARRIERS = ["USPS", "UPS", "FedEx", "DHL"] as const;
 type Carrier = (typeof CARRIERS)[number];
+
+export type BatchRowItem = {
+  id: string;
+  title: string;
+  sizeLabel: string;
+  editionNumber: number;
+  editionTotal: number;
+};
 
 type Row = {
   orderId: string;
   shortId: string;
   customerName: string;
   shippingAddress: Address;
-  itemCount: number;
-  itemSummary: string;
-  status: OrderStatus;
+  items: BatchRowItem[];
   initialCarrier: string | null;
   initialTrackingNumber: string | null;
+  reprintLabel: string | null;
 };
 
 type RowState = {
@@ -42,7 +53,9 @@ function initialRowState(row: Row): RowState {
   return {
     carrier: isCarrier(row.initialCarrier) ? row.initialCarrier : "USPS",
     tracking: row.initialTrackingNumber ?? "",
-    result: row.status === "shipped" && row.initialTrackingNumber ? "ok" : "idle",
+    // Pre-mark rows that already have tracking persisted as "ok" so they
+    // render with the success indicator without re-submitting.
+    result: row.initialTrackingNumber ? "ok" : "idle",
   };
 }
 
@@ -50,8 +63,6 @@ export function BatchTrackingTable({ token, rows }: Props) {
   const [state, setState] = useState<Record<string, RowState>>(() =>
     Object.fromEntries(rows.map((r) => [r.orderId, initialRowState(r)]))
   );
-  const [applyCarrier, setApplyCarrier] = useState<Carrier>("USPS");
-  const [applyTracking, setApplyTracking] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [banner, setBanner] = useState<
     | { kind: "idle" }
@@ -64,25 +75,6 @@ export function BatchTrackingTable({ token, rows }: Props) {
       ...prev,
       [orderId]: { ...prev[orderId], ...patch },
     }));
-  }
-
-  function onApplyToAll() {
-    const trimmed = applyTracking.trim();
-    if (!trimmed) return;
-    setState((prev) => {
-      const next = { ...prev };
-      for (const row of rows) {
-        const cur = next[row.orderId];
-        if (!cur.tracking.trim()) {
-          next[row.orderId] = {
-            ...cur,
-            carrier: applyCarrier,
-            tracking: trimmed,
-          };
-        }
-      }
-      return next;
-    });
   }
 
   async function onSubmitAll() {
@@ -178,93 +170,107 @@ export function BatchTrackingTable({ token, rows }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <div
-        className="flex flex-wrap items-end gap-4 border-t border-b border-ink-line py-4"
+        className="flex items-baseline justify-between border-t border-b border-ink-line py-4"
         style={{ color: "rgba(0,0,0,0.78)" }}
       >
-        <label className="flex flex-col gap-1">
-          <span className="label-caps">Carrier for all</span>
-          <select
-            value={applyCarrier}
-            onChange={(e) => setApplyCarrier(e.target.value as Carrier)}
-            disabled={submitting}
-            className="text-sm"
-            style={inputStyle}
-          >
-            {CARRIERS.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="label-caps">Same tracking # for all</span>
-          <input
-            type="text"
-            value={applyTracking}
-            onChange={(e) => setApplyTracking(e.target.value)}
-            disabled={submitting}
-            autoComplete="off"
-            className="text-sm"
-            style={{ ...inputStyle, minWidth: 240 }}
-          />
-        </label>
-        <button
-          type="button"
-          onClick={onApplyToAll}
-          disabled={submitting || !applyTracking.trim()}
-          className="btn-ghost is-secondary"
-          style={{ padding: "8px 18px", fontSize: 14 }}
-        >
-          Apply to all empty rows
-        </button>
-        <span className="text-sm" style={{ color: "rgba(0,0,0,0.5)", marginLeft: "auto" }}>
+        <span className="label-caps">Tracking</span>
+        <span style={{ color: "rgba(0,0,0,0.5)", fontSize: 15 }}>
           {pendingCount} without tracking
         </span>
       </div>
 
-      <ul className="flex flex-col gap-6">
+      <ul className="flex flex-col gap-10">
         {rows.map((row) => {
           const s = state[row.orderId];
           return (
             <li
               key={row.orderId}
-              className="grid gap-4 border-b border-ink-line pb-6 md:grid-cols-[1fr_auto]"
+              className="grid gap-6 border-b border-ink-line pb-10 md:grid-cols-[1fr_auto]"
             >
               <div>
-                <div className="flex flex-wrap items-baseline gap-3">
-                  <span className="label-caps" style={{ color: "rgba(0,0,0,0.5)" }}>
-                    {row.shortId}
-                  </span>
-                  <span style={{ color: "rgba(0,0,0,0.95)" }}>{row.customerName}</span>
-                  <StatusPill status={row.status} />
-                  <span className="text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>
-                    {row.itemCount} item{row.itemCount === 1 ? "" : "s"}
-                  </span>
+                {row.reprintLabel ? (
+                  <div
+                    className="label-caps mb-1"
+                    style={{
+                      color: "var(--btn-accent)",
+                      letterSpacing: "0.08em",
+                      fontSize: 13,
+                    }}
+                  >
+                    {row.reprintLabel}
+                  </div>
+                ) : null}
+                <div
+                  style={{
+                    color: "rgba(0,0,0,0.5)",
+                    fontSize: 13,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Order #{row.shortId.toUpperCase()}
                 </div>
-                <div className="mt-1 text-sm" style={{ color: "rgba(0,0,0,0.78)" }}>
-                  {row.itemSummary || "-"}
+                <div
+                  className="mt-2"
+                  style={{ color: "rgba(0,0,0,0.95)", fontSize: 22, lineHeight: 1.2 }}
+                >
+                  {row.customerName}
                 </div>
-                <div className="mt-2 text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>
+                <div
+                  className="mt-2"
+                  style={{ color: "rgba(0,0,0,0.6)", fontSize: 16, lineHeight: 1.5 }}
+                >
                   {row.shippingAddress.line1}
-                  {row.shippingAddress.line2 ? `, ${row.shippingAddress.line2}` : ""} ·{" "}
+                  {row.shippingAddress.line2 ? `, ${row.shippingAddress.line2}` : ""}
+                  <br />
                   {row.shippingAddress.city}
                   {row.shippingAddress.state ? `, ${row.shippingAddress.state}` : ""}{" "}
                   {row.shippingAddress.postalCode} · {row.shippingAddress.country}
                 </div>
-                <div className="mt-2 flex flex-wrap gap-3">
+                <ul
+                  className="mt-4 flex flex-col gap-2"
+                  style={{ color: "rgba(0,0,0,0.78)", fontSize: 17, lineHeight: 1.45 }}
+                >
+                  {row.items.length === 0 ? (
+                    <li style={{ color: "rgba(0,0,0,0.5)" }}>—</li>
+                  ) : (
+                    row.items.map((item) => (
+                      <li key={item.id}>
+                        {item.title}{" "}
+                        <span style={{ color: "rgba(0,0,0,0.55)", fontSize: 15 }}>
+                          · Ed. {item.editionNumber}/{item.editionTotal}
+                        </span>
+                      </li>
+                    ))
+                  )}
+                </ul>
+                <div className="mt-3 flex flex-wrap gap-4">
                   <a
-                    className="text-sm"
                     style={{
                       color: "rgba(0,0,0,0.78)",
                       textDecoration: "underline",
+                      fontSize: 15,
                     }}
                     href={`/dispatch/${row.orderId}?token=${token}`}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Open full order →
+                    Open order · print files →
                   </a>
+                  {row.items.length > 0 ? (
+                    <a
+                      style={{
+                        color: "rgba(0,0,0,0.78)",
+                        textDecoration: "underline",
+                        fontSize: 15,
+                      }}
+                      href={`/api/coa/${row.orderId}?token=${token}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {row.items.length > 1 ? "Download COAs" : "Download COA"}
+                    </a>
+                  ) : null}
                 </div>
               </div>
 
@@ -313,8 +319,19 @@ export function BatchTrackingTable({ token, rows }: Props) {
           type="button"
           onClick={onSubmitAll}
           disabled={submitting}
-          className="btn-ghost"
-          style={{ padding: "10px 22px", fontSize: "0.95rem" }}
+          style={{
+            background: "var(--btn-accent)",
+            color: "#ffffff",
+            textDecoration: "none",
+            padding: "14px 26px",
+            fontSize: 17,
+            letterSpacing: "0.03em",
+            borderRadius: 2,
+            fontWeight: 900,
+            border: "none",
+            cursor: submitting ? "default" : "pointer",
+            opacity: submitting ? 0.6 : 1,
+          }}
         >
           {submitting ? "Submitting…" : "Submit all tracking"}
         </button>
@@ -365,25 +382,11 @@ function RowStatus({ result }: { result: RowState["result"] }) {
   );
 }
 
-function StatusPill({ status }: { status: OrderStatus }) {
-  return (
-    <span
-      className="label-caps"
-      style={{
-        border: "1px solid rgba(0,0,0,0.18)",
-        padding: "2px 8px",
-        color: "rgba(0,0,0,0.78)",
-      }}
-    >
-      {status.replace(/_/g, " ")}
-    </span>
-  );
-}
-
 const inputStyle = {
   border: "1px solid rgba(0,0,0,0.18)",
   background: "#ffffff",
-  padding: "8px 10px",
+  padding: "10px 12px",
+  fontSize: 15,
   fontWeight: 900,
   color: "rgba(0,0,0,0.78)",
 } as const;

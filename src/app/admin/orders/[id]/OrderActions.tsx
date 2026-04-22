@@ -192,9 +192,34 @@ export default function OrderActions({
                 : typeof data.newOrderId === "string"
                   ? data.newOrderId.slice(0, 8).toUpperCase()
                   : "";
-            return ref
-              ? `Reprint created. Order ${ref} is queued for the next batch.`
-              : "Reprint created. Queued for the next batch.";
+            const base = ref
+              ? `Reprint ${ref} created. Customer was emailed an ack. Waiting for the next batch dispatch — run one from Orders → Send batch when you're ready.`
+              : "Reprint created. Customer was emailed an ack. Waiting for the next batch dispatch.";
+            // Surface cluster findings inline so Thalia sees the pattern
+            // immediately instead of waiting for the ops alert channel.
+            const findings = Array.isArray(data.clusterFindings)
+              ? (data.clusterFindings as Array<Record<string, unknown>>)
+              : [];
+            if (findings.length === 0) return base;
+            const summary = findings
+              .map((f) => {
+                if (f.kind === "photo") {
+                  const title =
+                    typeof f.photoTitle === "string" && f.photoTitle.length > 0
+                      ? f.photoTitle
+                      : typeof f.photoId === "string"
+                        ? f.photoId
+                        : "photo";
+                  return `“${title}” reprinted ${String(f.count ?? "?")}× in 30 days`;
+                }
+                if (f.kind === "reason") {
+                  return `reason “${String(f.normalizedReason ?? "")}” seen ${String(f.count ?? "?")}× in 30 days`;
+                }
+                return null;
+              })
+              .filter(Boolean)
+              .join("; ");
+            return `${base}  ⚠ Cluster detected: ${summary}. Ops alert elevated — investigate before the next batch ships.`;
           },
         }
       );
@@ -315,8 +340,9 @@ export default function OrderActions({
       <section className="flex flex-col gap-3">
         <h2 className="label-caps">Reprint / reship</h2>
         <p className="text-sm text-ink-faint">
-          Clone this order as a new free reprint. It starts as &ldquo;paid&rdquo; and sweeps through
-          the next batch dispatch. Use for damage, lost-in-transit, or reship.
+          Clone this order as a new free reprint. The customer gets an &ldquo;on the way&rdquo; ack
+          email right away, and the reprint sweeps through the next batch dispatch. Use for damage,
+          lost-in-transit, or reship.
         </p>
         {!reprintOpen ? (
           <div className="flex flex-wrap gap-2">

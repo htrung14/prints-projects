@@ -13,37 +13,86 @@
  * Audit rows are written on BOTH the parent (`reprint_created`) and child
  * (`reprint_of`) inside `createReprintOrder`.
  *
- * Fires an ops alert (severity: warning) so Thalia + Loupe coordination
- * channels know a reprint was triggered. Follows the no-silent-failures
- * contract: the alert is dispatched via `alertSafely` on the `after()`
- * hook, DB errors are both logged AND alerted (via `alertSystemError`)
- * before re-raising as a 500.
+ * Also:
+ *   - Sends a "replacement is on the way" ack to the customer so they
+ *     don't sit in silence waiting for the next batch.
+ *   - Runs a lightweight cluster check: if the same photo has been
+ *     reprinted 3+ times in 30 days, OR the same normalized reason has
+ *     fired 3+ times in 30 days, the ops alert is elevated to severity
+ *     'critical' with an investigate-now action line.
+ *
+ * Fires an ops alert (severity: warning by default) so Thalia + Loupe
+ * coordination channels know a reprint was triggered. Follows the
+ * no-silent-failures contract: the alert is dispatched via `alertSafely`
+ * on the `after()` hook, DB errors are both logged AND alerted (via
+ * `alertSystemError`) before re-raising as a 500.
  */
 
 import { after, NextResponse } from "next/server";
 import { z } from "zod";
 import { getAdminSession } from "@/lib/auth/session";
-import { createReprintOrder, getOrderById } from "@/lib/supabase/queries/orders";
+import {
+  countRecentReprintsByPhoto,
+  countRecentReprintsByReason,
+  createReprintOrder,
+  getOrderById,
+  getOrderPhotoIds,
+  normalizeReason,
+} from "@/lib/supabase/queries/orders";
 import { alertSafely, alertSystemError } from "@/lib/alerting";
 import type { Alert } from "@/lib/alerting";
+import { sendAndAlert, sendReprintOnTheWay } from "@/lib/email/send";
 
 const Body = z.object({
   reason: z.string().trim().min(1, "reason is required").max(200, "reason max 200 chars"),
 });
 
-function reprintAlert(parentRef: string, childRef: string, reason: string, actor: string): Alert {
+const CLUSTER_WINDOW_DAYS = 30;
+const CLUSTER_THRESHOLD = 3;
+
+type ClusterFinding =
+  | { kind: "photo"; photoTitle: string; photoId: string; count: number }
+  | { kind: "reason"; normalizedReason: string; count: number };
+
+function reprintAlert(
+  parentRef: string,
+  childRef: string,
+  reason: string,
+  actor: string,
+  findings: ClusterFinding[]
+): Alert {
+  const hasCluster = findings.length > 0;
+  const clusterSummary = findings
+    .map((f) =>
+      f.kind === "photo"
+        ? `photo "${f.photoTitle || f.photoId}" reprinted ${f.count}× in the last ${CLUSTER_WINDOW_DAYS}d`
+        : `reason "${f.normalizedReason}" seen ${f.count}× in the last ${CLUSTER_WINDOW_DAYS}d`
+    )
+    .join("; ");
+
   return {
     type: "system_error", // reuse existing AlertType union — keeps triage routing sane
-    severity: "warning",
-    title: `Reprint created for order ${parentRef}`,
-    whatHappened: `Reprint created for order ${parentRef}. Reason: ${reason}. New order: ${childRef}. Actor: ${actor}.`,
+    severity: hasCluster ? "critical" : "warning",
+    title: hasCluster
+      ? `Reprint cluster on order ${parentRef} — investigate`
+      : `Reprint created for order ${parentRef}`,
+    whatHappened: hasCluster
+      ? `Reprint created for order ${parentRef}. Reason: ${reason}. New order: ${childRef}. Actor: ${actor}. Cluster: ${clusterSummary}.`
+      : `Reprint created for order ${parentRef}. Reason: ${reason}. New order: ${childRef}. Actor: ${actor}.`,
     autoHandled:
-      "New order row inserted with status=paid; items cloned with same edition numbers; will be swept into the next batch dispatch.",
-    actionRequired: false,
-    actionInstructions:
-      "None unless reprints become frequent for this photo — then investigate paper / packaging / shipping.",
+      "New order row inserted with status=paid; items cloned with same edition numbers; will be swept into the next batch dispatch. Customer was emailed a 'replacement on the way' ack.",
+    actionRequired: hasCluster,
+    actionInstructions: hasCluster
+      ? "Pattern detected — check packaging, paper, or image-prep for the affected photo(s) before the next batch ships."
+      : "None unless reprints become frequent for this photo — then investigate paper / packaging / shipping.",
     timestamp: new Date().toISOString(),
-    metadata: { parentRef, childRef, reason, actor },
+    metadata: {
+      parentRef,
+      childRef,
+      reason,
+      actor,
+      clusterFindings: findings,
+    },
   };
 }
 
@@ -64,6 +113,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/admin/order
     );
   }
   const reason = parsed.reason;
+  const normalizedReasonStr = normalizeReason(reason);
 
   // Verify parent exists up-front so we can return a clean 404 instead of
   // letting createReprintOrder throw a generic 500. (It will also throw on
@@ -102,14 +152,70 @@ export async function POST(request: Request, ctx: RouteContext<"/api/admin/order
   const parentRef = id.slice(0, 8).toUpperCase();
   const childRef = child.id.slice(0, 8).toUpperCase();
 
+  // --- Cluster detection (post-success, non-blocking) --------------------
+  // The reprint itself is authoritative; if this check throws we still want
+  // the route to succeed so the admin UI doesn't show a false failure.
+  const findings: ClusterFinding[] = [];
+  try {
+    const photoIds = await getOrderPhotoIds(id);
+    if (photoIds.length > 0) {
+      const byPhoto = await countRecentReprintsByPhoto(photoIds, CLUSTER_WINDOW_DAYS);
+      for (const row of byPhoto) {
+        if (row.reprintCount >= CLUSTER_THRESHOLD) {
+          findings.push({
+            kind: "photo",
+            photoId: row.photoId,
+            photoTitle: row.photoTitle,
+            count: row.reprintCount,
+          });
+        }
+      }
+    }
+    const byReason = await countRecentReprintsByReason(normalizedReasonStr, CLUSTER_WINDOW_DAYS);
+    if (byReason >= CLUSTER_THRESHOLD) {
+      findings.push({
+        kind: "reason",
+        normalizedReason: normalizedReasonStr,
+        count: byReason,
+      });
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`reprint(${id}) cluster-check failure (non-fatal):`, err);
+    after(() => {
+      alertSystemError(`reprint(${id}) cluster check (actor=${session.email})`, msg).catch(
+        (alertErr) => console.error(`reprint(${id}): alert dispatch failed:`, alertErr)
+      );
+    });
+  }
+
+  // --- Customer "replacement on the way" email ---------------------------
+  // Non-blocking: sendAndAlert already logs + alerts + Sentry-captures any
+  // failure, and it's fine for the admin UI to report success even if the
+  // email step errored — the DB is the source of truth. We schedule in
+  // after() so the response returns promptly.
+  after(() => {
+    sendAndAlert("reprint_ack", id, () => sendReprintOnTheWay(parent)).catch(() => {
+      // sendAndAlert already alerts + throws; swallow here so after()
+      // doesn't complain about an unhandled rejection.
+    });
+  });
+
   // Fire-and-forget ops alert. `alertSafely` already handles dispatcher
   // failures (log + Sentry), so nothing else to wrap.
   after(() => {
     alertSafely(
       `reprint(${id}) created`,
-      reprintAlert(parentRef, childRef, reason, session.email)
+      reprintAlert(parentRef, childRef, reason, session.email, findings)
     ).catch((alertErr) => console.error(`reprint(${id}): alert dispatch failed:`, alertErr));
   });
 
-  return NextResponse.json({ ok: true, newOrderId: child.id, newOrderRef: childRef });
+  return NextResponse.json({
+    ok: true,
+    newOrderId: child.id,
+    newOrderRef: childRef,
+    // Surface cluster findings so the admin UI can show an inline warning
+    // without waiting for the alert to hit the ops channels.
+    clusterFindings: findings,
+  });
 }

@@ -31,7 +31,37 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest): Promise<Response> {
-  const signature = req.headers.get("stripe-signature");
+  // --- Proof-of-life breadcrumb ---------------------------------------------
+  // Fires BEFORE any validation so that a broken signing secret, a wrong-URL
+  // redirect, or any other early failure still leaves a trail. Stripe adds
+  // a `Stripe-Signature` header with a `t=` timestamp; capture it and the
+  // event-id header for fast correlation with the Stripe dashboard.
+  //
+  // Why: a real live-prod outage (2026-04-21, the apex→www 307 redirect) was
+  // invisible to all ops channels because Vercel answered the redirect
+  // before this handler ever ran. The handler running at all is itself a
+  // signal worth recording; Sentry.addBreadcrumb is cheap and non-alerting.
+  const receivedAtIso = new Date().toISOString();
+  const sigHeader = req.headers.get("stripe-signature");
+  const stripeEventId = req.headers.get("stripe-signature-event-id") ?? null;
+  const userAgent = req.headers.get("user-agent") ?? null;
+  console.log(
+    `[stripe-webhook] received at=${receivedAtIso} ua=${userAgent ?? "?"} ` +
+      `event-id=${stripeEventId ?? "?"} signed=${sigHeader ? "yes" : "no"}`
+  );
+  Sentry.addBreadcrumb({
+    category: "stripe-webhook",
+    level: "info",
+    message: "webhook POST received",
+    data: {
+      receivedAtIso,
+      signed: Boolean(sigHeader),
+      stripeEventId,
+      userAgent,
+    },
+  });
+
+  const signature = sigHeader;
   if (!signature) {
     // No signature header → not a legitimate Stripe delivery. Return 400.
     return new Response("Missing Stripe-Signature header", { status: 400 });

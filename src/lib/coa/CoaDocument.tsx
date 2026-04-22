@@ -1,150 +1,158 @@
 /**
- * Certificate of Authenticity - @react-pdf/renderer document.
+ * Certificate of Authenticity — @react-pdf/renderer document.
  *
- * Layout: 8.5x11 portrait.
- *   Left 3/5 - image area (placeholder rectangle in v1 until the master
- *               file lands locally; the master lives in R2 and is resolved
- *               by Track D at dispatch time).
- *   Right 2/5 - metadata: title, edition `N of 10`, size, paper, date,
- *               reference number, plus a provenance block.
+ * Landscape Letter. Lemaire-style product-spec layout (matches the site's
+ * PDPs): full-bleed photo left, metadata right. Typography is all Helvetica
+ * variants — no font mixing — so size and weight do the hierarchy work.
  *
- * Restraint per the Notion research-report §3 anti-patterns:
- *   - no gold foil
- *   - no flourish fonts
- *   - no ornamental borders
+ * One <Page> is rendered per item, so a multi-line order produces a single
+ * multi-page PDF. Single-item orders still produce a one-page PDF.
  *
- * Brand match (2026-04-21): modest alignment with the rest of the site —
- *   - thin French Blue accent rule at the top (matches email templates)
- *   - serif italic for the photo title (matches BuyUI + OrderConfirmation
- *     headline typography, approximated with @react-pdf's built-in
- *     `Times-Italic` since we avoid `Font.register` to keep render
- *     network-free)
- *   - Helvetica retained for labels + meta for legibility on paper
- *
- * Background stays white for printability; the site's warm paper tone
- * doesn't reproduce reliably on a laser printer.
+ * Constraints:
+ *   - No `Font.register`: keeps render network-free on Vercel and avoids
+ *     bundling surprises. Site fonts (Suisse Intl, Favorit) would need to
+ *     be bundled as .otf for @react-pdf; a v1.1 move if the user wants
+ *     strict brand-font parity.
+ *   - Pure white background — warm paper tone doesn't reproduce reliably
+ *     on a standard laser printer.
+ *   - No brand colour: ink + whitespace only.
  */
 
 import * as React from "react";
-import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { Document, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { Order, OrderItem } from "@/lib/types";
 
 export type CoaDocumentProps = {
   order: Order;
-  item: OrderItem;
-  /**
-   * Customer-facing reference (`TB-YYYY-NNNN`). Passed in rather than
-   * recomputed so the PDF matches the order confirmation email.
-   */
+  /** One <Page> rendered per item. */
+  items: OrderItem[];
+  /** Customer-facing reference (TB-YYYY-NNNN). */
   referenceNumber: string;
-  /**
-   * ISO date string shown in the metadata block. Typically
-   * `order.createdAt`, but callers can override (e.g. regen date).
-   */
+  /** ISO date string shown in the metadata strip. */
   dateIso: string;
+  /**
+   * Optional per-item print thumbnail source (absolute URL or Buffer). Keyed
+   * by item id. When present for a given item, renders in the image column;
+   * otherwise a placeholder text box shows the photo title.
+   */
+  imageSrcByItemId?: Record<string, string>;
 };
 
-// Solid ink on pure white paper — the print is legible on any printer regardless
-// of the site's warm-paper web tone, which wouldn't reproduce reliably.
 const INK = "#0c0b0a";
 const INK_SOFT = "#4a4644";
-// French Blue — the site accent. Used sparingly here: one thin top rule.
-const FRENCH_BLUE = "#0072BB";
+const RULE = "#e6e3dd";
 
 const styles = StyleSheet.create({
   page: {
-    flexDirection: "column",
+    flexDirection: "row",
     backgroundColor: "#ffffff",
-    paddingTop: 0,
-    paddingRight: 36,
-    paddingBottom: 36,
-    paddingLeft: 36,
     fontFamily: "Helvetica",
     fontSize: 10,
     color: INK,
-  },
-  // Thin blue accent rule at the very top of the page, matching the email
-  // templates' blue accent bar. Page padding accommodates it.
-  accentRule: {
-    height: 4,
-    backgroundColor: FRENCH_BLUE,
-    marginBottom: 28,
-    marginLeft: -36,
-    marginRight: -36,
-  },
-  body: {
-    flexDirection: "row",
   },
   imageColumn: {
-    flex: 3,
-    marginRight: 24,
-    // Placeholder rectangle. Replaced when the master file is resolvable.
-    borderWidth: 1,
-    borderColor: INK,
+    flexBasis: "60%",
+    flexGrow: 0,
+    flexShrink: 0,
+    backgroundColor: "#ffffff",
     justifyContent: "center",
     alignItems: "center",
-    padding: 12,
+    padding: 36,
+  },
+  imageFill: {
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
   },
   imagePlaceholderText: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 10,
-    textAlign: "center",
+    fontFamily: "Helvetica",
+    fontSize: 9,
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    color: INK_SOFT,
   },
-  metaColumn: {
-    flex: 2,
+  rightColumn: {
+    flexBasis: "40%",
+    flexGrow: 0,
+    flexShrink: 0,
     flexDirection: "column",
     justifyContent: "space-between",
+    paddingTop: 54,
+    paddingRight: 42,
+    paddingBottom: 54,
+    paddingLeft: 42,
   },
-  metaTop: {
+  // --- Top block ---
+  topBlock: {
     flexDirection: "column",
   },
-  // Artist name — serif italic mirrors the site headline typography
-  // (Times-Italic is @react-pdf's built-in approximation of our web serif).
-  header: {
-    fontFamily: "Times-Italic",
-    fontSize: 16,
-    marginBottom: 24,
-    color: INK,
-  },
-  label: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 8,
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: INK_SOFT,
-    marginTop: 12,
-    marginBottom: 4,
-  },
-  value: {
-    fontFamily: "Helvetica",
-    fontSize: 11,
-  },
-  // Photo title — serif italic for editorial warmth, matches BuyUI + the
-  // order-confirmation email headline treatment.
-  title: {
-    fontFamily: "Times-Italic",
-    fontSize: 15,
-    marginBottom: 6,
-    color: INK,
-  },
-  edition: {
+  artistName: {
     fontFamily: "Helvetica-Bold",
     fontSize: 14,
-    marginTop: 6,
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
+    color: INK,
     marginBottom: 6,
   },
-  signatureBlock: {
-    marginTop: 24,
-    borderTopWidth: 1,
-    borderTopColor: INK,
-    paddingTop: 8,
-  },
-  smallPrint: {
-    fontFamily: "Helvetica",
-    fontSize: 8,
-    marginTop: 4,
+  photoTitle: {
+    fontFamily: "Helvetica-Oblique",
+    fontSize: 13,
     color: INK_SOFT,
-    lineHeight: 1.5,
+    marginBottom: 22,
+  },
+  kicker: {
+    fontFamily: "Helvetica-Bold",
+    fontSize: 9,
+    textTransform: "uppercase",
+    letterSpacing: 1.4,
+    color: INK,
+    paddingBottom: 10,
+    marginBottom: 16,
+    borderBottomWidth: 0.5,
+    borderBottomColor: INK,
+  },
+  // --- Metadata rows ---
+  metaBlock: {
+    flexDirection: "column",
+  },
+  metaRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    paddingTop: 9,
+    paddingBottom: 9,
+    borderBottomWidth: 0.5,
+    borderBottomColor: RULE,
+  },
+  metaLabel: {
+    fontFamily: "Helvetica",
+    fontSize: 10,
+    color: INK_SOFT,
+  },
+  metaValue: {
+    fontFamily: "Helvetica",
+    fontSize: 10,
+    color: INK,
+    textAlign: "right",
+  },
+  // --- Bottom block ---
+  bottomBlock: {
+    flexDirection: "column",
+  },
+  provenanceLabel: {
+    fontFamily: "Helvetica-Bold",
+    fontSize: 9,
+    textTransform: "uppercase",
+    letterSpacing: 1.4,
+    color: INK,
+    marginBottom: 6,
+  },
+  provenanceBody: {
+    fontFamily: "Helvetica",
+    fontSize: 10,
+    lineHeight: 1.55,
+    color: INK_SOFT,
+    marginBottom: 20,
   },
 });
 
@@ -157,62 +165,97 @@ function formatDate(iso: string): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-export function CoaDocument({ order, item, referenceNumber, dateIso }: CoaDocumentProps) {
+type PageProps = {
+  order: Order;
+  item: OrderItem;
+  referenceNumber: string;
+  dateIso: string;
+  imageSrc?: string;
+};
+
+function CoaPage({ order, item, referenceNumber, dateIso, imageSrc }: PageProps) {
   return (
-    <Document
-      title={`COA - ${referenceNumber}`}
-      author="Thalia Bassim"
-      subject={`Certificate of Authenticity for ${item.photoTitle}`}
-      creator="Thalia Bassim"
-    >
-      <Page size="LETTER" style={styles.page}>
-        <View style={styles.accentRule} />
+    <Page size="LETTER" orientation="landscape" style={styles.page}>
+      <View style={styles.imageColumn}>
+        {imageSrc ? (
+          <Image src={imageSrc} style={styles.imageFill} />
+        ) : (
+          <Text style={styles.imagePlaceholderText}>{item.photoTitle}</Text>
+        )}
+      </View>
 
-        <View style={styles.body}>
-          <View style={styles.imageColumn}>
-            <Text style={styles.imagePlaceholderText}>Print preview</Text>
-            <Text style={[styles.smallPrint, { marginTop: 6 }]}>{item.photoTitle}</Text>
-          </View>
+      <View style={styles.rightColumn}>
+        <View style={styles.topBlock}>
+          <Text style={styles.artistName}>Thalia Bassim</Text>
+          <Text style={styles.photoTitle}>{item.photoTitle}</Text>
+          <Text style={styles.kicker}>Certificate of Authenticity</Text>
 
-          <View style={styles.metaColumn}>
-            <View style={styles.metaTop}>
-              <Text style={styles.header}>Thalia Bassim</Text>
-
-              <Text style={styles.label}>Title</Text>
-              <Text style={styles.title}>{item.photoTitle}</Text>
-
-              <Text style={styles.label}>Edition</Text>
-              <Text style={styles.edition}>
+          <View style={styles.metaBlock}>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaLabel}>Edition</Text>
+              <Text style={styles.metaValue}>
                 {item.editionNumber} of {item.editionTotal}
               </Text>
-
-              <Text style={styles.label}>Size</Text>
-              <Text style={styles.value}>{item.sizeLabel}</Text>
-
-              <Text style={styles.label}>Paper</Text>
-              <Text style={styles.value}>{item.paperName}</Text>
-
-              <Text style={styles.label}>Date</Text>
-              <Text style={styles.value}>{formatDate(dateIso)}</Text>
-
-              <Text style={styles.label}>Reference</Text>
-              <Text style={styles.value}>{referenceNumber}</Text>
-
-              <Text style={styles.label}>Order</Text>
-              <Text style={styles.value}>{order.customerName}</Text>
             </View>
-
-            <View style={styles.signatureBlock}>
-              <Text style={styles.label}>Provenance</Text>
-              <Text style={styles.smallPrint}>
-                Printed to order on archival pigment paper. Issued against the edition register held
-                by Thalia Bassim. This certificate is the authoritative record of the print&apos;s
-                edition number.
-              </Text>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaLabel}>Size</Text>
+              <Text style={styles.metaValue}>{item.sizeLabel}</Text>
+            </View>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaLabel}>Paper</Text>
+              <Text style={styles.metaValue}>{item.paperName}</Text>
+            </View>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaLabel}>Date</Text>
+              <Text style={styles.metaValue}>{formatDate(dateIso)}</Text>
+            </View>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaLabel}>Reference</Text>
+              <Text style={styles.metaValue}>{referenceNumber}</Text>
+            </View>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaLabel}>Issued to</Text>
+              <Text style={styles.metaValue}>{order.customerName}</Text>
             </View>
           </View>
         </View>
-      </Page>
+
+        <View style={styles.bottomBlock}>
+          <Text style={styles.provenanceLabel}>Provenance</Text>
+          <Text style={styles.provenanceBody}>
+            Printed to order on archival pigment paper. Numbered and signed by hand on the print
+            itself. Issued against the edition register held by Thalia Bassim.
+          </Text>
+        </View>
+      </View>
+    </Page>
+  );
+}
+
+export function CoaDocument({
+  order,
+  items,
+  referenceNumber,
+  dateIso,
+  imageSrcByItemId,
+}: CoaDocumentProps) {
+  const docTitle = items.length > 1 ? `COAs - ${referenceNumber}` : `COA - ${referenceNumber}`;
+  const docSubject =
+    items.length > 1
+      ? `Certificates of Authenticity for order ${referenceNumber}`
+      : `Certificate of Authenticity for ${items[0]?.photoTitle ?? referenceNumber}`;
+  return (
+    <Document title={docTitle} author="Thalia Bassim" subject={docSubject} creator="Thalia Bassim">
+      {items.map((item) => (
+        <CoaPage
+          key={item.id}
+          order={order}
+          item={item}
+          referenceNumber={referenceNumber}
+          dateIso={dateIso}
+          imageSrc={imageSrcByItemId?.[item.id]}
+        />
+      ))}
     </Document>
   );
 }

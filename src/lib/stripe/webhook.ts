@@ -21,12 +21,9 @@ import type Stripe from "stripe";
 import type { Address, CartLine, Order, OrderItem } from "@/lib/types";
 import { resolveCartLines, expectedShippingCentsFor } from "./checkout";
 import { insertOrderWithItems, insertRefundedStub } from "@/lib/supabase/queries/orders";
+import { getPhotoIdMapBySlugs } from "@/lib/supabase/queries/photos";
 import { audit } from "@/lib/supabase/queries/audit";
-import {
-  sendOrderConfirmation,
-  sendPrintJobEmail,
-  schedulePostPurchaseSequence,
-} from "@/lib/email/send";
+import { sendOrderConfirmation, schedulePostPurchaseSequence } from "@/lib/email/send";
 import { buildDispatchUrl } from "@/lib/dispatch/url";
 import { alertAfterOrder } from "@/lib/alerting/webhook-alerts";
 import { alertSafely, alertSystemError } from "@/lib/alerting/dispatcher";
@@ -221,6 +218,25 @@ export async function handleCheckoutSessionCompleted(
   }
 
   // ---- 3. Insert order + items (atomic edition assignment) ----
+  //
+  // `resolveCartLines` reads from the static fixture (src/data/photos.fixture.json),
+  // which does NOT carry DB UUIDs. The create_order_with_items RPC's
+  // photo_id column is `uuid`, so we must enrich each line with the real
+  // Supabase id before calling. Doing this in one batched select avoids
+  // an N+1 against the photos table.
+  const photoIdMap = await getPhotoIdMapBySlugs(resolved.map((r) => r.photo.slug));
+  for (const r of resolved) {
+    if (!photoIdMap.has(r.photo.slug)) {
+      // Rare: fixture has a slug that the DB doesn't. Throwing here makes
+      // the webhook 500 → Stripe retries → ops sees the alert via
+      // alertSystemError in the route's outer catch. Better than inserting
+      // a bad row.
+      throw new Error(
+        `webhook: photo slug "${r.photo.slug}" present in fixture but missing from photos table`
+      );
+    }
+  }
+
   let inserted: { order: Order; items: OrderItem[] };
   try {
     inserted = await insertOrderWithItems({
@@ -237,7 +253,7 @@ export async function handleCheckoutSessionCompleted(
       items: resolved.map((r) => ({
         // Track A's InsertOrderArgs requires photoId + denormalized snapshot
         // fields so order_items rows survive catalog edits.
-        photoId: r.photo.id ?? "",
+        photoId: photoIdMap.get(r.photo.slug)!,
         photoSlug: r.photo.slug,
         photoTitle: r.photo.title,
         sizeId: r.line.sizeId,
@@ -312,37 +328,13 @@ export async function runPostOrderSideEffects(
   const currency = order.currency;
 
   await runSafely("sendOrderConfirmation", () => sendOrderConfirmation(order, items), order.id);
-  // Print-lab notification is opt-in: only run when the printer email is
-  // configured (in admin settings, or as env fallback). Otherwise orders
-  // are batched manually.
-  if (dispatchUrl) {
-    const { getPrinterEmail } = await import("@/lib/supabase/queries/settings");
-    const printerEmail = await getPrinterEmail();
-    if (printerEmail) {
-      const url = dispatchUrl;
-      await runSafely(
-        "sendPrintJobEmail",
-        () => sendPrintJobEmail(order, items, url, printerEmail),
-        order.id
-      );
-    } else {
-      // Misconfiguration, not transient: we have a dispatch URL but nowhere
-      // to send it. Fire a single admin alert per order (idempotency on
-      // `stripe_checkout_session_id` ensures we only reach here once).
-      console.warn(
-        `webhook(${order.id}): dispatchUrl available but no printer email configured — skipping print-job email`
-      );
-      Sentry.captureMessage("sendPrintJobEmail skipped: no printer email configured", {
-        level: "warning",
-        tags: { pipeline: "stripe-webhook:sendPrintJobEmail" },
-        extra: { orderId: order.id },
-      });
-      await alertSystemError(
-        `sendPrintJobEmail skipped (order ${order.id})`,
-        `Order ${order.id} paid and a dispatch URL was generated, but no printer email is configured (admin settings or PRINT_SHOP_EMAIL env). Print job was NOT sent. Configure the printer email at /admin/settings, then use the admin "resend print job" button to deliver it.`
-      );
-    }
-  }
+  // Print-lab notification is NOT sent per-order. Loupe batches weekly:
+  // Thalia runs `/admin/orders → Send batch` manually, which flips every
+  // `paid` row to `queued_for_print` and sends ONE batch email to the
+  // printer (see `src/lib/dispatch/batch.ts`). Per-order emails here
+  // would spam the printer with 5-10 messages/week for no workflow gain.
+  // The dispatchUrl is still built above so it's audit-logged and
+  // available for manual resend if ever needed.
   await runSafely(
     "schedulePostPurchaseSequence",
     () => schedulePostPurchaseSequence(order),

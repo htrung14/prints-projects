@@ -10,7 +10,7 @@
  * - Guest checkout only - no `customer` param
  * - Currency: USD. Adaptive Pricing is a dashboard-level setting.
  * - Shipping address collected by Stripe (not pre-filled from us) ← Pastel #5 "shipping at checkout"
- * - Shipping: 4-tier regional (US free, CA $35, EU/UK $50, AU/ROW $65)
+ * - Shipping: 4-tier regional (US $10, CA $35, EU/UK $50, AU/ROW $65)
  * - `cart_lines_json` stored on session metadata so the webhook can rebuild
  *   the cart server-side without trusting the Stripe line-item echo.
  *

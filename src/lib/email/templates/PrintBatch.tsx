@@ -36,21 +36,13 @@ export type PrintBatchProps = {
     items: OrderItem[];
     dispatchUrl: string;
   }>;
+  /**
+   * Signed URL that lands on `/dispatch/batch` — the "all-orders" page
+   * where the printer can enter tracking for every row in one sitting.
+   * Rendered as a prominent top-of-email CTA.
+   */
+  batchDispatchUrl: string;
 };
-
-function formatShipTo(order: Order): string {
-  const a = order.shippingAddress;
-  if (!a) return "(no shipping address)";
-  return [
-    a.name,
-    a.line1,
-    a.line2,
-    [a.city, a.state, a.postalCode].filter(Boolean).join(", "),
-    a.country,
-  ]
-    .filter((l): l is string => Boolean(l && l.length > 0))
-    .join(" · ");
-}
 
 const REPRINT_REASON_MAX = 80;
 
@@ -79,7 +71,7 @@ function getReprintLabel(order: Order): string | null {
   return `REPRINT · ${truncated}`;
 }
 
-export function PrintBatch({ orders }: PrintBatchProps) {
+export function PrintBatch({ orders, batchDispatchUrl }: PrintBatchProps) {
   const count = orders.length;
   const totalPrints = orders.reduce(
     (acc, o) => acc + o.items.reduce((a, i) => a + i.quantity, 0),
@@ -125,11 +117,30 @@ export function PrintBatch({ orders }: PrintBatchProps) {
             >
               New batch ready
             </Text>
-            <Text style={{ ...baseTextStyle, color: colors.inkSoft, margin: "0 0 28px" }}>
+            <Text style={{ ...baseTextStyle, color: colors.inkSoft, margin: "0 0 22px" }}>
               {count} order{count === 1 ? "" : "s"} · {totalPrints} print
-              {totalPrints === 1 ? "" : "s"} total. Each order below has its own dispatch link for
-              the shipping address, COA notes, and tracking upload.
+              {totalPrints === 1 ? "" : "s"} to fulfill. Open the batch page to print, ship, and
+              submit tracking — or click into individual orders below.
             </Text>
+
+            {/* Single top-level CTA. Per-order detail lives below as text links
+                (not blue buttons) so the email has one visual focal point. */}
+            <Link
+              href={batchDispatchUrl}
+              style={{
+                display: "inline-block",
+                background: colors.blue,
+                color: colors.white,
+                textDecoration: "none",
+                padding: "12px 22px",
+                fontSize: 14,
+                letterSpacing: "0.03em",
+                borderRadius: 2,
+                marginBottom: 32,
+              }}
+            >
+              Open batch · submit tracking →
+            </Link>
 
             {orders.map(({ order, items, dispatchUrl }, idx) => {
               const ref = formatOrderReference(order);
@@ -155,18 +166,6 @@ export function PrintBatch({ orders }: PrintBatchProps) {
                       {reprintLabel}
                     </Text>
                   )}
-                  <Text
-                    style={{
-                      ...baseTextStyle,
-                      fontSize: 11,
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      color: colors.inkFaint,
-                      margin: "0 0 6px",
-                    }}
-                  >
-                    Order {ref}
-                  </Text>
                   <Text
                     style={{
                       fontFamily: serifFamily,
@@ -195,8 +194,7 @@ export function PrintBatch({ orders }: PrintBatchProps) {
                                 margin: 0,
                               }}
                             >
-                              {item.sizeLabel} · {item.paperName} · Ed. {item.editionNumber}/
-                              {item.editionTotal}
+                              Ed. {item.editionNumber}/{item.editionTotal}
                             </Text>
                           </td>
                           <td
@@ -215,31 +213,16 @@ export function PrintBatch({ orders }: PrintBatchProps) {
                     </tbody>
                   </table>
 
-                  <Text
-                    style={{
-                      ...baseTextStyle,
-                      fontSize: 12,
-                      color: colors.inkSoft,
-                      margin: "0 0 14px",
-                    }}
-                  >
-                    <span style={{ color: colors.inkFaint }}>Ship to:</span> {formatShipTo(order)}
-                  </Text>
-
                   <Link
                     href={dispatchUrl}
                     style={{
-                      display: "inline-block",
-                      background: colors.blue,
-                      color: colors.white,
-                      textDecoration: "none",
-                      padding: "10px 20px",
+                      color: colors.blue,
+                      textDecoration: "underline",
+                      textUnderlineOffset: 3,
                       fontSize: 13,
-                      letterSpacing: "0.03em",
-                      borderRadius: 2,
                     }}
                   >
-                    Open order {ref} →
+                    Open order {ref} · print files →
                   </Link>
                 </Section>
               );
@@ -254,9 +237,8 @@ export function PrintBatch({ orders }: PrintBatchProps) {
                 margin: 0,
               }}
             >
-              Reply to this email with any questions. Each order link above carries the shipping
-              address, COA notes, and the tracking upload form for when the print leaves the lab.
-              Files aren&apos;t attached — you already have all photos on hand.
+              Print files live on each order page — nothing is attached here. Reply with any
+              questions.
             </Text>
           </div>
         </Container>

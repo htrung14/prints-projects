@@ -110,30 +110,54 @@ export default async function AdminDashboardPage() {
   const recentCutoff = daysAgoIso(RECENT_WINDOW_DAYS);
   const countQ = () => db.from("orders").select("*", { count: "exact", head: true });
 
-  const [paidTile, inPrintTile, shippedTile, deliveredTile, refundedTile, stuck, activity] =
-    await Promise.all([
-      safeCount("Paid, not batched", countQ().eq("status", "paid"), {
+  const [
+    paidTile,
+    reprintsWaitingTile,
+    inPrintTile,
+    shippedTile,
+    deliveredTile,
+    refundedTile,
+    stuck,
+    activity,
+  ] = await Promise.all([
+    safeCount("Paid, not batched", countQ().eq("status", "paid"), {
+      href: "/admin/orders?status=paid",
+      cta: "Send to printer",
+    }),
+    // Reprints sit in status='paid' until the next batch dispatch sweeps
+    // them. Surfacing the count separately makes it obvious when a reprint
+    // is lagging — customer already got a "replacement is on the way"
+    // email, so every day waiting is a day of silence they didn't expect.
+    safeCount(
+      "Reprints waiting for batch",
+      countQ().eq("status", "paid").not("parent_order_id", "is", null),
+      {
         href: "/admin/orders?status=paid",
-        cta: "Send to printer",
-      }),
-      safeCount(
-        "In print",
-        countQ().in("status", ["queued_for_print", "sent_to_print", "printed"])
-      ),
-      safeCount("Shipped, not delivered", countQ().eq("status", "shipped")),
-      safeCount(
-        `Delivered — ordered in last ${RECENT_WINDOW_DAYS} days`,
-        countQ().eq("status", "delivered").gte("created_at", recentCutoff)
-      ),
-      safeCount(
-        `Refunded — ordered in last ${RECENT_WINDOW_DAYS} days`,
-        countQ().eq("status", "refunded").gte("created_at", recentCutoff)
-      ),
-      loadStuckOrders(),
-      loadRecentActivity(),
-    ]);
+        cta: "Run batch dispatch",
+      }
+    ),
+    safeCount("In print", countQ().in("status", ["queued_for_print", "sent_to_print", "printed"])),
+    safeCount("Shipped, not delivered", countQ().eq("status", "shipped")),
+    safeCount(
+      `Delivered — ordered in last ${RECENT_WINDOW_DAYS} days`,
+      countQ().eq("status", "delivered").gte("created_at", recentCutoff)
+    ),
+    safeCount(
+      `Refunded — ordered in last ${RECENT_WINDOW_DAYS} days`,
+      countQ().eq("status", "refunded").gte("created_at", recentCutoff)
+    ),
+    loadStuckOrders(),
+    loadRecentActivity(),
+  ]);
 
-  const tiles: CountResult[] = [paidTile, inPrintTile, shippedTile, deliveredTile, refundedTile];
+  const tiles: CountResult[] = [
+    paidTile,
+    reprintsWaitingTile,
+    inPrintTile,
+    shippedTile,
+    deliveredTile,
+    refundedTile,
+  ];
 
   return (
     <section className="flex flex-col gap-10">
