@@ -100,6 +100,7 @@ function parseStatus(raw: string | string[] | undefined): OrderStatus | null {
   if (typeof raw !== "string") return null;
   const allowed: OrderStatus[] = [
     "paid",
+    "hold_shipping_shortfall",
     "queued_for_print",
     "sent_to_print",
     "printed",
@@ -376,6 +377,7 @@ function parseAddressLoose(raw: unknown): Address {
 function narrowStatusLoose(status: string): OrderStatus {
   switch (status) {
     case "paid":
+    case "hold_shipping_shortfall":
     case "queued_for_print":
     case "sent_to_print":
     case "printed":

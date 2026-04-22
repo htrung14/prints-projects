@@ -160,7 +160,8 @@ function ShipTo({ address, customerName }: { address: Address; customerName: str
         {address.line2 ? <div>{address.line2}</div> : null}
         <div>
           {address.city}
-          {address.state ? `, ${address.state}` : ""} {address.postalCode}
+          {address.state ? `, ${address.state}` : ""}
+          {address.postalCode ? ` ${address.postalCode}` : ""}
         </div>
         <div>{address.country}</div>
       </div>

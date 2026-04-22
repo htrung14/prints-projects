@@ -27,7 +27,6 @@ export type PostPurchaseTouchNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type PostPurchaseProps = {
   order: Order;
   touchNumber: PostPurchaseTouchNumber;
-  referralCode?: string;
 };
 
 type TouchContent = {
@@ -41,11 +40,7 @@ function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "https://thaliabassim.com";
 }
 
-function contentForTouch(
-  order: Order,
-  touchNumber: PostPurchaseTouchNumber,
-  referralCode?: string
-): TouchContent {
+function contentForTouch(order: Order, touchNumber: PostPurchaseTouchNumber): TouchContent {
   const base = appUrl();
   const ref = formatOrderReference(order);
 
@@ -98,8 +93,8 @@ function contentForTouch(
   }
 }
 
-export function PostPurchase({ order, touchNumber, referralCode }: PostPurchaseProps) {
-  const content = contentForTouch(order, touchNumber, referralCode);
+export function PostPurchase({ order, touchNumber }: PostPurchaseProps) {
+  const content = contentForTouch(order, touchNumber);
 
   return (
     <Html>
@@ -144,12 +139,8 @@ export function PostPurchase({ order, touchNumber, referralCode }: PostPurchaseP
  * Exported so the sender can set the email subject per touch without
  * re-deriving it from the template.
  */
-export function subjectForTouch(
-  order: Order,
-  touchNumber: PostPurchaseTouchNumber,
-  referralCode?: string
-): string {
-  return contentForTouch(order, touchNumber, referralCode).subject;
+export function subjectForTouch(order: Order, touchNumber: PostPurchaseTouchNumber): string {
+  return contentForTouch(order, touchNumber).subject;
 }
 
 export default PostPurchase;

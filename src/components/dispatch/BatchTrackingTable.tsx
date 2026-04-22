@@ -225,7 +225,8 @@ export function BatchTrackingTable({ token, rows }: Props) {
                   <br />
                   {row.shippingAddress.city}
                   {row.shippingAddress.state ? `, ${row.shippingAddress.state}` : ""}{" "}
-                  {row.shippingAddress.postalCode} · {row.shippingAddress.country}
+                  {row.shippingAddress.postalCode ? `${row.shippingAddress.postalCode} · ` : ""}
+                  {row.shippingAddress.country}
                 </div>
                 <ul
                   className="mt-4 flex flex-col gap-2"

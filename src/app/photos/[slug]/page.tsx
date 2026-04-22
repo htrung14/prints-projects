@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import DetailPanel from "@/components/DetailPanel";
 import RelatedPrints from "@/components/RelatedPrints";
-import { getAllPhotos, getCatalogPhotos, getPhotoBySlug } from "@/lib/photos";
+import { getCatalogPhotos, getPhotoBySlug } from "@/lib/photos";
 
 export function generateStaticParams() {
   // Only pre-generate published slugs. The test item remains accessible by

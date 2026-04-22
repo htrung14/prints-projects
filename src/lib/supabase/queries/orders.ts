@@ -98,7 +98,7 @@ function parseAddress(raw: unknown): Address {
     line2: opt("line2"),
     city: need("city"),
     state: opt("state"),
-    postalCode: need("postalCode"),
+    postalCode: opt("postalCode") ?? null,
     country: need("country"),
   };
 }
@@ -106,6 +106,7 @@ function parseAddress(raw: unknown): Address {
 function narrowStatus(status: string): OrderStatus {
   switch (status) {
     case "paid":
+    case "hold_shipping_shortfall":
     case "queued_for_print":
     case "sent_to_print":
     case "printed":

@@ -23,15 +23,21 @@ vi.mock("@/lib/stripe/client", () => ({
 }));
 
 const mockGetPhotoBySlug = vi.fn();
+const mockGetPhotoIdMapBySlugs = vi
+  .fn()
+  .mockResolvedValue(new Map([["north-lebanon-oct-2020", "photo-001"]]));
 vi.mock("@/lib/supabase/queries/photos", () => ({
   getPhotoBySlug: (...args: unknown[]) => mockGetPhotoBySlug(...args),
+  getPhotoIdMapBySlugs: (...args: unknown[]) => mockGetPhotoIdMapBySlugs(...args),
 }));
 
 const mockInsertOrderWithItems = vi.fn();
 const mockInsertRefundedStub = vi.fn();
+const mockUpdateOrderStatus = vi.fn().mockResolvedValue(undefined);
 vi.mock("@/lib/supabase/queries/orders", () => ({
   insertOrderWithItems: (...args: unknown[]) => mockInsertOrderWithItems(...args),
   insertRefundedStub: (...args: unknown[]) => mockInsertRefundedStub(...args),
+  updateOrderStatus: (...args: unknown[]) => mockUpdateOrderStatus(...args),
 }));
 
 const mockSendOrderConfirmation = vi.fn().mockResolvedValue(undefined);

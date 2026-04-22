@@ -103,7 +103,8 @@ export default async function OrderDetailPage({ params }: PageProps<"/admin/orde
               ) : null}
               <br />
               {addr.city}
-              {addr.state ? `, ${addr.state}` : ""} {addr.postalCode}
+              {addr.state ? `, ${addr.state}` : ""}
+              {addr.postalCode ? ` ${addr.postalCode}` : ""}
               <br />
               {addr.country}
             </address>

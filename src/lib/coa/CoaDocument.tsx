@@ -178,6 +178,7 @@ function CoaPage({ order, item, referenceNumber, dateIso, imageSrc }: PageProps)
     <Page size="LETTER" orientation="landscape" style={styles.page}>
       <View style={styles.imageColumn}>
         {imageSrc ? (
+          // eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image has no alt prop
           <Image src={imageSrc} style={styles.imageFill} />
         ) : (
           <Text style={styles.imagePlaceholderText}>{item.photoTitle}</Text>

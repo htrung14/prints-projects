@@ -266,7 +266,7 @@ export async function listPendingDispatchOrders(): Promise<Order[]> {
         line2: opt("line2"),
         city: need("city"),
         state: opt("state"),
-        postalCode: need("postalCode"),
+        postalCode: opt("postalCode") ?? null,
         country: need("country"),
       },
       subtotalCents: r.subtotal_cents,

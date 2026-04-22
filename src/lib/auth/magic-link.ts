@@ -20,7 +20,7 @@ import { adminServerClient } from "@/lib/supabase/admin";
  * (browser) and the callback route (server). Falls back to a sensible dev
  * value when the env is missing so the build doesn't fail locally.
  */
-export function magicLinkRedirectUrl(_nextPath?: string): string {
+export function magicLinkRedirectUrl(): string {
   // Intentionally no query string. Supabase's redirect-URL allowlist matcher
   // is strict: a URL with `?next=…` does not match an allowlist entry of
   // `/admin/auth/callback`, so Supabase silently falls back to Site URL and

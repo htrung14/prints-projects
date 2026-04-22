@@ -21,7 +21,11 @@ import type Stripe from "stripe";
 import type { Address, CartLine, Order, OrderItem } from "@/lib/types";
 import { resolveCartLines, expectedShippingCentsFor } from "./checkout";
 import { stripeClient } from "./client";
-import { insertOrderWithItems, insertRefundedStub } from "@/lib/supabase/queries/orders";
+import {
+  insertOrderWithItems,
+  insertRefundedStub,
+  updateOrderStatus,
+} from "@/lib/supabase/queries/orders";
 import { getPhotoIdMapBySlugs } from "@/lib/supabase/queries/photos";
 import { audit } from "@/lib/supabase/queries/audit";
 import { sendOrderConfirmation, sendRefundedNotification } from "@/lib/email/send";
@@ -112,9 +116,6 @@ function extractShippingAddress(session: Stripe.Checkout.Session): Address {
   if (typeof addr.city !== "string" || addr.city.length === 0) {
     throw new Error("webhook: shipping address missing city");
   }
-  if (typeof addr.postal_code !== "string" || addr.postal_code.length === 0) {
-    throw new Error("webhook: shipping address missing postal_code");
-  }
   if (typeof addr.country !== "string" || addr.country.length === 0) {
     throw new Error("webhook: shipping address missing country");
   }
@@ -125,7 +126,7 @@ function extractShippingAddress(session: Stripe.Checkout.Session): Address {
     line2: addr.line2 ?? null,
     city: addr.city,
     state: addr.state ?? null,
-    postalCode: addr.postal_code,
+    postalCode: addr.postal_code || null,
     country: addr.country,
   };
 }
@@ -222,6 +223,7 @@ export async function handleCheckoutSessionCompleted(
         tags: { pipeline: "stripe-webhook:pi-refund-check" },
         extra: { sessionId: session.id, paymentIntentId: piId },
       });
+      await alertSystemError("PI refund lookup", `Session ${session.id}, PI ${piId}: ${msg}`);
     }
   }
 
@@ -264,13 +266,13 @@ export async function handleCheckoutSessionCompleted(
   // reaching this point is a real order. No need for a second isTestCart
   // check — the shipping-mismatch guard applies unconditionally.
   const expected = expectedShippingCentsFor(address.country);
-  if (shippingCents < expected) {
-    const shortfall = expected - shippingCents;
+  const shippingShortfallCents = shippingCents < expected ? expected - shippingCents : 0;
+  if (shippingShortfallCents > 0) {
     const msg =
       `Order ${session.id}: shipping country ${address.country} expects ${expected}¢ ` +
       `(US=1000, CA=3500, EU/UK=5000, AU/ROW=6500) but buyer paid only ${shippingCents}¢. ` +
-      `Likely picked a cheaper tier at checkout. Hold shipment and collect the ` +
-      `$${(shortfall / 100).toFixed(2)} shortfall before dispatch.`;
+      `Order will be set to hold_shipping_shortfall. Collect the ` +
+      `$${(shippingShortfallCents / 100).toFixed(2)} shortfall before dispatch.`;
     Sentry.captureMessage("shipping/country mismatch at checkout", {
       level: "warning",
       tags: { pipeline: "stripe-webhook:shipping-mismatch" },
@@ -369,6 +371,17 @@ export async function handleCheckoutSessionCompleted(
   }
 
   const { order, items } = inserted;
+
+  // ---- 3b. Hold order if shipping mismatch detected ----
+  if (shippingShortfallCents > 0) {
+    await updateOrderStatus(order.id, "hold_shipping_shortfall", {
+      reason: "shipping_country_mismatch",
+      actualCountry: address.country,
+      paidShippingCents: shippingCents,
+      expectedShippingCents: expected,
+      shortfallCents: shippingShortfallCents,
+    });
+  }
 
   // ---- 4. Build the dispatch URL once; Track C's template embeds it. ----
   //
@@ -622,6 +635,7 @@ async function hasPriorRefundEmail(orderId: string): Promise<boolean> {
         tags: { pipeline: "stripe-webhook:hasPriorRefundEmail" },
         extra: { orderId },
       });
+      await alertSystemError("hasPriorRefundEmail query", `Order ${orderId}: ${error.message}`);
       return false;
     }
     return Boolean(data);
@@ -632,6 +646,7 @@ async function hasPriorRefundEmail(orderId: string): Promise<boolean> {
       tags: { pipeline: "stripe-webhook:hasPriorRefundEmail" },
       extra: { orderId },
     });
+    await alertSystemError("hasPriorRefundEmail", `Order ${orderId}: ${msg}`);
     return false;
   }
 }

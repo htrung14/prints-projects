@@ -23,7 +23,7 @@ function normalizeNext(raw: string | string[] | undefined): string {
 export default async function SignInPage({ searchParams }: PageProps<"/admin/sign-in">) {
   const q = await searchParams;
   const nextPath = normalizeNext(q.next);
-  const redirectTo = magicLinkRedirectUrl(nextPath);
+  const redirectTo = magicLinkRedirectUrl();
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6">

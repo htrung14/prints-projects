@@ -8,9 +8,10 @@
  * already surfaces Apple Pay, Google Pay, and Link natively; no extra
  * integration needed.
  *
- * Shipping model: buyer picks their country here, we derive the tier
- * server-side. Stripe's `allowed_countries` is narrowed to exactly that
- * country so a buyer who picks US can't ship to Canada, and vice versa.
+ * Shipping model: buyer's country is auto-detected from timezone/locale
+ * (with manual override). We derive the tier server-side and Stripe's
+ * `allowed_countries` is set to the entire tier, so the buyer can adjust
+ * to any country in the same shipping bracket.
  */
 
 import Link from "next/link";
@@ -20,14 +21,108 @@ import { useCart } from "@/lib/cart";
 import { getAllPhotos } from "@/lib/photos";
 import { formatUsd, priceCents } from "@/lib/pricing";
 import type { PaperType, Photo } from "@/lib/types";
-import { COUNTRY_OPTIONS } from "@/lib/countries";
+import { COUNTRY_OPTIONS, SUPPORTED_COUNTRY_CODES } from "@/lib/countries";
+
+const TZ_COUNTRY: Record<string, string> = {
+  "America/New_York": "US",
+  "America/Chicago": "US",
+  "America/Denver": "US",
+  "America/Los_Angeles": "US",
+  "America/Phoenix": "US",
+  "America/Anchorage": "US",
+  "Pacific/Honolulu": "US",
+  "America/Detroit": "US",
+  "America/Boise": "US",
+  "America/Indiana/Indianapolis": "US",
+  "America/Toronto": "CA",
+  "America/Vancouver": "CA",
+  "America/Halifax": "CA",
+  "America/Winnipeg": "CA",
+  "America/Edmonton": "CA",
+  "America/St_Johns": "CA",
+  "America/Regina": "CA",
+  "Europe/London": "GB",
+  "Europe/Dublin": "IE",
+  "Europe/Berlin": "DE",
+  "Europe/Paris": "FR",
+  "Europe/Amsterdam": "NL",
+  "Europe/Brussels": "BE",
+  "Europe/Luxembourg": "LU",
+  "Europe/Rome": "IT",
+  "Europe/Madrid": "ES",
+  "Europe/Lisbon": "PT",
+  "Europe/Vienna": "AT",
+  "Europe/Copenhagen": "DK",
+  "Europe/Stockholm": "SE",
+  "Europe/Helsinki": "FI",
+  "Europe/Oslo": "NO",
+  "Europe/Zurich": "CH",
+  "Atlantic/Reykjavik": "IS",
+  "Europe/Warsaw": "PL",
+  "Europe/Prague": "CZ",
+  "Europe/Athens": "GR",
+  "Europe/Budapest": "HU",
+  "Europe/Bratislava": "SK",
+  "Europe/Ljubljana": "SI",
+  "Europe/Zagreb": "HR",
+  "Europe/Tallinn": "EE",
+  "Europe/Riga": "LV",
+  "Europe/Vilnius": "LT",
+  "Europe/Bucharest": "RO",
+  "Europe/Sofia": "BG",
+  "Asia/Nicosia": "CY",
+  "Europe/Malta": "MT",
+  "Australia/Sydney": "AU",
+  "Australia/Melbourne": "AU",
+  "Australia/Brisbane": "AU",
+  "Australia/Perth": "AU",
+  "Australia/Adelaide": "AU",
+  "Pacific/Auckland": "NZ",
+  "Asia/Tokyo": "JP",
+  "Asia/Singapore": "SG",
+  "Asia/Hong_Kong": "HK",
+  "Asia/Seoul": "KR",
+  "Asia/Taipei": "TW",
+  "Asia/Bangkok": "TH",
+  "Asia/Kuala_Lumpur": "MY",
+  "Asia/Jerusalem": "IL",
+  "Asia/Dubai": "AE",
+  "Asia/Riyadh": "SA",
+  "America/Mexico_City": "MX",
+  "America/Monterrey": "MX",
+  "America/Sao_Paulo": "BR",
+  "America/Argentina/Buenos_Aires": "AR",
+  "America/Santiago": "CL",
+  "America/Bogota": "CO",
+  "Africa/Johannesburg": "ZA",
+  "Asia/Kolkata": "IN",
+  "Asia/Calcutta": "IN",
+  "Asia/Manila": "PH",
+};
+
+function detectCountry(): string {
+  if (typeof window === "undefined") return "US";
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
+    const code = TZ_COUNTRY[tz];
+    if (code && SUPPORTED_COUNTRY_CODES.includes(code)) return code;
+  } catch {}
+  try {
+    const parts = (navigator.language ?? "").split("-");
+    if (parts.length >= 2) {
+      const region = parts[parts.length - 1].toUpperCase();
+      if (/^[A-Z]{2}$/.test(region) && SUPPORTED_COUNTRY_CODES.includes(region)) return region;
+    }
+  } catch {}
+  return "US";
+}
 
 export default function CheckoutPage() {
   const { lines, subtotalCents, itemCount, remove } = useCart();
   const photos = getAllPhotos();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [country, setCountry] = useState<string>("US");
+  const [country, setCountry] = useState<string>(detectCountry);
 
   // Fire one funnel event per checkout-page view, with cart snapshot so
   // the Vercel Analytics funnel can compare "entered checkout" to "paid".
@@ -220,7 +315,6 @@ function CheckoutLine({
   void index;
 
   const size = photo.sizes.find((s) => s.id === line.sizeId);
-  const paper = photo.papers.find((p) => p.id === line.paperId);
   const lineUnit = priceCents(photo, line.sizeId, line.paperId);
 
   return (

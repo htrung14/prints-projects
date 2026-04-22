@@ -21,14 +21,7 @@ import {
   Text,
 } from "@react-email/components";
 import type { Order, OrderItem } from "@/lib/types";
-import {
-  baseTextStyle,
-  colors,
-  fontFamily,
-  formatOrderReference,
-  formatUsdFromCents,
-  serifFamily,
-} from "./_shared";
+import { baseTextStyle, colors, fontFamily, formatOrderReference, serifFamily } from "./_shared";
 
 export type PrintBatchProps = {
   orders: Array<{
@@ -144,7 +137,6 @@ export function PrintBatch({ orders, batchDispatchUrl }: PrintBatchProps) {
 
             {orders.map(({ order, items, dispatchUrl }, idx) => {
               const ref = formatOrderReference(order);
-              const orderPrintCount = items.reduce((a, i) => a + i.quantity, 0);
               const reprintLabel = getReprintLabel(order);
               return (
                 <Section key={order.id} style={{ marginBottom: idx === count - 1 ? 0 : 28 }}>

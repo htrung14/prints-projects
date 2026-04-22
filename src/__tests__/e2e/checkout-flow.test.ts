@@ -18,8 +18,12 @@ vi.mock("@/lib/stripe/client", () => ({
 }));
 
 const mockGetPhotoBySlug = vi.fn();
+const mockGetPhotoIdMapBySlugs = vi
+  .fn()
+  .mockResolvedValue(new Map([["north-lebanon-oct-2020", "photo-001"]]));
 vi.mock("@/lib/supabase/queries/photos", () => ({
   getPhotoBySlug: (...args: unknown[]) => mockGetPhotoBySlug(...args),
+  getPhotoIdMapBySlugs: (...args: unknown[]) => mockGetPhotoIdMapBySlugs(...args),
 }));
 
 const mockInsertOrderWithItems = vi.fn();
@@ -55,9 +59,11 @@ const mockInsertRefundedStub = vi.fn().mockResolvedValue({
   },
   idempotent: false,
 });
+const mockUpdateOrderStatus = vi.fn().mockResolvedValue(undefined);
 vi.mock("@/lib/supabase/queries/orders", () => ({
   insertOrderWithItems: (...args: unknown[]) => mockInsertOrderWithItems(...args),
   insertRefundedStub: (...args: unknown[]) => mockInsertRefundedStub(...args),
+  updateOrderStatus: (...args: unknown[]) => mockUpdateOrderStatus(...args),
 }));
 
 const mockSendOrderConfirmation = vi.fn().mockResolvedValue(undefined);
@@ -84,7 +90,14 @@ vi.mock("@/lib/supabase/server", () => ({
 
 // --- Import after mocks ---
 import type Stripe from "stripe";
-import { resolveCartLines, createCheckoutSession } from "@/lib/stripe/checkout";
+import {
+  resolveCartLines,
+  createCheckoutSession,
+  US_COUNTRIES,
+  CA_COUNTRIES,
+  EU_UK_COUNTRIES,
+  AU_ROW_COUNTRIES,
+} from "@/lib/stripe/checkout";
 import { handleCheckoutSessionCompleted, dispatchWebhookEvent } from "@/lib/stripe/webhook";
 import { priceCents, formatUsd, editionRemaining, isSoldOut } from "@/lib/pricing";
 import type { Photo, CartLine } from "@/lib/types";
@@ -268,7 +281,7 @@ describe("createCheckoutSession", () => {
     expect(session.url).toBe("https://checkout.stripe.com/test");
   });
 
-  it("US country: $10 shipping, allowed_countries narrowed to [US]", async () => {
+  it("US country: $10 shipping, allowed_countries includes full tier", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE, { ...VALID_CART_LINE, photoSlug: "tyre-feb-2022" }],
@@ -280,10 +293,10 @@ describe("createCheckoutSession", () => {
     expect(params.shipping_options).toHaveLength(1);
     expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(1000);
     expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("United States");
-    expect(params.shipping_address_collection.allowed_countries).toEqual(["US"]);
+    expect(params.shipping_address_collection.allowed_countries).toEqual([...US_COUNTRIES]);
   });
 
-  it("CA country: $35, allowed_countries narrowed to [CA]", async () => {
+  it("CA country: $35, allowed_countries includes full tier", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE],
@@ -295,10 +308,10 @@ describe("createCheckoutSession", () => {
     expect(params.shipping_options).toHaveLength(1);
     expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(3500);
     expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("Canada");
-    expect(params.shipping_address_collection.allowed_countries).toEqual(["CA"]);
+    expect(params.shipping_address_collection.allowed_countries).toEqual([...CA_COUNTRIES]);
   });
 
-  it("DE country (EU_UK tier): $50, allowed_countries narrowed to [DE]", async () => {
+  it("DE country (EU_UK tier): $50, allowed_countries includes full tier", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE],
@@ -310,10 +323,10 @@ describe("createCheckoutSession", () => {
     expect(params.shipping_options).toHaveLength(1);
     expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(5000);
     expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("EU");
-    expect(params.shipping_address_collection.allowed_countries).toEqual(["DE"]);
+    expect(params.shipping_address_collection.allowed_countries).toEqual([...EU_UK_COUNTRIES]);
   });
 
-  it("AU country (AU_ROW tier): $65, allowed_countries narrowed to [AU]", async () => {
+  it("AU country (AU_ROW tier): $65, allowed_countries includes full tier", async () => {
     mockGetPhotoBySlug.mockResolvedValue(FIXTURE_PHOTO);
     await createCheckoutSession({
       lines: [VALID_CART_LINE],
@@ -324,8 +337,8 @@ describe("createCheckoutSession", () => {
     const params = mockStripeCreate.mock.calls[0][0];
     expect(params.shipping_options).toHaveLength(1);
     expect(params.shipping_options[0].shipping_rate_data.fixed_amount.amount).toBe(6500);
-    expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("Australia");
-    expect(params.shipping_address_collection.allowed_countries).toEqual(["AU"]);
+    expect(params.shipping_options[0].shipping_rate_data.display_name).toContain("Rest of world");
+    expect(params.shipping_address_collection.allowed_countries).toEqual([...AU_ROW_COUNTRIES]);
   });
 
   it("unsupported country throws before Stripe is called", async () => {

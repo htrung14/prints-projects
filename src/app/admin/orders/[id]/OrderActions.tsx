@@ -20,6 +20,7 @@ import type { OrderStatus } from "@/lib/types";
 
 const STATUS_ORDER: OrderStatus[] = [
   "paid",
+  "hold_shipping_shortfall",
   "queued_for_print",
   "sent_to_print",
   "printed",

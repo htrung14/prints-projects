@@ -27,6 +27,7 @@ function formatDate(iso: string): string {
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   paid: "Order received",
+  hold_shipping_shortfall: "Under review",
   queued_for_print: "Queued for print",
   sent_to_print: "Sent to printer",
   printed: "Printed",
@@ -38,6 +39,7 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 
 const STATUS_DESCRIPTIONS: Record<OrderStatus, string> = {
   paid: "Payment received. Your order joins the next print batch (Tuesdays & Fridays).",
+  hold_shipping_shortfall: "Your order is being reviewed. We'll be in touch shortly.",
   queued_for_print: "In the queue for the next batch to the print lab in New York.",
   sent_to_print:
     "Being printed and inspected at the lab. Total time from order to delivery is 2–3 weeks within the United States, and 3–5 weeks internationally.",

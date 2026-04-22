@@ -77,6 +77,7 @@ export type CartLine = {
  */
 export type OrderStatus =
   | "paid"
+  | "hold_shipping_shortfall"
   | "queued_for_print"
   | "sent_to_print"
   | "printed"
@@ -91,7 +92,7 @@ export type Address = {
   line2?: string | null;
   city: string;
   state?: string | null; // state/region (US: state code; intl: region)
-  postalCode: string;
+  postalCode: string | null;
   country: string; // ISO 3166-1 alpha-2
 };
 

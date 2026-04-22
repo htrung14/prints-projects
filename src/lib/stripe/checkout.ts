@@ -42,6 +42,7 @@ import type Stripe from "stripe";
 import type { CartLine, Photo } from "@/lib/types";
 import { priceCents } from "@/lib/pricing";
 import { getPhotoBySlug as getPhotoFromFixture } from "@/lib/photos";
+import { countriesForTier, tierForCountryCode, type ShippingTier } from "@/lib/countries";
 import { stripeClient } from "./client";
 
 // ---------------------------------------------------------------------------
@@ -66,77 +67,19 @@ type LineItemParam = NonNullable<SessionCreateParams["line_items"]>[number];
 // ---------------------------------------------------------------------------
 
 /**
- * Countries Stripe Checkout will offer in the shipping address collection.
- * Split into four tiers because Stripe hosted Checkout cannot restrict
- * shipping_options per country — we pre-select the correct rate on our own
- * /checkout page (destination picker) and narrow `allowed_countries` to the
- * matching tier's subset before creating the session.
- *
- * Two-letter ISO 3166-1 alpha-2 codes. Tier rates are calibrated to real
- * USPS/FedEx NYC-origin estimates (see docs-ai/shipping-model.md).
+ * Country tier arrays derived from the single source of truth in
+ * `src/lib/countries.ts`. Cast to Stripe's AllowedCountry type here
+ * since the SDK requires its own literal union.
  */
-export const US_COUNTRIES: ReadonlyArray<AllowedCountry> = ["US"];
-export const CA_COUNTRIES: ReadonlyArray<AllowedCountry> = ["CA"];
-export const EU_UK_COUNTRIES: ReadonlyArray<AllowedCountry> = [
-  "GB",
-  "IE",
-  "DE",
-  "FR",
-  "NL",
-  "BE",
-  "LU",
-  "IT",
-  "ES",
-  "PT",
-  "AT",
-  "DK",
-  "SE",
-  "FI",
-  "NO",
-  "CH",
-  "IS",
-  "PL",
-  "CZ",
-  "GR",
-  "HU",
-  "SK",
-  "SI",
-  "HR",
-  "EE",
-  "LV",
-  "LT",
-  "RO",
-  "BG",
-  "CY",
-  "MT",
-];
-export const AU_ROW_COUNTRIES: ReadonlyArray<AllowedCountry> = [
-  "AU",
-  "NZ",
-  "JP",
-  "SG",
-  "HK",
-  "KR",
-  "TW",
-  "TH",
-  "MY",
-  "IL",
-  "AE",
-  "SA",
-  "MX",
-  "BR",
-  "AR",
-  "CL",
-  "CO",
-  "ZA",
-  "IN",
-  "PH",
-];
+export const US_COUNTRIES = countriesForTier("US") as unknown as ReadonlyArray<AllowedCountry>;
+export const CA_COUNTRIES = countriesForTier("CA") as unknown as ReadonlyArray<AllowedCountry>;
+export const EU_UK_COUNTRIES = countriesForTier(
+  "EU_UK"
+) as unknown as ReadonlyArray<AllowedCountry>;
+export const AU_ROW_COUNTRIES = countriesForTier(
+  "AU_ROW"
+) as unknown as ReadonlyArray<AllowedCountry>;
 
-/**
- * @deprecated Prefer the per-tier country arrays. Kept as the flattened
- * aggregate for legacy doc/tooling references. No runtime callers.
- */
 export const ALLOWED_COUNTRIES: ReadonlyArray<AllowedCountry> = [
   ...US_COUNTRIES,
   ...CA_COUNTRIES,
@@ -144,7 +87,7 @@ export const ALLOWED_COUNTRIES: ReadonlyArray<AllowedCountry> = [
   ...AU_ROW_COUNTRIES,
 ];
 
-export type ShippingDestination = "US" | "CA" | "EU_UK" | "AU_ROW";
+export type ShippingDestination = ShippingTier;
 
 /**
  * Stripe Tax product code used on inline `product_data`. `txcd_99999999`
@@ -163,30 +106,13 @@ const SHIPPING_CENTS_AU_ROW = 6500; // $65 Australia + rest of world
  * Map a destination tier to its country list.
  */
 function countriesForDestination(destination: ShippingDestination): ReadonlyArray<AllowedCountry> {
-  switch (destination) {
-    case "US":
-      return US_COUNTRIES;
-    case "CA":
-      return CA_COUNTRIES;
-    case "EU_UK":
-      return EU_UK_COUNTRIES;
-    case "AU_ROW":
-      return AU_ROW_COUNTRIES;
-  }
+  return countriesForTier(destination) as unknown as ReadonlyArray<AllowedCountry>;
 }
 
 /**
- * Map an ISO2 country code to its shipping tier. Returns null when we don't
- * ship to that country (caller must 4xx before reaching session creation).
+ * Map an ISO2 country code to its shipping tier. Re-exported from countries.ts.
  */
-export function tierForCountry(country: string): ShippingDestination | null {
-  const c = country.toUpperCase();
-  if ((US_COUNTRIES as ReadonlyArray<string>).includes(c)) return "US";
-  if ((CA_COUNTRIES as ReadonlyArray<string>).includes(c)) return "CA";
-  if ((EU_UK_COUNTRIES as ReadonlyArray<string>).includes(c)) return "EU_UK";
-  if ((AU_ROW_COUNTRIES as ReadonlyArray<string>).includes(c)) return "AU_ROW";
-  return null;
-}
+export const tierForCountry: (country: string) => ShippingDestination | null = tierForCountryCode;
 
 /**
  * Expected shipping cents for a given ISO2 country code. Used by the webhook
@@ -349,7 +275,7 @@ function buildShippingOptions(destination: ShippingDestination): ShippingOptionP
           shipping_rate_data: {
             type: "fixed_amount",
             fixed_amount: { amount: SHIPPING_CENTS_US, currency: "usd" },
-            display_name: "United States — $10",
+            display_name: "United States",
             tax_behavior: "exclusive",
           },
         },
@@ -360,7 +286,7 @@ function buildShippingOptions(destination: ShippingDestination): ShippingOptionP
           shipping_rate_data: {
             type: "fixed_amount",
             fixed_amount: { amount: SHIPPING_CENTS_CA, currency: "usd" },
-            display_name: "Canada — $35",
+            display_name: "Canada",
             tax_behavior: "exclusive",
           },
         },
@@ -371,7 +297,7 @@ function buildShippingOptions(destination: ShippingDestination): ShippingOptionP
           shipping_rate_data: {
             type: "fixed_amount",
             fixed_amount: { amount: SHIPPING_CENTS_EU_UK, currency: "usd" },
-            display_name: "United Kingdom & EU — $50",
+            display_name: "United Kingdom & EU",
             tax_behavior: "exclusive",
           },
         },
@@ -382,7 +308,7 @@ function buildShippingOptions(destination: ShippingDestination): ShippingOptionP
           shipping_rate_data: {
             type: "fixed_amount",
             fixed_amount: { amount: SHIPPING_CENTS_AU_ROW, currency: "usd" },
-            display_name: "Australia & rest of world — $65",
+            display_name: "Rest of world",
             tax_behavior: "exclusive",
           },
         },
@@ -494,7 +420,7 @@ export async function createCheckoutSession(
       );
     }
     shippingOptions = buildShippingOptions(tier);
-    allowedCountries = [args.country.toUpperCase() as AllowedCountry];
+    allowedCountries = countriesForDestination(tier);
   }
 
   const origin = args.origin ?? siteOrigin();
