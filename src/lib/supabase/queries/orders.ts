@@ -220,11 +220,20 @@ export async function insertOrderWithItems(
   // of the "paid" event). Without this flag a Stripe event replay — which
   // happens routinely when a delivery retry lands after a manual Resend —
   // fires the order-confirmation email to the customer twice.
-  const { data: existing } = await db
+  const { data: existing, error: existingErr } = await db
     .from("orders")
     .select(ORDER_COLUMNS)
     .eq("stripe_checkout_session_id", args.stripeSessionId)
     .maybeSingle();
+  if (existingErr) {
+    // Surface DB errors loudly — previously they were silently ignored,
+    // which meant a Supabase timeout here would make us proceed into the
+    // RPC path and either double-insert or throw a less diagnosable
+    // downstream error.
+    throw new Error(
+      `insertOrderWithItems: pre-check failed for session ${args.stripeSessionId}: ${existingErr.message}`
+    );
+  }
 
   if (existing) {
     const { data: existingItems, error: itemsErr } = await db

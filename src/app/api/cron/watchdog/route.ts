@@ -46,6 +46,24 @@ const STRIPE_EVENTS_PAGE_LIMIT = 100;
 export async function GET(req: NextRequest): Promise<Response> {
   const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
+  // Fail-CLOSED in production: if CRON_SECRET is unset on prod, the
+  // endpoint would otherwise be publicly callable (and would hit Stripe
+  // + Supabase on every hit). Block + alert instead of silently running.
+  const isProd = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
+  if (isProd && !cronSecret) {
+    console.error("[watchdog] CRON_SECRET is not set in production — refusing to run");
+    try {
+      await getDispatcher().send(
+        systemErrorAlert(
+          "GET /api/cron/watchdog (misconfigured)",
+          "CRON_SECRET env var is not set in production. The watchdog cron is refusing to run until it's configured — otherwise the endpoint would be publicly callable."
+        )
+      );
+    } catch (alertErr) {
+      console.error("[watchdog] cron-misconfigured alert dispatch failed:", alertErr);
+    }
+    return new Response("Misconfigured", { status: 500 });
+  }
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return new Response("Unauthorized", { status: 401 });
   }

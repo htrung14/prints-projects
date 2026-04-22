@@ -43,7 +43,12 @@ export async function POST(req: NextRequest): Promise<Response> {
   // signal worth recording; Sentry.addBreadcrumb is cheap and non-alerting.
   const receivedAtIso = new Date().toISOString();
   const sigHeader = req.headers.get("stripe-signature");
-  const stripeEventId = req.headers.get("stripe-signature-event-id") ?? null;
+  // Stripe does not expose the event ID in an HTTP header — it lives in
+  // the JSON body (`evt_...`). The old read of `stripe-signature-event-id`
+  // was nonstandard and always returned null. Leave the field in the
+  // breadcrumb so future correlation-header support (if any) slots in
+  // cleanly, but expect null today.
+  const stripeEventId = req.headers.get("stripe-event-id") ?? null;
   const userAgent = req.headers.get("user-agent") ?? null;
   console.log(
     `[stripe-webhook] received at=${receivedAtIso} ua=${userAgent ?? "?"} ` +

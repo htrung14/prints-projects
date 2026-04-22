@@ -14,7 +14,8 @@ import { after, NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { verifyDispatchToken } from "@/lib/dispatch/token";
 import { updateOrderTracking } from "@/lib/dispatch/queries";
-import { getOrderById, updateOrderStatus } from "@/lib/supabase/queries/orders";
+import { getOrderById } from "@/lib/supabase/queries/orders";
+import { serverClient } from "@/lib/supabase/server";
 import { audit } from "@/lib/supabase/queries/audit";
 import { sendShippedNotification } from "@/lib/email/send";
 import { getDispatcher } from "@/lib/alerting/dispatcher";
@@ -75,11 +76,8 @@ export async function POST(req: NextRequest) {
         failed.push({ orderId: upd.orderId, error: "Link revoked." });
         continue;
       }
-      // Idempotency: if this order is already in a terminal shipped
-      // state, treat the resubmit as a no-op success so a double-click
-      // (or a rapid retry from Michael) doesn't generate a second
-      // shipped-notification email + second audit row. Re-sending the
-      // tracking notification from here is not desired.
+      // Idempotency pass 1 (read side): short-circuit early if we can
+      // see the order is already shipped/delivered. Cheap.
       if (order.status === "shipped" || order.status === "delivered") {
         succeeded.push(upd.orderId);
         continue;
@@ -90,11 +88,61 @@ export async function POST(req: NextRequest) {
         carrier: upd.carrier,
         notes: upd.notes ?? null,
       });
-      await updateOrderStatus(upd.orderId, "shipped", {
-        trackingNumber: upd.trackingNumber,
-        carrier: upd.carrier,
-        actor: "dispatch_batch",
-      });
+
+      // Idempotency pass 2 (write side): conditional UPDATE that only
+      // transitions to 'shipped' when the row is still in an earlier
+      // state. If two concurrent submissions race, the second one's
+      // affected-row count will be 0 and we short-circuit as a no-op
+      // success — preventing a double shipped-notification email.
+      const db = serverClient();
+      const { data: flipped, error: flipErr } = await db
+        .from("orders")
+        .update({ status: "shipped" })
+        .eq("id", upd.orderId)
+        .in("status", ["paid", "queued_for_print", "sent_to_print", "printed"])
+        .select("id");
+      if (flipErr) {
+        throw new Error(`conditional status flip failed: ${flipErr.message}`);
+      }
+      if (!flipped || flipped.length === 0) {
+        // Another submission beat us to it. Tracking is written, status
+        // is already shipped — treat as idempotent success.
+        succeeded.push(upd.orderId);
+        continue;
+      }
+      // Mirror the status_change audit row that updateOrderStatus would
+      // have written (kept in sync with its semantics).
+      try {
+        await audit({
+          orderId: upd.orderId,
+          actor: "system",
+          action: "status_change",
+          meta: {
+            trackingNumber: upd.trackingNumber,
+            carrier: upd.carrier,
+            actor: "dispatch_batch",
+            status: "shipped",
+          },
+        });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`dispatch/batch: status_change audit failure for ${upd.orderId}:`, err);
+        after(() => {
+          getDispatcher()
+            .send(
+              systemErrorAlert(
+                `POST /api/dispatch/batch status_change audit ${upd.orderId} (non-blocking)`,
+                msg
+              )
+            )
+            .catch((alertErr) => {
+              console.error(
+                `dispatch/batch(${upd.orderId}): audit-alert dispatch failed:`,
+                alertErr
+              );
+            });
+        });
+      }
 
       // Best-effort email + audit; don't flip a succeeded item to failed if
       // email or audit hiccups. Customer will still see the shipped status

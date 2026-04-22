@@ -24,7 +24,7 @@ import { stripeClient } from "./client";
 import { insertOrderWithItems, insertRefundedStub } from "@/lib/supabase/queries/orders";
 import { getPhotoIdMapBySlugs } from "@/lib/supabase/queries/photos";
 import { audit } from "@/lib/supabase/queries/audit";
-import { sendAndAlert, sendOrderConfirmation, sendRefundedNotification } from "@/lib/email/send";
+import { sendOrderConfirmation, sendRefundedNotification } from "@/lib/email/send";
 import { buildDispatchUrl } from "@/lib/dispatch/url";
 import { alertAfterOrder } from "@/lib/alerting/webhook-alerts";
 import { alertSafely, alertSystemError } from "@/lib/alerting/dispatcher";
@@ -479,45 +479,98 @@ async function handleChargeRefunded(charge: Stripe.Charge): Promise<void> {
   }
 
   const db = await import("@/lib/supabase/server").then((m) => m.serverClient());
-  const { data } = await db
+  const { data, error: lookupErr } = await db
     .from("orders")
     .select("id, status")
     .eq("stripe_payment_intent_id", piId)
     .maybeSingle();
 
+  // A Supabase-side error here (timeout, 5xx, schema problem) previously
+  // left `data` undefined and fell through to the "no matching order"
+  // branch — a misleading alert. Surface the real error and re-throw so
+  // Stripe retries the delivery.
+  if (lookupErr) {
+    const msg = `charge.refunded DB lookup failed for PI ${piId}: ${lookupErr.message}`;
+    console.error(`webhook: ${msg}`);
+    Sentry.captureException(lookupErr, {
+      tags: { pipeline: "stripe-webhook:charge.refunded:db-lookup" },
+      extra: { paymentIntentId: piId, chargeId: charge.id },
+    });
+    await alertSystemError(`charge.refunded (PI ${piId}) DB lookup`, msg);
+    throw new Error(msg);
+  }
+
   if (!data) {
-    console.info(`webhook: charge.refunded for PI ${piId} — no matching order found`);
-    await alertSystemError(
-      `charge.refunded (PI ${piId})`,
-      `Refund issued in Stripe for payment intent ${piId} but no matching order found in database. Possible data drift — investigate.`
-    );
+    // Refund-before-session race: charge.refunded can arrive before the
+    // corresponding checkout.session.completed has been processed. Try
+    // to persist a refunded stub so /admin/orders has visibility — ops
+    // doesn't end up in "Stripe has it, our DB doesn't" drift.
+    await handleRefundWithoutMatchingOrder(charge, piId);
     return;
   }
 
-  if (data.status === "refunded") return;
-
   const ordersModule = await import("@/lib/supabase/queries/orders");
-  await ordersModule.updateOrderStatus(data.id, "refunded", {
-    trigger: "stripe_charge.refunded",
-    chargeId: charge.id,
-  });
 
-  // Fetch the full order so the customer email has customer_email, name,
-  // total, etc. — updateOrderStatus is void-returning.
-  const fullOrder = await ordersModule.getOrderById(data.id);
-  if (fullOrder) {
-    // sendAndAlert captures + alerts any Resend failure but never throws
-    // back into the dispatcher (Stripe would otherwise retry this event
-    // on every email hiccup).
-    await sendAndAlert("refunded", fullOrder.id, () => sendRefundedNotification(fullOrder));
+  // IMPORTANT: do NOT early-return on `data.status === "refunded"`. That
+  // used to be a retry trap — if the Resend call failed on the first
+  // attempt (throw from sendAndAlert → 500 → Stripe retries), the retry
+  // would see status='refunded' and skip email forever.
+  //
+  // Instead: only skip the status flip when it's already refunded, but
+  // always attempt the email if we haven't successfully sent one yet.
+  // Idempotency for the email itself is handled by checking the audit
+  // log for a prior "refund_email_sent" row below.
+  if (data.status !== "refunded") {
+    await ordersModule.updateOrderStatus(data.id, "refunded", {
+      trigger: "stripe_charge.refunded",
+      chargeId: charge.id,
+    });
+  }
+
+  // Don't double-send the refund email on Stripe retries. Check the
+  // audit log for a prior send.
+  const auditMod = await import("@/lib/supabase/queries/audit");
+  const alreadySent = await hasPriorRefundEmail(data.id);
+  if (alreadySent) {
+    console.info(
+      `webhook(${data.id}): refund email already sent previously — skipping re-send on retry.`
+    );
   } else {
-    console.warn(
-      `webhook(${data.id}): order lookup returned null after status flip; refund email NOT sent.`
-    );
-    await alertSystemError(
-      `refund email skipped (order ${data.id})`,
-      `Order ${data.id} flipped to 'refunded' but a follow-up getOrderById returned null. Refund email was not sent. Reconcile manually.`
-    );
+    const fullOrder = await ordersModule.getOrderById(data.id);
+    if (fullOrder) {
+      // Wrap in try/catch so a Resend hiccup does NOT throw back into
+      // Stripe's retry loop (that was the old retry trap). On failure
+      // we alert ops and move on — the `refund_email_sent` audit row is
+      // only written on success, so a future retry will try again.
+      try {
+        await sendRefundedNotification(fullOrder);
+        await auditMod.audit({
+          orderId: fullOrder.id,
+          actor: "stripe_webhook",
+          action: "refund_email_sent",
+          meta: { chargeId: charge.id, paymentIntentId: piId },
+        });
+      } catch (sendErr) {
+        const msg = sendErr instanceof Error ? sendErr.message : String(sendErr);
+        console.error(`webhook(${fullOrder.id}): refund email send failed: ${msg}`);
+        Sentry.captureException(sendErr, {
+          tags: { pipeline: "stripe-webhook:refund-email" },
+          extra: { orderId: fullOrder.id, chargeId: charge.id },
+        });
+        await alertSystemError(
+          `refund email send failed (order ${fullOrder.id})`,
+          `Order status is 'refunded' but the customer email failed to send: ${msg}. Resend manually from /admin/orders or via Stripe's "Send receipt" button. A future Stripe retry will also reattempt this send (no audit row written yet).`
+        );
+      }
+    } else {
+      console.warn(
+        `webhook(${data.id}): order lookup returned null after status flip; refund email NOT sent.`
+      );
+      await alertSystemError(
+        `refund email skipped (order ${data.id})`,
+        `Order ${data.id} flipped to 'refunded' but a follow-up getOrderById returned null. Refund email was not sent. Reconcile manually.`
+      );
+    }
   }
 
   // Don't rethrow — we already updated the order status above, so a dispatcher
@@ -534,6 +587,151 @@ async function handleChargeRefunded(charge: Stripe.Charge): Promise<void> {
     timestamp: new Date().toISOString(),
     metadata: { orderId: data.id, chargeId: charge.id, paymentIntentId: piId },
   });
+}
+
+/**
+ * Check whether a `refund_email_sent` audit row exists for the given order.
+ * Used to avoid re-sending the refund email when Stripe replays a
+ * charge.refunded event we've already fully handled.
+ */
+async function hasPriorRefundEmail(orderId: string): Promise<boolean> {
+  try {
+    const db = await import("@/lib/supabase/server").then((m) => m.serverClient());
+    const { data, error } = await db
+      .from("audit_log")
+      .select("id")
+      .eq("order_id", orderId)
+      .eq("action", "refund_email_sent")
+      .limit(1)
+      .maybeSingle();
+    if (error) {
+      // Fail-open: if the audit check errors, we'd rather risk a duplicate
+      // email than no email at all. Surface the issue so ops sees it
+      // even though we don't block the caller.
+      console.warn(`hasPriorRefundEmail(${orderId}) query failed: ${error.message}`);
+      Sentry.captureException(error, {
+        tags: { pipeline: "stripe-webhook:hasPriorRefundEmail" },
+        extra: { orderId },
+      });
+      return false;
+    }
+    return Boolean(data);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`hasPriorRefundEmail(${orderId}) threw: ${msg}`);
+    Sentry.captureException(err, {
+      tags: { pipeline: "stripe-webhook:hasPriorRefundEmail" },
+      extra: { orderId },
+    });
+    return false;
+  }
+}
+
+/**
+ * charge.refunded arrived but no matching order exists in our DB yet —
+ * either the session.completed event is still in flight or was lost.
+ * Try to fetch the Stripe Checkout Session via the PaymentIntent and
+ * persist a refunded stub so ops has admin-UI visibility; fall back to
+ * a detailed alert if the session can't be retrieved.
+ */
+async function handleRefundWithoutMatchingOrder(
+  charge: Stripe.Charge,
+  piId: string
+): Promise<void> {
+  const stripe = stripeClient();
+  let sessionList;
+  try {
+    sessionList = await stripe.checkout.sessions.list({ payment_intent: piId, limit: 1 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`webhook: charge.refunded session lookup failed for PI ${piId}: ${msg}`);
+    Sentry.captureException(err, {
+      tags: { pipeline: "stripe-webhook:charge.refunded:session-lookup" },
+      extra: { paymentIntentId: piId, chargeId: charge.id },
+    });
+    await alertSystemError(
+      `charge.refunded (PI ${piId})`,
+      `Refund issued in Stripe for PI ${piId} but no matching order in DB, and the session lookup to create a refunded stub also failed: ${msg}. Reconcile via Stripe Dashboard.`
+    );
+    return;
+  }
+  const session = sessionList.data[0] ?? null;
+  if (!session) {
+    await alertSystemError(
+      `charge.refunded (PI ${piId})`,
+      `Refund issued in Stripe for PI ${piId} but no matching order in DB and no Checkout Session associated with this PaymentIntent. Reconcile manually.`
+    );
+    return;
+  }
+
+  // Best-effort derive the stub row fields. Fall back to charge/billing
+  // data when the session is missing pieces (guest checkouts sometimes
+  // have partial customer details).
+  let address: Address;
+  try {
+    address = extractShippingAddress(session);
+  } catch {
+    // Fall back to the charge's shipping or billing address when the
+    // session didn't carry one (shouldn't happen for US-only checkouts
+    // with shipping_address_collection, but guard anyway).
+    const fallback = charge.shipping?.address ?? charge.billing_details?.address ?? null;
+    if (!fallback || !fallback.line1) {
+      await alertSystemError(
+        `charge.refunded (PI ${piId})`,
+        `Refund for PI ${piId} has no matching order and no usable shipping address. A refunded stub cannot be created. Reconcile manually.`
+      );
+      return;
+    }
+    address = {
+      name: charge.shipping?.name ?? charge.billing_details?.name ?? "Unknown",
+      line1: fallback.line1,
+      line2: fallback.line2 ?? null,
+      city: fallback.city ?? "",
+      state: fallback.state ?? null,
+      postalCode: fallback.postal_code ?? "",
+      country: fallback.country ?? "",
+    };
+  }
+
+  const email =
+    session.customer_details?.email ??
+    session.customer_email ??
+    charge.billing_details?.email ??
+    "unknown@example.invalid";
+  const name = session.customer_details?.name ?? charge.billing_details?.name ?? address.name;
+  const notes = `charge.refunded arrived before checkout.session.completed (or session was never processed). stub inserted so ops has visibility. chargeId=${charge.id}.`;
+
+  try {
+    const ordersModule = await import("@/lib/supabase/queries/orders");
+    const { order: stub } = await ordersModule.insertRefundedStub({
+      stripeSessionId: session.id,
+      stripePaymentIntentId: piId,
+      customerEmail: email,
+      customerName: name,
+      shippingAddress: address,
+      subtotalCents: Math.max(0, session.amount_subtotal ?? 0),
+      taxCents: session.total_details?.amount_tax ?? 0,
+      shippingCents: session.total_details?.amount_shipping ?? 0,
+      totalCents: session.amount_total ?? 0,
+      currency: session.currency ?? "usd",
+      notes,
+    });
+    await alertSystemError(
+      `charge.refunded stub (order ${stub.id})`,
+      `Stripe refund for PI ${piId} arrived before the corresponding order existed in our DB. Inserted a refunded stub (order ${stub.id}) with status=refunded. No customer email sent from this path — if one was expected, send manually.`
+    );
+  } catch (stubErr) {
+    const msg = stubErr instanceof Error ? stubErr.message : String(stubErr);
+    console.error(`webhook: refunded-stub insert failed for session ${session.id}: ${msg}`);
+    Sentry.captureException(stubErr, {
+      tags: { pipeline: "stripe-webhook:charge.refunded:stub" },
+      extra: { sessionId: session.id, paymentIntentId: piId, chargeId: charge.id },
+    });
+    await alertSystemError(
+      `charge.refunded stub insert (session ${session.id})`,
+      `Refund for PI ${piId} has no matching order and a stub insert ALSO failed: ${msg}. Reconcile manually.`
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
