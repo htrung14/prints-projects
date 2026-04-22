@@ -207,7 +207,7 @@ function generateFulfillmentToken(): string {
 
 export async function insertOrderWithItems(
   args: InsertOrderArgs
-): Promise<{ order: Order; items: OrderItem[] }> {
+): Promise<{ order: Order; items: OrderItem[]; wasExisting: boolean }> {
   if (args.items.length === 0) {
     throw new Error("insertOrderWithItems: items must be non-empty");
   }
@@ -215,6 +215,11 @@ export async function insertOrderWithItems(
   const db = serverClient();
 
   // Idempotency: if an order already exists for this session, return it
+  // with wasExisting=true so the caller can skip non-idempotent side
+  // effects (customer confirmation email, post-purchase schedule, audit
+  // of the "paid" event). Without this flag a Stripe event replay — which
+  // happens routinely when a delivery retry lands after a manual Resend —
+  // fires the order-confirmation email to the customer twice.
   const { data: existing } = await db
     .from("orders")
     .select(ORDER_COLUMNS)
@@ -231,6 +236,7 @@ export async function insertOrderWithItems(
     return {
       order: rowToOrder(existing as OrderRow),
       items: (existingItems ?? []).map((i) => rowToOrderItem(i as OrderItemRow)),
+      wasExisting: true,
     };
   }
 
@@ -284,7 +290,7 @@ export async function insertOrderWithItems(
   const order = rowToOrder(obj.order as OrderRow);
   const items = obj.items.map((i) => rowToOrderItem(i as OrderItemRow));
 
-  return { order, items };
+  return { order, items, wasExisting: false };
 }
 
 // ---------------------------------------------------------------------------
@@ -538,10 +544,17 @@ export async function updateOrderStatus(
   });
   if (logErr) {
     // We intentionally don't throw here: the status change already succeeded
-    // and the webhook path must remain idempotent-friendly. Surface via log.
-    console.error(
-      `updateOrderStatus(${id}): audit log insert failed (${logErr.message}); continuing`
-    );
+    // and the webhook path must remain idempotent-friendly. BUT — per the
+    // no-silent-failures rule, a lost audit row is operationally important
+    // (the order just changed state without a trail). Log + alert so ops
+    // notices, without failing the caller.
+    const msg = `updateOrderStatus(${id}): audit log insert failed (${logErr.message}); status change already applied`;
+    console.error(msg);
+    try {
+      await alertSystemError(`updateOrderStatus audit (order ${id})`, msg);
+    } catch (alertErr) {
+      console.error(`updateOrderStatus(${id}): alert dispatch failed:`, alertErr);
+    }
   }
 }
 

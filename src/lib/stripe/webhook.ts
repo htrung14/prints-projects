@@ -249,8 +249,13 @@ export async function handleCheckoutSessionCompleted(
   // (e.g. picked "United States — $10" then shipped to Canada, or picked
   // "EU — $50" then shipped to Australia). Advisory only — the order still
   // persists; ops holds the shipment and collects the difference.
+  //
+  // Test-mode carts (only `test-1-dollar` slug) intentionally skip shipping
+  // collection in checkout.ts, so shippingCents=0 is expected. Skip the
+  // guard for them to avoid a false-positive ops alert on every $1 test.
+  const isTestCart = resolved.length > 0 && resolved.every((r) => r.photo.slug === "test-1-dollar");
   const expected = expectedShippingCentsFor(address.country);
-  if (shippingCents < expected) {
+  if (!isTestCart && shippingCents < expected) {
     const shortfall = expected - shippingCents;
     const msg =
       `Order ${session.id}: shipping country ${address.country} expects ${expected}¢ ` +
@@ -290,7 +295,7 @@ export async function handleCheckoutSessionCompleted(
     }
   }
 
-  let inserted: { order: Order; items: OrderItem[] };
+  let inserted: { order: Order; items: OrderItem[]; wasExisting: boolean };
   try {
     inserted = await insertOrderWithItems({
       stripeSessionId: session.id,
@@ -339,6 +344,19 @@ export async function handleCheckoutSessionCompleted(
     // Anything else (bad payload, RPC error) bubbles up so the route
     // returns 500 and Stripe retries.
     throw err;
+  }
+
+  // If `insertOrderWithItems` returned an already-existing order, the
+  // caller is processing a Stripe replay for an event we've already
+  // fully handled. Skip side-effects (emails, post-purchase, audit)
+  // to avoid double-sending the customer confirmation. Observed in
+  // the 2026-04-22 incident: order a16a5611 got 2 "paid" audit rows
+  // and Mizar received 2 confirmation emails.
+  if (inserted.wasExisting) {
+    console.info(
+      `webhook: session ${session.id} replayed — order ${inserted.order.id} already persisted; skipping side-effects`
+    );
+    return { idempotent: true };
   }
 
   const { order, items } = inserted;

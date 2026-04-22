@@ -75,6 +75,15 @@ export async function POST(req: NextRequest) {
         failed.push({ orderId: upd.orderId, error: "Link revoked." });
         continue;
       }
+      // Idempotency: if this order is already in a terminal shipped
+      // state, treat the resubmit as a no-op success so a double-click
+      // (or a rapid retry from Michael) doesn't generate a second
+      // shipped-notification email + second audit row. Re-sending the
+      // tracking notification from here is not desired.
+      if (order.status === "shipped" || order.status === "delivered") {
+        succeeded.push(upd.orderId);
+        continue;
+      }
 
       await updateOrderTracking(upd.orderId, {
         trackingNumber: upd.trackingNumber,
