@@ -9,6 +9,11 @@ Sentry.init({
   replaysSessionSampleRate: 0.0,
   replaysOnErrorSampleRate: 1.0,
   integrations: [Sentry.replayIntegration()],
+  beforeSend(event) {
+    const msg = event.exception?.values?.[0]?.value ?? "";
+    if (msg.includes("__firefox__")) return null;
+    return event;
+  },
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
