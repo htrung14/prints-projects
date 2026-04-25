@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { getAllPhotos } from "@/lib/photos";
+import { useSaved } from "@/hooks/useSaved";
 import { formatUsd, priceCents } from "@/lib/pricing";
 import type { PaperType } from "@/lib/types";
 
@@ -11,8 +12,15 @@ const ENTER_MS = 260;
 const EXIT_MS = 200;
 
 export default function CartDrawer() {
-  const { lines, drawerOpen, closeDrawer, remove, subtotalCents } = useCart();
+  const { lines, drawerOpen, closeDrawer, remove, add, subtotalCents } = useCart();
   const photos = getAllPhotos();
+  const { savedSlugs, toggleSave } = useSaved();
+
+  const cartSlugs = new Set(lines.map((l) => l.photoSlug));
+  const savedPhotos = savedSlugs
+    .filter((slug) => !cartSlugs.has(slug))
+    .map((slug) => photos.find((p) => p.slug === slug))
+    .filter((p): p is NonNullable<typeof p> => p != null && p.isPublished !== false);
 
   // `mounted` controls DOM presence; `visible` controls transform/opacity.
   // When drawerOpen flips false we set visible=false and keep the node
@@ -139,6 +147,44 @@ export default function CartDrawer() {
               );
             })}
           </ul>
+        )}
+
+        {savedPhotos.length > 0 && (
+          <div className="border-t border-ink-line pt-4">
+            <span className="text-[11px] tracking-[0.08em] uppercase text-ink-faint">Saved</span>
+            <ul className="mt-2 flex flex-col gap-2">
+              {savedPhotos.map((photo) => (
+                <li key={photo.slug} className="flex items-center gap-3">
+                  <img
+                    src={photo.imageUrl}
+                    alt={photo.imageAlt}
+                    className="h-12 w-12 object-cover"
+                  />
+                  <span
+                    className="flex-1 font-serif italic text-ink-strong"
+                    style={{ fontSize: 13, fontWeight: 500 }}
+                  >
+                    {photo.title}
+                  </span>
+                  <button
+                    onClick={() => {
+                      add({
+                        photoSlug: photo.slug,
+                        sizeId: photo.sizes[0].id,
+                        paperId: photo.papers[0].id as PaperType,
+                        quantity: 1,
+                      });
+                      toggleSave(photo.slug);
+                    }}
+                    className="text-ink underline"
+                    style={{ fontSize: 12 }}
+                  >
+                    Add to cart
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         <div className="mt-4 border-t border-ink-line pt-4">

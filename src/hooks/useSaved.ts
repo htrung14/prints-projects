@@ -16,9 +16,11 @@ function read(): string[] {
 }
 
 export function useSaved() {
-  const [savedSlugs, setSavedSlugs] = useState<string[]>(read);
+  const [savedSlugs, setSavedSlugs] = useState<string[]>([]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSavedSlugs(read());
     const onStorage = (e: StorageEvent) => {
       if (e.key === KEY) setSavedSlugs(read());
     };
