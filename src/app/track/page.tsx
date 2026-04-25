@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { REF_PATTERN } from "@/lib/orderRef";
+
+export const metadata: Metadata = {
+  title: "Track Your Order - At-Tamassok",
+  description: "Look up your print order status by email or reference number.",
+};
 import { getOrderByRefPrefix, getOrdersByEmail } from "@/lib/supabase/queries/orders";
 import type { Order, OrderStatus } from "@/lib/types";
 import TrackForm from "./TrackForm";

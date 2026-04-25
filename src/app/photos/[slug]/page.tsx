@@ -24,7 +24,15 @@ export async function generateMetadata({
   if (photo.isPublished === false) {
     return { robots: { index: false, follow: false } };
   }
-  return {};
+  return {
+    title: `${photo.title} - At-Tamassok`,
+    description: photo.description[0] ?? "Archival pigment print, limited edition.",
+    openGraph: {
+      title: photo.title,
+      description: photo.description[0] ?? "Archival pigment print, limited edition.",
+      images: [{ url: photo.imageUrl, alt: photo.imageAlt }],
+    },
+  };
 }
 
 export default async function PhotoPage({ params }: { params: Promise<{ slug: string }> }) {

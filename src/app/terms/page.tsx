@@ -28,7 +28,7 @@ export default function TermsPage() {
           </a>
         </div>
 
-        <Section id="shipping" n={1} heading="Shipping &amp; Delivery">
+        <Section id="shipping" n={1} heading="Shipping & Delivery">
           <p>
             <strong>Production lead time.</strong> Prints are made to order. Expected total delivery
             time: 2–3 weeks within the United States, 3–5 weeks internationally. An order
@@ -61,7 +61,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section id="returns" n={2} heading="Refunds &amp; Returns">
+        <Section id="returns" n={2} heading="Refunds & Returns">
           <p>
             Each print is made to order and all sales are final. If your print arrives damaged,
             contact us within 14 days with a clear photo showing the damage alongside the sealed,
@@ -170,8 +170,9 @@ function Section({
         <h2
           className="mb-6 text-ink-strong"
           style={{ fontSize: "28px", lineHeight: 1.1, letterSpacing: "-0.01em" }}
-          dangerouslySetInnerHTML={{ __html: heading }}
-        />
+        >
+          {heading}
+        </h2>
         <div className="space-y-4 text-sm leading-relaxed">{children}</div>
       </div>
     </section>

@@ -10,9 +10,7 @@
  * Row links to the detail page via the stretched-link pattern (pseudo-element
  * over the <tr>). See the <Link> on the ID cell.
  *
- * TODO: pagination — the page currently renders every matching order. With
- * weekly batches this will eventually blow past a screen; add `.range()` +
- * page-number links once the list gets long enough to matter.
+ * Paginated: 25 orders per page, controlled via `?page=N` query param.
  */
 
 import Link from "next/link";
@@ -162,6 +160,14 @@ function parseDate(raw: string | string[] | undefined): string | null {
   return raw;
 }
 
+const PAGE_SIZE = 25;
+
+function parsePage(raw: string | string[] | undefined): number {
+  if (typeof raw !== "string") return 1;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && n >= 1 ? n : 1;
+}
+
 function parseQ(raw: string | string[] | undefined): string | null {
   if (typeof raw !== "string") return null;
   const trimmed = raw.trim();
@@ -197,7 +203,7 @@ function formatDate(iso: string): string {
 // a FilterError sentinel so the caller can render an inline banner rather
 // than crashing the page.
 type FilterError = { kind: "error"; message: string };
-type FilteredOrders = { kind: "ok"; orders: Order[] };
+type FilteredOrders = { kind: "ok"; orders: Order[]; total: number };
 
 const ORDER_COLUMNS =
   "id, created_at, stripe_checkout_session_id, stripe_payment_intent_id, customer_email, customer_name, shipping_address, subtotal_cents, tax_cents, shipping_cents, total_cents, currency, status, fulfillment_token, fulfillment_token_revoked_at, print_job_email_sent_at, tracking_number, carrier, notes";
@@ -210,9 +216,16 @@ async function fetchFilteredOrders(params: {
   q: string | null;
   from: string | null;
   to: string | null;
+  page: number;
 }): Promise<FilteredOrders | FilterError> {
   const db = serverClient();
-  let query = db.from("orders").select(ORDER_COLUMNS).order("created_at", { ascending: false });
+  const start = (params.page - 1) * PAGE_SIZE;
+  const end = start + PAGE_SIZE - 1;
+  let query = db
+    .from("orders")
+    .select(ORDER_COLUMNS, { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(start, end);
 
   if (params.inPrintBucket) {
     query = query.in("status", IN_PRINT_STATUSES);
@@ -271,7 +284,7 @@ async function fetchFilteredOrders(params: {
     query = query.or(clauses.join(","));
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
   if (error) {
     const msg = `listOrders (filtered) failed: ${error.message}`;
     console.error(`[admin/orders] ${msg}`);
@@ -341,7 +354,7 @@ async function fetchFilteredOrders(params: {
     }
   }
 
-  return { kind: "ok", orders };
+  return { kind: "ok", orders, total: count ?? orders.length };
 }
 
 function parseAddressLoose(raw: unknown): Address {
@@ -401,6 +414,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
   const qTerm = parseQ(q.q);
   const from = parseDate(q.from);
   const to = parseDate(q.to);
+  const page = parsePage(q.page);
   const inPrintBucket = status !== null && IN_PRINT_STATUSES.includes(status);
 
   // Guard against `from > to` — silently returning zero rows is a worse UX
@@ -420,12 +434,17 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
       q: qTerm,
       from: effectiveFrom,
       to: effectiveTo,
+      page,
     }),
     listOrders({ status: "paid" }),
   ]);
 
   const orders = filtered.kind === "ok" ? filtered.orders : [];
   const filterError = filtered.kind === "error" ? filtered.message : null;
+  const totalOrders = filtered.kind === "ok" ? filtered.total : 0;
+  const totalPages = Math.max(1, Math.ceil(totalOrders / PAGE_SIZE));
+  const hasPrev = page > 1;
+  const hasNext = page < totalPages;
 
   const paidItemCounts = await countItemsByOrder(paidOrders.map((o) => o.id));
   const paidPreview = toPreview(paidOrders, paidItemCounts);
@@ -438,7 +457,9 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
     <section className="flex flex-col gap-6">
       <header className="flex items-baseline justify-between">
         <h1 className="h-display">Orders</h1>
-        <span className="text-sm text-ink-faint">{orders.length} shown</span>
+        <span className="text-sm text-ink-faint">
+          {totalOrders} total · page {page} of {totalPages}
+        </span>
       </header>
 
       {filterError && (
@@ -623,8 +644,54 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
           </table>
         </div>
       )}
+
+      {totalPages > 1 && (
+        <nav className="flex items-center justify-between border-t border-ink-line pt-4 text-sm">
+          {hasPrev ? (
+            <Link
+              href={paginationHref(page - 1, activeKey, qTerm, effectiveFrom, effectiveTo)}
+              className="text-ink-strong underline underline-offset-4 hover:text-ink-faint"
+            >
+              Previous
+            </Link>
+          ) : (
+            <span className="text-ink-faint">Previous</span>
+          )}
+          <span className="text-ink-faint">
+            Page {page} of {totalPages}
+          </span>
+          {hasNext ? (
+            <Link
+              href={paginationHref(page + 1, activeKey, qTerm, effectiveFrom, effectiveTo)}
+              className="text-ink-strong underline underline-offset-4 hover:text-ink-faint"
+            >
+              Next
+            </Link>
+          ) : (
+            <span className="text-ink-faint">Next</span>
+          )}
+        </nav>
+      )}
     </section>
   );
+}
+
+function paginationHref(
+  p: number,
+  filterKey: FilterKey,
+  q: string | null,
+  from: string | null,
+  to: string | null
+): string {
+  const params = new URLSearchParams();
+  if (p > 1) params.set("page", String(p));
+  if (filterKey !== "all")
+    params.set("status", filterKey === "in_print" ? "queued_for_print" : filterKey);
+  if (q) params.set("q", q);
+  if (from) params.set("from", from);
+  if (to) params.set("to", to);
+  const qs = params.toString();
+  return qs ? `/admin/orders?${qs}` : "/admin/orders";
 }
 
 function Th({ children, className }: { children: React.ReactNode; className?: string }) {

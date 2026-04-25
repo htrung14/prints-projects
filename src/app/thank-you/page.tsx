@@ -6,8 +6,14 @@
  * source of truth for fulfillment — this is display only.
  */
 
+import type { Metadata } from "next";
 import Link from "next/link";
 import { stripeClient } from "@/lib/stripe/client";
+
+export const metadata: Metadata = {
+  title: "Order Confirmed - At-Tamassok",
+  robots: { index: false, follow: false },
+};
 import { getOrderBySessionId } from "@/lib/supabase/queries/orders";
 import ClearCart from "./ClearCart";
 import TrackPurchase from "./TrackPurchase";

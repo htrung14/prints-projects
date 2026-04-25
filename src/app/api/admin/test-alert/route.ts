@@ -3,12 +3,13 @@ import { triageAlert } from "@/lib/alerting/triage";
 import { createTelegramChannel } from "@/lib/alerting/channels/telegram";
 import { createEmailChannel } from "@/lib/alerting/channels/email";
 import { getResend } from "@/lib/email/client";
+import { getAdminSession } from "@/lib/auth/session";
 
 const ALERT_FROM = "alerts@thaliabassim.com";
 
-export async function POST(req: Request) {
-  const secret = req.headers.get("x-admin-secret");
-  if (!secret || secret !== process.env.DISPATCH_SIGNING_SECRET) {
+export async function POST() {
+  const session = await getAdminSession();
+  if (!session) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

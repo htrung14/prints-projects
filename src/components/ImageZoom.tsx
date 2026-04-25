@@ -47,6 +47,12 @@ export function ImageZoom({ src, alt }: Props) {
         onMouseLeave={() => setHovering(false)}
         onMouseMove={handleMove}
         onClick={() => setFullscreen(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setFullscreen(true);
+          }
+        }}
         role="button"
         tabIndex={0}
         aria-label="Zoom image"

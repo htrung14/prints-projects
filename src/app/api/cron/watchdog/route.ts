@@ -64,7 +64,7 @@ export async function GET(req: NextRequest): Promise<Response> {
     }
     return new Response("Misconfigured", { status: 500 });
   }
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return new Response("Unauthorized", { status: 401 });
   }
 
