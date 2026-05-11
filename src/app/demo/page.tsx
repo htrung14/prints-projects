@@ -33,6 +33,21 @@ export default function DemoPage() {
       className="min-h-screen"
     >
       <div className="mx-auto max-w-4xl px-6 py-12 md:px-10 md:py-20">
+        <div
+          style={{
+            background: "rgba(21,41,219,0.07)",
+            border: "1px solid rgba(21,41,219,0.25)",
+            padding: "12px 18px",
+            fontSize: 13,
+            color: "rgba(21,41,219,0.9)",
+            lineHeight: 1.5,
+            marginBottom: 32,
+          }}
+        >
+          <strong>This is a demo.</strong> All order data is fake. No database reads or writes
+          occur. Emails are not sent. Stripe is not involved.
+        </div>
+
         <header className="flex flex-col gap-3 border-b border-ink-line pb-10">
           <Link
             href="/"
@@ -51,8 +66,15 @@ export default function DemoPage() {
             Backend demo
           </h1>
           <p style={{ maxWidth: "56ch", fontSize: 17, lineHeight: 1.6, color: "rgba(0,0,0,0.6)" }}>
-            Live production codebase — fake order data. Interactions POST to mock API endpoints that
-            return success without touching the database or sending real emails.
+            Live production codebase with hardcoded fake orders. Shows the printer dispatch,
+            fulfillment, and admin interfaces that run behind{" "}
+            <a
+              href="https://www.thaliabassim.com"
+              style={{ color: "inherit", textDecoration: "underline" }}
+            >
+              www.thaliabassim.com
+            </a>
+            .
           </p>
         </header>
 

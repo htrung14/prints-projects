@@ -208,16 +208,22 @@ function DemoBanner() {
   return (
     <div
       style={{
-        background: "rgba(21,41,219,0.06)",
-        border: "1px solid rgba(21,41,219,0.2)",
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
+        background: "rgba(21,41,219,0.07)",
+        borderBottom: "1px solid rgba(21,41,219,0.25)",
         padding: "10px 16px",
         fontSize: 13,
-        color: "rgba(21,41,219,0.85)",
+        color: "rgba(21,41,219,0.9)",
         lineHeight: 1.5,
       }}
     >
-      <strong>Demo mode</strong> — fake metrics and audit log. In production this page requires
-      admin magic-link auth and reads live from Supabase.
+      <strong>Demo — no real data.</strong> Fake metrics and audit log. In production this page
+      requires admin magic-link auth and reads live from Supabase.{" "}
+      <a href="/demo" style={{ color: "inherit", textDecoration: "underline" }}>
+        Back to demo index →
+      </a>
     </div>
   );
 }
