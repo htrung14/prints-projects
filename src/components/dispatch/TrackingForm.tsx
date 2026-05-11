@@ -20,6 +20,7 @@ type Props = {
   initialTrackingNumber: string | null;
   initialNotes: string | null;
   submittedAt: string | null;
+  endpoint?: string;
 };
 
 export function TrackingForm({
@@ -29,6 +30,7 @@ export function TrackingForm({
   initialTrackingNumber,
   initialNotes,
   submittedAt,
+  endpoint,
 }: Props) {
   const [carrier, setCarrier] = useState<Carrier>(
     isCarrier(initialCarrier) ? initialCarrier : "USPS"
@@ -48,7 +50,7 @@ export function TrackingForm({
     }
     setStatus({ kind: "pending" });
     try {
-      const res = await fetch(`/api/dispatch/${orderId}/status`, {
+      const res = await fetch(endpoint ?? `/api/dispatch/${orderId}/status`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({

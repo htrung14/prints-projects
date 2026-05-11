@@ -47,6 +47,7 @@ type RowState = {
 type Props = {
   token: string;
   rows: Row[];
+  endpoint?: string;
 };
 
 function initialRowState(row: Row): RowState {
@@ -59,7 +60,7 @@ function initialRowState(row: Row): RowState {
   };
 }
 
-export function BatchTrackingTable({ token, rows }: Props) {
+export function BatchTrackingTable({ token, rows, endpoint }: Props) {
   const [state, setState] = useState<Record<string, RowState>>(() =>
     Object.fromEntries(rows.map((r) => [r.orderId, initialRowState(r)]))
   );
@@ -100,7 +101,7 @@ export function BatchTrackingTable({ token, rows }: Props) {
     setSubmitting(true);
     setBanner({ kind: "idle" });
     try {
-      const res = await fetch("/api/dispatch/batch", {
+      const res = await fetch(endpoint ?? "/api/dispatch/batch", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ token, updates }),

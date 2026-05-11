@@ -4,6 +4,9 @@ A boutique print shop for a Brooklyn, NY photographer. Limited-edition archival 
 
 **Live at [www.thaliabassim.com](https://www.thaliabassim.com)**
 
+**Backend demo (no login required): [www.thaliabassim.com/demo](https://www.thaliabassim.com/demo)**
+— printer batch dispatch, single order fulfillment, admin dashboard. Fake data, mock API.
+
 ---
 
 ## Stack
