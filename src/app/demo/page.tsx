@@ -85,16 +85,7 @@ export default function DemoPage() {
                 href={v.href}
                 style={{ textDecoration: "none", color: "inherit", display: "block" }}
               >
-                <div
-                  className="border border-ink-line p-6 transition-colors"
-                  style={{ cursor: "pointer" }}
-                  onMouseEnter={(e) =>
-                    ((e.currentTarget as HTMLDivElement).style.borderColor = "rgba(0,0,0,0.5)")
-                  }
-                  onMouseLeave={(e) =>
-                    ((e.currentTarget as HTMLDivElement).style.borderColor = "rgba(0,0,0,0.12)")
-                  }
-                >
+                <div className="border border-ink-line p-6 transition-colors hover:border-black/50">
                   <div className="flex flex-wrap items-baseline justify-between gap-4">
                     <span style={{ fontSize: 22, lineHeight: 1.2, color: "rgba(0,0,0,0.95)" }}>
                       {v.label} →
