@@ -41,3 +41,16 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# AI tooling — not for public repo
+.claude/
+.mempalace-notes/
+docs-ai/
+docs/superpowers/
+design-extract-output/
+CLAUDE.md
+AGENTS.md
+mempalace.yaml
+entities.json
+prints-press-HANDOFF.md
+prints-press-scaffold.tar.gz

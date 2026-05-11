@@ -533,10 +533,4 @@ Kept on a separate branch because the preview deployment should be gate-able. To
 - NODE_ENV gates removed from lab/mock routes so they render on the preview deployment
 
 ### Backend design (locked)
-Full architecture, schema, order flow, print-shop hand-off, and fulfillment token design live in the plan file:
-
-- Plan: `/Users/haivotrung/.claude/plans/adaptive-hopping-snowglobe.md`
-- MemPalace drawer: `mempalace search "prints-projects master state"`
-
-### Stakeholder decision poll
-Notion: https://www.notion.so/344d02ec20c080e79873eafdb2459a23
+Full architecture, schema, order flow, print-shop hand-off, and fulfillment token design are documented in this file and in the codebase.

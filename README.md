@@ -1,31 +1,29 @@
-# prints-projects
+# At-Tamassok Print Shop
 
-Demo build for a Brooklyn, NY photographer's print shop. This is the Phase 0 static shell — chrome, catalog grid, detail panel, buy UI, cart drawer, stubbed checkout. No Stripe, no database, no CMS yet.
+A boutique print shop for a Brooklyn, NY photographer. Limited-edition archival prints — 10 per photo, globally shipped.
 
-System design and decisions live in [`docs/system-design.md`](docs/system-design.md).
-Visual reference: [468414.cargo.site](https://468414.cargo.site/) (Thalia Bassim, At-Tamassok template).
-Buy UI mockup (vanilla HTML/JS, source of truth for pricing math): [`docs/mockups/buy-ui-mockup.html`](docs/mockups/buy-ui-mockup.html).
+**Live at [www.thaliabassim.com](https://www.thaliabassim.com)**
 
-## Current state
-
-**Last updated: 2026-04-19**
-
-Phase 0 static shell is design-locked. Accent color `#1529DB`, footer F2 (80px gap), product detail P3 layout, 25 interleaved photos, Vercel Analytics wired. Pastel feedback batch A+B complete, `/terms` route live, ghost-button CTAs locked.
-_Update 04-19: Initialized Vercel environment variables, upgraded Stripe setup to use Restricted Keys, and documented precise Sanity and Stripe Webhook endpoints for Phase 2 preparation._
-
-Backend architecture is locked. Schema, order flow, print-shop hand-off (token-gated fulfillment), admin roles, and shipping-zone model all captured in the plan file: `/Users/haivotrung/.claude/plans/adaptive-hopping-snowglobe.md`. MemPalace drawer: `mempalace search "prints-projects master state"`.
-
-Printer-facing mocks (`/dispatch-mock`, `/dispatch-batch-mock`, `/coa-mock`), archival spec block in BuyUI, and remaining Brooklyn/"signed" copy strip live on the `stakeholder-preview` branch pending review. Not yet merged to `main`.
-
-See [`docs/system-design.md` Section 15](docs/system-design.md) for the 2026-04-15/16 update summary.
+---
 
 ## Stack
 
-- Next.js 16 (App Router)
-- TypeScript, strict
-- Tailwind v4 (CSS-based config in `src/app/globals.css`)
-- Geist (free, MIT) standing in for licensed Diatype until brand is locked
-- pnpm
+| Layer           | Choice                                          |
+| --------------- | ----------------------------------------------- |
+| Framework       | Next.js 16 (App Router)                         |
+| Language        | TypeScript (strict)                             |
+| Styles          | Tailwind v4 (CSS-based config in `globals.css`) |
+| Database        | Supabase (Postgres + Row Level Security)        |
+| Auth            | Supabase magic link (admin-only)                |
+| Payments        | Stripe Checkout + webhooks                      |
+| Email           | Resend + React Email templates                  |
+| File storage    | Cloudflare R2 (print masters)                   |
+| Error tracking  | Sentry                                          |
+| Analytics       | Vercel Analytics                                |
+| Package manager | pnpm                                            |
+| Hosting         | Vercel                                          |
+
+---
 
 ## Local development
 
@@ -35,92 +33,129 @@ pnpm install
 pnpm dev           # http://localhost:3000
 ```
 
+Copy `.env.example` to `.env.local` and fill in keys for Supabase, Stripe, Resend, R2, and Sentry before running.
+
+---
+
 ## Quality gates
 
 ```sh
 pnpm lint          # ESLint
 pnpm typecheck     # tsc --noEmit
-pnpm format:check  # Prettier check
-pnpm build         # production build
+pnpm format:check  # Prettier
+pnpm test          # Vitest unit tests
+pnpm build         # production build (runs before typecheck in CI)
 ```
 
-Pre-commit hook (Husky + lint-staged) runs `prettier --write`, `eslint --fix` on staged files, then `pnpm typecheck` on the full project. To bypass in an emergency: `git commit --no-verify` — but the user's instructions explicitly forbid this without sign-off.
+Pre-commit hook (Husky + lint-staged) auto-runs Prettier + ESLint on staged files, then `tsc --noEmit` on the full project.
+
+---
 
 ## Folder layout
 
 ```
 src/
-├── app/                     # Next.js App Router routes
-│   ├── layout.tsx           # Header, Footer, CartProvider, FeedbackButton mount
-│   ├── page.tsx             # Catalog home (grid)
-│   ├── photos/[slug]/       # Detail panel route (statically generated per slug)
-│   ├── checkout/            # Stub "demo, real checkout coming soon" page
-│   ├── about/               # Info page
-│   └── globals.css          # Tailwind + design tokens
-├── components/
-│   ├── Header.tsx
-│   ├── Footer.tsx
+├── app/                         # Next.js App Router
+│   ├── layout.tsx               # Root layout — header, footer, providers
+│   ├── page.tsx                 # Catalog home (grid + hero)
+│   ├── photos/[slug]/           # Print detail page
+│   ├── checkout/                # Stripe Checkout entry
+│   ├── thank-you/               # Post-payment confirmation
+│   ├── track/                   # Order status for customers
+│   ├── dispatch/                # Printer-facing fulfillment view
+│   ├── admin/                   # Admin panel (orders, catalog, settings, audit)
+│   ├── essay/                   # Long-form artist page
+│   ├── info/                    # About / contact
+│   ├── terms/                   # Terms of sale
+│   ├── api/
+│   │   ├── webhooks/stripe/     # Stripe webhook handler
+│   │   ├── checkout/            # Checkout session creation
+│   │   ├── email/               # Transactional email triggers
+│   │   ├── dispatch/            # Printer dispatch API
+│   │   ├── coa/                 # Certificate of Authenticity generation
+│   │   ├── admin/               # Admin-only data endpoints
+│   │   └── cron/                # Watchdog and scheduled jobs
+│   └── globals.css              # Tailwind + design tokens
+├── components/                  # UI components
+│   ├── BuyUI.tsx                # Variant picker, pricing, add-to-cart
+│   ├── CartDrawer.tsx           # Slide-in cart (saved prints + added items)
 │   ├── CatalogGrid.tsx
-│   ├── PhotoCard.tsx
-│   ├── DetailPanel.tsx      # 16/30/50 layout per design doc Section 10
-│   ├── BuyUI.tsx            # Variant picker, live pricing, add-to-cart
-│   ├── CartDrawer.tsx       # Slides in from right
-│   └── FeedbackButton.tsx   # Floating bottom-right, mailto: for now
+│   ├── DetailPanel.tsx
+│   ├── LandingHero.tsx
+│   ├── Header.tsx / Footer.tsx
+│   ├── SaveButton.tsx           # Save-for-later (local storage)
+│   ├── RecentlyViewed.tsx
+│   ├── RelatedPrints.tsx
+│   ├── ImageZoom.tsx
+│   ├── Toast.tsx
+│   └── dispatch/                # Printer dispatch UI
 ├── lib/
-│   ├── types.ts             # Photo, CartLine, etc.
-│   ├── pricing.ts           # priceCents, formatUsd, edition helpers
-│   ├── photos.ts            # Reads from src/data/photos.fixture.json
-│   └── cart.tsx             # CartProvider + useCart (localStorage-backed)
-└── data/
-    └── photos.fixture.json  # 8 placeholder photos with Unsplash URLs
+│   ├── types.ts                 # Shared types (Photo, Order, CartLine, …)
+│   ├── pricing.ts               # priceCents, formatUsd, edition helpers
+│   ├── photos.ts                # Catalog data access
+│   ├── cart.tsx                 # CartProvider + useCart (localStorage)
+│   ├── stripe/                  # Stripe client + helpers
+│   ├── supabase/                # Supabase client (browser + server + admin)
+│   ├── email/                   # Resend templates and send helpers
+│   ├── r2/                      # R2 presigned URL helpers
+│   ├── auth/                    # Session and role utilities
+│   ├── dispatch/                # Printer batch dispatch logic
+│   ├── coa/                     # COA PDF generation
+│   ├── alerting/                # Resend + Telegram alert helpers
+│   ├── analytics.ts
+│   ├── orderRef.ts              # Human-readable order reference generator
+│   └── countries.ts
+├── hooks/                       # Custom React hooks
+└── __tests__/                   # Vitest unit tests
+supabase/
+└── migrations/                  # Postgres migration files
+scripts/                         # One-off seed and build scripts
 docs/
-├── system-design.md         # Source of truth for the overall design
-└── mockups/buy-ui-mockup.html
-docs-ai/                     # AI-assistant working notes (per global CLAUDE.md)
+├── system-design.md             # Architecture and decisions log
+└── mockups/
 ```
 
-## Stakeholder feedback channels
+---
 
-The demo ships with multiple ways for a stakeholder to leave comments on the live preview:
+## Key flows
 
-1. **Floating "Send feedback" button** (bottom-right of every page) — opens a `mailto:` with the page URL and viewport size pre-filled. Zero setup for the reviewer.
-2. **MarkUp.io overlay** — paste the Vercel preview URL into <https://markup.io> to drop pinned annotations on the page. No login required for the reviewer. Free for 1–2 projects.
-3. _Optional:_ **Vercel Comments** (built into Vercel's Pro plan, $20/user/month or 14-day free team trial). Adds a click-anywhere comment overlay on the preview itself. Decision deferred to deploy time.
+**Checkout**
+Customer → `BuyUI` adds to cart → `CartDrawer` → `/checkout` → Stripe Checkout session created → Stripe hosted page → `checkout.session.completed` webhook → order written to Supabase → confirmation email (Resend) + dispatch email to printer.
 
-## What is intentionally missing
+**Editions**
+Each photo has a pool of 10 prints across all size/paper variants. Edition number is assigned in the webhook under a row-level lock (`SELECT FOR UPDATE` on the `photos` row). Once 10 are sold the photo is marked sold out.
 
-- No Stripe, no payment. Cart "Checkout" goes to a stub page.
-- No database, no auth. Photos load from the JSON fixture.
-- No Sanity CMS. Catalog edits require a code change in this phase.
-- No order email, no print-shop fulfillment page. Phase 2.
-- No tests. Add Vitest + Playwright before Phase 1 features land.
+**Printer dispatch**
+Printer receives a token-gated link to `/dispatch/[order-id]?token=xxx`. The page shows order details and a "Download print file" button that generates an R2 presigned URL on demand. Token is stored on the order row and revocable from admin.
 
-## Next phases
+**Admin panel**
+Magic-link auth (Supabase). Two roles: `admin` (full access including refunds) and `editor` (catalog + fulfillment status). Route group at `/admin`.
 
-See [`docs/system-design.md` Section 11](docs/system-design.md) for the full build phase plan. Phase 0 is the work in this README.
+**Certificate of Authenticity**
+Generated as a PDF via `@react-pdf/renderer` on demand from the dispatch page and admin panel.
 
-### Phase 2 Preparation
+---
 
-These webhook endpoints will be built during Phase 2. Here is the exact configuration needed for the third-party dashboards when that time comes:
+## Environment variables
 
-#### Stripe Webhook
+| Variable                                                                         | Purpose                            |
+| -------------------------------------------------------------------------------- | ---------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`                                                       | Supabase project URL               |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                                  | Supabase anon key                  |
+| `SUPABASE_SERVICE_ROLE_KEY`                                                      | Server-side admin operations       |
+| `STRIPE_SECRET_KEY`                                                              | Stripe restricted key              |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`                                             | Stripe publishable key             |
+| `STRIPE_WEBHOOK_SECRET`                                                          | Webhook signing secret             |
+| `RESEND_API_KEY`                                                                 | Transactional email                |
+| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET_NAME` | Print file storage                 |
+| `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN`                                          | Error tracking                     |
+| `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID`                                        | Real-time ops alerts               |
+| `CRON_SECRET`                                                                    | Authenticates Vercel cron requests |
 
-- **URL**: `https://prints-projects.vercel.app/api/webhooks/stripe`
-- **Events to listen to**: `checkout.session.completed` (Required). You can also safely select "All Checkout events".
-- **Environment Variable**: `STRIPE_WEBHOOK_SECRET` (Found by clicking "Reveal" on the webhook's Signing Secret after creation).
+> **Stripe webhook endpoint must use `www`** — the apex domain redirects with a 307 and Stripe will not follow it. Register `https://www.thaliabassim.com/api/webhooks/stripe`.
 
-#### Sanity CMS Webhook
+---
 
-- **URL**: `https://prints-projects.vercel.app/api/webhooks/sanity`
-- **Trigger on**: `Create`, `Update`, `Delete`
-- **Filter**: `_type == "photo"`
-- **Projection**: `{_type, "slug": slug.current}`
-- **Drafts & Versions**: Leave unchecked.
-- **Environment Variable**: `SANITY_WEBHOOK_SECRET` (A custom secure password you type into the "Secret" field in Sanity, which must exactly match your Vercel environment variable).
-  - _Note: Since Next.js generates static pages, this webhook is needed to automatically tell Vercel to revalidate the cache when you update photos in the CMS._
+## Taxes
 
-## Stakeholder review
-
-Active decision poll on Notion: <https://www.notion.so/344d02ec20c080e79873eafdb2459a23>
-
-Preview deployment lives on the `stakeholder-preview` branch of this repo (do not merge without sign-off). Main deploys to `prints-projects.vercel.app`.
+NY origin-state sales tax is currently **off**. `automatic_tax` will be enabled in Stripe after the NY Certificate of Authority is obtained.

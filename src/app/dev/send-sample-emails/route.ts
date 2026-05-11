@@ -9,7 +9,7 @@
  *      orders, one of which is a reprint so the "REPRINT" marker renders.
  *   2. PrintJob  — the per-order alternative template (single order body).
  *
- * Recipient is hardcoded to haivotrung@gmail.com. 404s in production.
+ * Recipient is hardcoded to the dev inbox. 404s in production.
  */
 
 import { NextResponse } from "next/server";
@@ -23,7 +23,7 @@ import PrintJob from "@/lib/email/templates/PrintJob";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const SAMPLE_RECIPIENT = "haivotrung@gmail.com";
+const SAMPLE_RECIPIENT = process.env.DEV_EMAIL ?? "dev@example.com";
 
 // Stubbed orders. No DB work, no signed URLs (the dispatch links in the email
 // are fake non-resolving placeholders — the sample is for visual review, not
