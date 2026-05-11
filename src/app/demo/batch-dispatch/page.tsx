@@ -35,14 +35,12 @@ export default function DemoBatchDispatchPage() {
             submit — each customer receives a shipping notification automatically.
           </p>
           <div className="mt-2 flex flex-wrap gap-4">
-            <a
-              href="#"
+            <span
               className="btn-ghost"
               style={{ padding: "8px 18px", fontSize: 14, opacity: 0.45, cursor: "not-allowed" }}
-              onClick={(e) => e.preventDefault()}
             >
               Download pick-list PDF
-            </a>
+            </span>
             <span style={{ fontSize: 13, color: "rgba(0,0,0,0.4)", alignSelf: "center" }}>
               (disabled in demo)
             </span>
