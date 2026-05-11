@@ -22,8 +22,8 @@ const execFileP = promisify(execFile);
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const SRC_DIRS = [
-  "/Users/haivo/Library/Mobile Documents/com~apple~CloudDocs/Thalia Final Selects Prints/final slects",
-  "/Users/haivo/Library/Mobile Documents/com~apple~CloudDocs/Thalia Final Selects Prints/New Folder With Items",
+  "/Users/haivotrung/Library/Mobile Documents/com~apple~CloudDocs/Thalia Final Selects Prints/final slects",
+  "/Users/haivotrung/Library/Mobile Documents/com~apple~CloudDocs/Thalia Final Selects Prints/New Folder With Items",
 ];
 const DEST_DIR = path.join(ROOT, "public/images/catalog");
 const FIXTURE_PATH = path.join(ROOT, "src/data/photos.fixture.json");

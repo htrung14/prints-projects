@@ -215,12 +215,6 @@ export async function insertOrderWithItems(
 
   const db = serverClient();
 
-  // Idempotency: if an order already exists for this session, return it
-  // with wasExisting=true so the caller can skip non-idempotent side
-  // effects (customer confirmation email, post-purchase schedule, audit
-  // of the "paid" event). Without this flag a Stripe event replay — which
-  // happens routinely when a delivery retry lands after a manual Resend —
-  // fires the order-confirmation email to the customer twice.
   const { data: existing, error: existingErr } = await db
     .from("orders")
     .select(ORDER_COLUMNS)
